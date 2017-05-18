@@ -252,3 +252,11 @@
 		max-height: 400px;
 	}
 }
+
+.editor__content {
+	display: none;
+
+	&.is-shown {
+		display: block;
+	}
+}

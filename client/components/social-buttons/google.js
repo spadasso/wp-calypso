@@ -17,7 +17,7 @@ class GoogleLoginButton extends Component {
 		scope: PropTypes.string,
 		fetchBasicProfile: PropTypes.bool,
 		responseHandler: PropTypes.func.isRequired,
-		translate: PropTypes.func.isRequired
+		translate: PropTypes.func.isRequired,
 	};
 
 	static defaultProps = {

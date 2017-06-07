@@ -40,6 +40,7 @@ describe( 'reducer', () => {
 			'requestError',
 			'requestNotice',
 			'requestSuccess',
+			'socialAccount',
 			'twoFactorAuth',
 			'isRequestingTwoFactorAuth',
 			'twoFactorAuthRequestError',

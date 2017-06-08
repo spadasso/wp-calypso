@@ -87,9 +87,10 @@ export const receiveSuccess = ( { dispatch }, { siteId, postId }, next, revision
  * @param {Object} action Redux action
  */
 export const fetchPostRevisions = ( { dispatch }, action ) => {
-	const { siteId, postId } = action;
+	const { siteId, postId, postType } = action;
+	const ressourceName = postType === 'page' ? 'pages' : 'posts';
 	dispatch( http( {
-		path: `/sites/${ siteId }/posts/${ postId }/revisions`,
+		path: `/sites/${ siteId }/${ ressourceName }/${ postId }/revisions`,
 		method: 'GET',
 		query: {
 			apiNamespace: 'wp/v2',

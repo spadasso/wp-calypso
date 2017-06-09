@@ -21,6 +21,7 @@ import ErrorBanner from '../activity-log-banner/error-banner';
 import ProgressBanner from '../activity-log-banner/progress-banner';
 import SuccessBanner from '../activity-log-banner/success-banner';
 import QueryRewindStatus from 'components/data/query-rewind-status';
+import ActivityLogRewindToggle from './activity-log-rewind-toggle';
 
 class ActivityLog extends Component {
 	static propTypes = {
@@ -333,6 +334,7 @@ class ActivityLog extends Component {
 		return (
 			<div>
 				{ this.renderBanner() }
+				<ActivityLogRewindToggle siteId={ siteId } />
 				<section className="activity-log__wrapper">
 					{ logsGroupedByDate }
 				</section>

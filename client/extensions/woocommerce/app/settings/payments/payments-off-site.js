@@ -27,11 +27,9 @@ class SettingsPaymentsOffSite extends Component {
 		this.props.fetchPaymentMethods();
 	}
 
-	renderMethodItem = ( method ) => {
-		return (
-			<PaymentMethodItem key={ method.title } method={ method } />
-		);
-	}
+	renderMethodItem = method => {
+		return <PaymentMethodItem key={ method.title } method={ method } />;
+	};
 
 	render() {
 		const { translate, paymentMethods } = this.props;
@@ -40,26 +38,24 @@ class SettingsPaymentsOffSite extends Component {
 			<div className="payments__off-site-container">
 				<ExtendedHeader
 					label={ translate( 'Off-site credit card payment methods' ) }
-					description={
-						translate(
-							'Off-site payment methods involve sending the customer to a ' +
+					description={ translate(
+						'Off-site payment methods involve sending the customer to a ' +
 							'third party web site to complete payment, like PayPal. More ' +
-							'information'
-						)
-					} />
-					<List>
-						<ListHeader>
-							<ListItemField className="payments__methods-column-method">
-								{ translate( 'Method' ) }
-							</ListItemField>
-							<ListItemField className="payments__methods-column-fees">
-								{ translate( 'Fees' ) }
-							</ListItemField>
-							<ListItemField className="payments__methods-column-settings">
-							</ListItemField>
-						</ListHeader>
-						{ paymentMethods && paymentMethods.map( this.renderMethodItem ) }
-					</List>
+							'information',
+					) }
+				/>
+				<List>
+					<ListHeader>
+						<ListItemField className="payments__methods-column-method">
+							{ translate( 'Method' ) }
+						</ListItemField>
+						<ListItemField className="payments__methods-column-fees">
+							{ translate( 'Fees' ) }
+						</ListItemField>
+						<ListItemField className="payments__methods-column-settings" />
+					</ListHeader>
+					{ paymentMethods && paymentMethods.map( this.renderMethodItem ) }
+				</List>
 			</div>
 		);
 	}
@@ -68,17 +64,19 @@ class SettingsPaymentsOffSite extends Component {
 function mapStateToProps( state ) {
 	const paymentMethods = getPaymentMethodsGroup( state, 'off-site' );
 	return {
-		paymentMethods
+		paymentMethods,
 	};
 }
 
 function mapDispatchToProps( dispatch ) {
 	return bindActionCreators(
 		{
-			fetchPaymentMethods
+			fetchPaymentMethods,
 		},
-		dispatch
+		dispatch,
 	);
 }
 
-export default localize( connect( mapStateToProps, mapDispatchToProps )( SettingsPaymentsOffSite ) );
+export default localize(
+	connect( mapStateToProps, mapDispatchToProps )( SettingsPaymentsOffSite ),
+);

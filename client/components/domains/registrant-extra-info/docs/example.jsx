@@ -14,11 +14,11 @@ const countriesList = getCountries();
 class ExtraInfoFrFormExample extends PureComponent {
 	state = {
 		registrantExtraInfo: {},
-	}
+	};
 
-	handleExtraChange = ( registrantExtraInfo ) => {
+	handleExtraChange = registrantExtraInfo => {
 		this.setState( { registrantExtraInfo } );
-	}
+	};
 
 	render() {
 		return (
@@ -32,8 +32,8 @@ class ExtraInfoFrFormExample extends PureComponent {
 					<ExtraInfoFrForm
 						values={ this.state.registrantExtraInfo }
 						countriesList={ countriesList }
-						onStateChange={ this.handleExtraChange } >
-					</ExtraInfoFrForm>
+						onStateChange={ this.handleExtraChange }
+					/>
 				</Card>
 			</div>
 		);

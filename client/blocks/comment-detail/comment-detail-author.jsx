@@ -25,7 +25,7 @@ export class CommentDetailAuthor extends Component {
 
 	toggleExpanded = () => {
 		this.setState( { isExpanded: ! this.state.isExpanded } );
-	}
+	};
 
 	render() {
 		const {
@@ -51,10 +51,7 @@ export class CommentDetailAuthor extends Component {
 			<div className={ classes }>
 				<div className="comment-detail__author-preview">
 					<div className="comment-detail__author-avatar">
-						<img
-							className="comment-detail__author-avatar-image"
-							src={ authorAvatarUrl }
-						/>
+						<img className="comment-detail__author-avatar-image" src={ authorAvatarUrl } />
 					</div>
 					<div className="comment-detail__author-info">
 						<div className="comment-detail__author-info-element comment-detail__author-name">
@@ -114,16 +111,14 @@ export class CommentDetailAuthor extends Component {
 						<a
 							className={ classNames(
 								'comment-detail__author-more-element comment-detail__author-more-element-block-user',
-								{ 'is-blocked': authorIsBlocked }
+								{ 'is-blocked': authorIsBlocked },
 							) }
 							onClick={ blockUser }
 						>
 							<Gridicon icon="block" />
-							<span>{
-								authorIsBlocked
-									? translate( 'Unblock user' )
-									: translate( 'Block user' )
-							}</span>
+							<span>
+								{ authorIsBlocked ? translate( 'Unblock user' ) : translate( 'Block user' ) }
+							</span>
 						</a>
 					</div>
 				</div>

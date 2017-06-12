@@ -16,13 +16,13 @@ module.exports = React.createClass( {
 		media: React.PropTypes.object,
 		scale: React.PropTypes.number,
 		maxImageWidth: React.PropTypes.number,
-		photon: React.PropTypes.bool
+		photon: React.PropTypes.bool,
 	},
 
 	getDefaultProps: function() {
 		return {
 			maxImageWidth: 450,
-			photon: true
+			photon: true,
 		};
 	},
 
@@ -47,7 +47,7 @@ module.exports = React.createClass( {
 
 		return {
 			width: width,
-			height: height
+			height: height,
 		};
 	},
 
@@ -56,20 +56,20 @@ module.exports = React.createClass( {
 
 		return {
 			maxHeight: dimensions.height > dimensions.width ? 'none' : '100%',
-			maxWidth: dimensions.height < dimensions.width ? 'none' : '100%'
+			maxWidth: dimensions.height < dimensions.width ? 'none' : '100%',
 		};
 	},
 
 	setUnknownImageDimensions: function( event ) {
 		if ( ! this.props.media.width ) {
 			this.setState( {
-				imageWidth: event.target.clientWidth
+				imageWidth: event.target.clientWidth,
 			} );
 		}
 
 		if ( ! this.props.media.height ) {
 			this.setState( {
-				imageHeight: event.target.clientHeight
+				imageHeight: event.target.clientHeight,
 			} );
 		}
 	},
@@ -77,7 +77,7 @@ module.exports = React.createClass( {
 	render: function() {
 		var url = MediaUtils.url( this.props.media, {
 			photon: this.props.photon,
-			maxWidth: this.props.maxImageWidth
+			maxWidth: this.props.maxImageWidth,
 		} );
 
 		if ( ! url ) {
@@ -85,7 +85,8 @@ module.exports = React.createClass( {
 				<MediaLibraryListItemFileDetails
 					scale={ this.props.scale }
 					media={ this.props.media }
-					icon="image" />
+					icon="image"
+				/>
 			);
 		}
 
@@ -96,7 +97,8 @@ module.exports = React.createClass( {
 				alt={ this.props.media.alt || this.props.media.title }
 				style={ this.getImageStyle() }
 				className="media-library__list-item-centered"
-				draggable="false" />
+				draggable="false"
+			/>
 		);
-	}
+	},
 } );

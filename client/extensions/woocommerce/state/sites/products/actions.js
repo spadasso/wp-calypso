@@ -15,7 +15,12 @@ import {
  * @param {String} [errorAction=undefined] Optional action object to be dispatched upon error.
  * @return {Object} Action object
  */
-export function createProduct( siteId, product, successAction = undefined, errorAction = undefined ) {
+export function createProduct(
+	siteId,
+	product,
+	successAction = undefined,
+	errorAction = undefined,
+ ) {
 	const action = {
 		type: WOOCOMMERCE_PRODUCT_CREATE,
 		siteId,
@@ -49,4 +54,3 @@ export function productUpdated( siteId, product ) {
 		product,
 	};
 }
-

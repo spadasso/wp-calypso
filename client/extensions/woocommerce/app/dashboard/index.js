@@ -15,7 +15,6 @@ import Main from 'components/main';
 import Setup from './setup';
 
 class Dashboard extends Component {
-
 	static propTypes = {
 		className: PropTypes.string,
 	};
@@ -23,17 +22,12 @@ class Dashboard extends Component {
 	onStoreSetupFinished = () => {
 		// TODO - save that setup has been finished to the store's state on WPCOM
 		// TODO - is there a way to set an option on the store site?
-	}
+	};
 
 	renderStoreSetup = () => {
 		const { selectedSite } = this.props;
-		return (
-			<Setup
-				onFinished={ this.onStoreSetupFinished }
-				site={ selectedSite }
-			/>
-		);
-	}
+		return <Setup onFinished={ this.onStoreSetupFinished } site={ selectedSite } />;
+	};
 
 	renderStoreManagement = () => {
 		const { translate } = this.props;
@@ -44,11 +38,13 @@ class Dashboard extends Component {
 					{ translate( 'This is the start of something great!' ) }
 				</p>
 				<p>
-					{ translate( 'This will be the home for your WooCommerce Store integration with WordPress.com.' ) }
+					{ translate(
+						'This will be the home for your WooCommerce Store integration with WordPress.com.',
+					) }
 				</p>
 			</Card>
 		);
-	}
+	};
 
 	render = () => {
 		const { storeSetupCompleted } = this.props;
@@ -58,8 +54,7 @@ class Dashboard extends Component {
 				{ storeSetupCompleted ? this.renderStoreManagement() : this.renderStoreSetup() }
 			</Main>
 		);
-	}
-
+	};
 }
 
 function mapStateToProps( state ) {

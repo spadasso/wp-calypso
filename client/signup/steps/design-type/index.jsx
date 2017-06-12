@@ -22,18 +22,22 @@ import { abtest } from 'lib/abtest';
 
 class DesignTypeStep extends Component {
 	static propTypes = {
-		translate: PropTypes.func
+		translate: PropTypes.func,
 	};
 
 	static defaultProps = {
-		translate: identity
+		translate: identity,
 	};
 
-	getChoiceHandlers = memoize( ( ) =>
-		transform( this.getChoices(), ( handlers, choice ) => {
-			handlers[ choice.type ] = ( event ) => this.handleChoiceClick( event, choice.type );
-		}, {} )
-	);
+	getChoiceHandlers = memoize( () =>
+		transform(
+			this.getChoices(),
+			( handlers, choice ) => {
+				handlers[ choice.type ] = event => this.handleChoiceClick( event, choice.type );
+			},
+			{},
+		),
+	 );
 
 	getChoices() {
 		const { translate } = this.props;
@@ -70,7 +74,7 @@ class DesignTypeStep extends Component {
 		];
 	}
 
-	renderChoice = ( choice ) => {
+	renderChoice = choice => {
 		const modified = abtest( 'siteCreationStepOne' ) === 'modified';
 		const choiceHandlers = this.getChoiceHandlers();
 
@@ -87,7 +91,12 @@ class DesignTypeStep extends Component {
 		}
 
 		return (
-			<Card className={ choiceCardClass } key={ choice.type } href="#{choice.type}" onClick={ choiceHandlers[ choice.type ] }>
+			<Card
+				className={ choiceCardClass }
+				key={ choice.type }
+				href="#{choice.type}"
+				onClick={ choiceHandlers[ choice.type ] }
+			>
 				<div className="design-type__choice-image">
 					{ choice.image }
 				</div>
@@ -98,7 +107,7 @@ class DesignTypeStep extends Component {
 				</div>
 			</Card>
 		);
-	}
+	};
 
 	renderChoices() {
 		return (
@@ -131,10 +140,10 @@ class DesignTypeStep extends Component {
 
 		if ( modified ) {
 			// Note: Don't make this translatable because it's only visible to English-language users
-			return 'Hello! Let\'s create your new site.';
+			return "Hello! Let's create your new site.";
 		}
 
-		return translate( 'Let\'s get started.' );
+		return translate( "Let's get started." );
 	}
 
 	getSubHeaderText() {
@@ -159,11 +168,14 @@ class DesignTypeStep extends Component {
 					stepName={ this.props.stepName }
 					positionInFlow={ this.props.positionInFlow }
 					fallbackHeaderText={ translate( 'What would you like your homepage to look like?' ) }
-					fallbackSubHeaderText={ translate( 'This will help us figure out what kinds of designs to show you.' ) }
+					fallbackSubHeaderText={ translate(
+						'This will help us figure out what kinds of designs to show you.',
+					) }
 					headerText={ this.getHeadertext() }
 					subHeaderText={ this.getSubHeaderText() }
 					signupProgress={ this.props.signupProgress }
-					stepContent={ this.renderChoices() } />
+					stepContent={ this.renderChoices() }
+				/>
 			</div>
 		);
 	}
@@ -182,9 +194,6 @@ class DesignTypeStep extends Component {
 	}
 }
 
-export default connect(
-	null,
-	{
-		recordTracksEvent
-	}
-)( localize( DesignTypeStep ) );
+export default connect( null, {
+	recordTracksEvent,
+} )( localize( DesignTypeStep ) );

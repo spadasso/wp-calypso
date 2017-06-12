@@ -33,8 +33,11 @@ describe( 'MediaLibraryListItem video', function() {
 		}
 	} );
 
-	const expectedBackground = () => styleUrl( photon( fixtures.media[ 1 ].thumbnails.fmt_hd, { width: WIDTH } ) );
-	const getItem = () => <ListItemVideo media={ fixtures.media[ 1 ] } scale={ 1 } maxImageWidth={ WIDTH } />;
+	const expectedBackground = () =>
+		styleUrl( photon( fixtures.media[ 1 ].thumbnails.fmt_hd, { width: WIDTH } ) );
+	const getItem = () => (
+		<ListItemVideo media={ fixtures.media[ 1 ] } scale={ 1 } maxImageWidth={ WIDTH } />
+	);
 
 	context( 'thumbnail display mode', function() {
 		it( 'returns a photon thumbnail for a video', function() {

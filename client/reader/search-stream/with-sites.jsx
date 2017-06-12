@@ -90,7 +90,7 @@ class SearchStream extends React.Component {
 
 	handleSearchTypeSelection = searchType =>
 		page.replace(
-			addQueryArgs( { show: searchType }, window.location.pathname + window.location.search )
+			addQueryArgs( { show: searchType }, window.location.pathname + window.location.search ),
 		);
 
 	render() {

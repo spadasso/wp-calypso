@@ -21,10 +21,12 @@ import {
 } from 'state/login/selectors';
 import { recordTracksEvent } from 'state/analytics/actions';
 import VerificationCodeForm from './two-factor-authentication/verification-code-form';
-import WaitingTwoFactorNotificationApproval from './two-factor-authentication/waiting-notification-approval';
+import WaitingTwoFactorNotificationApproval
+	from './two-factor-authentication/waiting-notification-approval';
 import { login } from 'lib/paths';
 import Notice from 'components/notice';
-import PushNotificationApprovalPoller from './two-factor-authentication/push-notification-approval-poller';
+import PushNotificationApprovalPoller
+	from './two-factor-authentication/push-notification-approval-poller';
 
 class Login extends Component {
 	static propTypes = {
@@ -49,9 +51,10 @@ class Login extends Component {
 		}
 	};
 
-	componentWillReceiveProps = ( nextProps ) => {
+	componentWillReceiveProps = nextProps => {
 		const hasLoginError = this.props.requestError !== nextProps.requestError;
-		const hasTwoFactorAuthError = this.props.twoFactorAuthRequestError !== nextProps.twoFactorAuthRequestError;
+		const hasTwoFactorAuthError =
+			this.props.twoFactorAuthRequestError !== nextProps.twoFactorAuthRequestError;
 		const hasNotice = this.props.requestNotice !== nextProps.requestNotice;
 		const isNewPage = this.props.twoFactorAuthType !== nextProps.twoFactorAuthType;
 
@@ -64,17 +67,22 @@ class Login extends Component {
 		if ( ! this.props.twoFactorEnabled ) {
 			this.rebootAfterLogin();
 		} else {
-			page( login( {
-				isNative: true,
-				// If no notification is sent, the user is using the authenticator for 2FA by default
-				twoFactorAuthType: this.props.twoFactorNotificationSent.replace( 'none', 'authenticator' )
-			} ) );
+			page(
+				login( {
+					isNative: true,
+					// If no notification is sent, the user is using the authenticator for 2FA by default
+					twoFactorAuthType: this.props.twoFactorNotificationSent.replace(
+						'none',
+						'authenticator',
+					),
+				} ),
+			);
 		}
 	};
 
 	rebootAfterLogin = () => {
 		this.props.recordTracksEvent( 'calypso_login_success', {
-			two_factor_enabled: this.props.twoFactorEnabled
+			two_factor_enabled: this.props.twoFactorEnabled,
 		} );
 
 		const { redirectLocation } = this.props;
@@ -120,15 +128,9 @@ class Login extends Component {
 	}
 
 	renderContent() {
-		const {
-			twoFactorAuthType,
-			twoFactorEnabled,
-			twoFactorNotificationSent,
-		} = this.props;
+		const { twoFactorAuthType, twoFactorEnabled, twoFactorNotificationSent } = this.props;
 
-		const {
-			rememberMe,
-		} = this.state;
+		const { rememberMe } = this.state;
 
 		let poller;
 		if ( twoFactorEnabled && twoFactorAuthType && twoFactorNotificationSent === 'push' ) {
@@ -157,9 +159,7 @@ class Login extends Component {
 			);
 		}
 
-		return (
-			<LoginForm onSuccess={ this.handleValidUsernamePassword } />
-		);
+		return <LoginForm onSuccess={ this.handleValidUsernamePassword } />;
 	}
 
 	render() {
@@ -170,7 +170,9 @@ class Login extends Component {
 				<DocumentHead title={ translate( 'Log In', { textOnly: true } ) } />
 
 				<div className="login__form-header">
-					{ twoStepNonce ? translate( 'Two-Step Authentication' ) : translate( 'Log in to your account.' ) }
+					{ twoStepNonce
+						? translate( 'Two-Step Authentication' )
+						: translate( 'Log in to your account.' ) }
 				</div>
 
 				{ this.renderError() }
@@ -184,13 +186,14 @@ class Login extends Component {
 }
 
 export default connect(
-	( state ) => ( {
+	state => ( {
 		requestError: getRequestError( state ),
 		requestNotice: getRequestNotice( state ),
 		twoFactorAuthRequestError: getTwoFactorAuthRequestError( state ),
 		twoFactorEnabled: isTwoFactorEnabled( state ),
 		twoFactorNotificationSent: getTwoFactorNotificationSent( state ),
-	} ), {
+	} ),
+	{
 		recordTracksEvent,
-	}
+	},
 )( localize( Login ) );

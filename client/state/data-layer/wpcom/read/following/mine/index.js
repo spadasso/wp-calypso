@@ -48,7 +48,7 @@ export const subscriptionFromApi = subscription =>
 			delivery_methods: subscription.delivery_methods,
 			is_owner: subscription.is_owner,
 		},
-		isUndefined
+		isUndefined,
 	);
 
 export const subscriptionsFromApi = apiResponse => {
@@ -87,7 +87,7 @@ export function requestPage( store, action ) {
 			},
 			onSuccess: action,
 			onError: action,
-		} )
+		} ),
 	);
 }
 
@@ -105,7 +105,7 @@ export function receivePage( store, action, next, apiResponse ) {
 		receiveFollowsAction( {
 			follows,
 			totalCount: apiResponse.total_subscriptions,
-		} )
+		} ),
 	);
 
 	forEach( follows, follow => {
@@ -133,7 +133,7 @@ export function updateSeenOnFollow( store, action ) {
 export function receiveError( store ) {
 	syncingFollows = false;
 	store.dispatch(
-		errorNotice( translate( 'Sorry, we had a problem fetching your Reader subscriptions.' ) )
+		errorNotice( translate( 'Sorry, we had a problem fetching your Reader subscriptions.' ) ),
 	);
 }
 

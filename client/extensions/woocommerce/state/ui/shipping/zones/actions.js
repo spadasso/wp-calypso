@@ -10,7 +10,7 @@ import {
 	WOOCOMMERCE_SHIPPING_ZONE_REMOVE,
 } from 'woocommerce/state/action-types';
 
-export const addNewShippingZone = ( siteId ) => {
+export const addNewShippingZone = siteId => {
 	return { type: WOOCOMMERCE_SHIPPING_ZONE_ADD, siteId };
 };
 
@@ -18,11 +18,11 @@ export const openShippingZoneForEdit = ( siteId, id ) => {
 	return { type: WOOCOMMERCE_SHIPPING_ZONE_OPEN, siteId, id };
 };
 
-export const closeEditingShippingZone = ( siteId ) => {
+export const closeEditingShippingZone = siteId => {
 	return { type: WOOCOMMERCE_SHIPPING_ZONE_CLOSE, siteId };
 };
 
-export const cancelEditingShippingZone = ( siteId ) => {
+export const cancelEditingShippingZone = siteId => {
 	return { type: WOOCOMMERCE_SHIPPING_ZONE_CANCEL, siteId };
 };
 

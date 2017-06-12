@@ -1,14 +1,12 @@
 /**
  * External dependencies
  */
-var React = require( 'react' ),
-	PureRenderMixin = require( 'react-pure-render/mixin' );
+var React = require( 'react' ), PureRenderMixin = require( 'react-pure-render/mixin' );
 
 /**
  * Internal dependencies
  */
-var Card = require( 'components/card' ),
-	DatePicker = require( 'components/date-picker' );
+var Card = require( 'components/card' ), DatePicker = require( 'components/date-picker' );
 
 /**
  * Date Picker Demo
@@ -30,19 +28,19 @@ var datePicker = React.createClass( {
 				{
 					title: '1 other post scheduled',
 					date: new Date( '2015-07-15 10:30' ),
-					type: 'scheduled'
+					type: 'scheduled',
 				},
 				{
 					title: 'Happy birthday Damian',
 					date: new Date( '2015-07-18 15:00' ),
-					type: 'birthday'
+					type: 'birthday',
 				},
 				{
 					title: 'Do not rest',
-					date: new Date( '2015-07-18 8:00' )
-				}
+					date: new Date( '2015-07-18 8:00' ),
+				},
 			],
-			selectedDay: this.moment( date )
+			selectedDay: this.moment( date ),
 		};
 	},
 
@@ -60,11 +58,11 @@ var datePicker = React.createClass( {
 				<DatePicker
 					events={ this.state.events }
 					onSelectDay={ this.selectDay }
-					selectedDay={ this.state.selectedDay }>
-				</DatePicker>
+					selectedDay={ this.state.selectedDay }
+				/>
 			</Card>
 		);
-	}
+	},
 } );
 
 module.exports = datePicker;

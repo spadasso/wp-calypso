@@ -28,7 +28,7 @@ describe( 'requestFollow', () => {
 				},
 				onSuccess: action,
 				onFailure: action,
-			} )
+			} ),
 		);
 	} );
 } );
@@ -61,7 +61,7 @@ describe( 'receiveFollow', () => {
 				date_subscribed: 211636800000,
 				delivery_methods: {},
 				is_owner: false,
-			} )
+			} ),
 		);
 	} );
 

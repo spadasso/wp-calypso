@@ -58,12 +58,14 @@ class EditorConfirmationSidebar extends React.Component {
 			return;
 		}
 
-		const publishButtonStatus = getPublishButtonStatus( this.props.site, this.props.post, this.props.savedPost );
+		const publishButtonStatus = getPublishButtonStatus(
+			this.props.site,
+			this.props.post,
+			this.props.savedPost,
+		);
 		const buttonLabel = this.getPublishButtonLabel( publishButtonStatus );
 
-		return (
-			<Button onClick={ this.closeAndPublish }>{ buttonLabel }</Button>
-		);
+		return <Button onClick={ this.closeAndPublish }>{ buttonLabel }</Button>;
 	}
 
 	getBusyButtonLabel( publishButtonStatus ) {
@@ -97,12 +99,10 @@ class EditorConfirmationSidebar extends React.Component {
 			password,
 			status,
 			savedStatus,
-			savedPassword
+			savedPassword,
 		};
 
-		return (
-			<EditorVisibility { ...props } />
-		);
+		return <EditorVisibility { ...props } />;
 	}
 
 	renderPublishingBusyButton() {
@@ -114,11 +114,20 @@ class EditorConfirmationSidebar extends React.Component {
 			return;
 		}
 
-		const publishButtonStatus = getPublishButtonStatus( this.props.site, this.props.post, this.props.savedPost );
+		const publishButtonStatus = getPublishButtonStatus(
+			this.props.site,
+			this.props.post,
+			this.props.savedPost,
+		);
 		const buttonLabel = this.getBusyButtonLabel( publishButtonStatus );
 
 		return (
-			<Button disabled className="editor-confirmation-sidebar__publishing-button is-busy is-primary">{ buttonLabel }</Button>
+			<Button
+				disabled
+				className="editor-confirmation-sidebar__publishing-button is-busy is-primary"
+			>
+				{ buttonLabel }
+			</Button>
 		);
 	}
 
@@ -128,27 +137,35 @@ class EditorConfirmationSidebar extends React.Component {
 
 		return (
 			<RootChild>
-				<div className={ classnames( {
-					'editor-confirmation-sidebar': true,
-					'is-active': isOverlayActive,
-				} ) } >
-					<div className={ classnames( {
-						'editor-confirmation-sidebar__overlay': true,
+				<div
+					className={ classnames( {
+						'editor-confirmation-sidebar': true,
 						'is-active': isOverlayActive,
-					} ) } onClick={ this.closeOverlay }>
+					} ) }
+				>
+					<div
+						className={ classnames( {
+							'editor-confirmation-sidebar__overlay': true,
+							'is-active': isOverlayActive,
+						} ) }
+						onClick={ this.closeOverlay }
+					>
 						{ this.renderPublishingBusyButton() }
 					</div>
-					<div className={ classnames( {
-						'editor-confirmation-sidebar__sidebar': true,
-						'is-active': isSidebarActive,
-					} ) }>
+					<div
+						className={ classnames( {
+							'editor-confirmation-sidebar__sidebar': true,
+							'is-active': isSidebarActive,
+						} ) }
+					>
 						<div className="editor-confirmation-sidebar__ground-control">
 							<div className="editor-confirmation-sidebar__close">
 								<Button
 									borderless
 									onClick={ this.closeOverlay }
 									title={ this.props.translate( 'Close sidebar' ) }
-									aria-label={ this.props.translate( 'Close sidebar' ) }>
+									aria-label={ this.props.translate( 'Close sidebar' ) }
+								>
 									<Gridicon icon="cross" />
 								</Button>
 							</div>
@@ -169,7 +186,7 @@ class EditorConfirmationSidebar extends React.Component {
 }
 
 export default connect(
-	( state ) => {
+	state => {
 		const siteId = getSelectedSiteId( state );
 		const postId = getEditorPostId( state );
 		const post = getEditedPost( state, siteId, postId );
@@ -177,8 +194,8 @@ export default connect(
 		return {
 			siteId,
 			postId,
-			post
+			post,
 		};
 	},
-	{ editPost }
+	{ editPost },
 )( localize( EditorConfirmationSidebar ) );

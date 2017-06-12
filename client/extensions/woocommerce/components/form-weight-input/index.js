@@ -17,7 +17,6 @@ import { getWeightUnitSetting } from 'woocommerce/state/sites/settings/products/
 import { fetchSettingsProducts } from 'woocommerce/state/sites/settings/products/actions';
 
 class FormWeightInput extends Component {
-
 	static propTypes = {
 		className: PropTypes.string,
 		value: PropTypes.string.isRequired,
@@ -30,7 +29,7 @@ class FormWeightInput extends Component {
 		className: '',
 		onChange: noop,
 		noWrap: false,
-	}
+	};
 
 	componentDidMount() {
 		const { siteId } = this.props;
@@ -68,7 +67,7 @@ class FormWeightInput extends Component {
 function mapStateToProps( state ) {
 	const site = getSelectedSiteWithFallback( state );
 	const weightUnitSetting = site && getWeightUnitSetting( state, site.ID );
-	const weightUnit = weightUnitSetting && weightUnitSetting.value || 'lbs';
+	const weightUnit = ( weightUnitSetting && weightUnitSetting.value ) || 'lbs';
 
 	return {
 		siteId: site && site.ID,
@@ -81,7 +80,7 @@ function mapDispatchToProps( dispatch ) {
 		{
 			fetchSettingsProducts,
 		},
-		dispatch
+		dispatch,
 	);
 }
 

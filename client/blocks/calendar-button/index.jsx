@@ -53,7 +53,7 @@ class CalendarButton extends Component {
 
 	togglePopover = () => this.setState( { showPopover: ! this.state.showPopover } );
 
-	setPopoverReference = calendarButtonRef => ( this.reference = calendarButtonRef );
+	setPopoverReference = calendarButtonRef => this.reference = calendarButtonRef;
 
 	renderCalendarPopover() {
 		const { showPopover } = this.state;
@@ -62,20 +62,26 @@ class CalendarButton extends Component {
 			return null;
 		}
 
-		const calendarProperties = Object.assign( {}, pick( this.props, [
-			'autoPosition',
-			'closeOnEsc',
-			'events',
-			'ignoreContext',
-			'isVisible',
-			'rootClassName',
-			'selectedDay',
-			'showDelay',
-			'siteId',
-			'onDateChange',
-			'onMonthChange',
-			'onShow',
-		] ) );
+		const calendarProperties = Object.assign(
+			{},
+			pick(
+				this.props,
+				[
+					'autoPosition',
+					'closeOnEsc',
+					'events',
+					'ignoreContext',
+					'isVisible',
+					'rootClassName',
+					'selectedDay',
+					'showDelay',
+					'siteId',
+					'onDateChange',
+					'onMonthChange',
+					'onShow',
+				],
+			),
+		);
 
 		return (
 			<AsyncLoad
@@ -90,23 +96,27 @@ class CalendarButton extends Component {
 	}
 
 	renderCalendarContent() {
-		return this.props.children
-			? this.props.children
-			: ( <Gridicon icon={ this.props.icon } /> );
+		return this.props.children ? this.props.children : <Gridicon icon={ this.props.icon } />;
 	}
 
 	render() {
-		const buttonsProperties = Object.assign( {}, pick( this.props, [
-			'compact',
-			'disabled',
-			'primary',
-			'scary',
-			'busy',
-			'href',
-			'borderless',
-			'target',
-			'rel',
-		] ) );
+		const buttonsProperties = Object.assign(
+			{},
+			pick(
+				this.props,
+				[
+					'compact',
+					'disabled',
+					'primary',
+					'scary',
+					'busy',
+					'href',
+					'borderless',
+					'target',
+					'rel',
+				],
+			),
+		);
 
 		return (
 			<Button

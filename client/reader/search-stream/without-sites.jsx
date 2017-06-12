@@ -145,8 +145,8 @@ class SearchStream extends Component {
 						railcar={ suggestion.railcar }
 					/>,
 					', ',
-				]
-			)
+				],
+			),
 		);
 
 		const documentTitle = this.props.translate( '%s ‹ Reader', {

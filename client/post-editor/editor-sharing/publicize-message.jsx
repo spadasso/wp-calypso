@@ -21,7 +21,7 @@ export default React.createClass( {
 		preview: React.PropTypes.string,
 		acceptableLength: React.PropTypes.number,
 		requireCount: React.PropTypes.bool,
-		onChange: React.PropTypes.func
+		onChange: React.PropTypes.func,
 	},
 
 	getDefaultProps: function() {
@@ -56,8 +56,8 @@ export default React.createClass( {
 			>
 				{ this.translate(
 					'The length includes space for the link to your post and an attached image.',
-					{ context: 'Post editor sharing message counter explanation' }
-			) }
+					{ context: 'Post editor sharing message counter explanation' },
+				) }
 			</InfoPopover>
 		);
 	},
@@ -83,7 +83,8 @@ export default React.createClass( {
 					value={ this.props.message }
 					placeholder={ this.props.preview }
 					onChange={ this.onChange }
-					className="editor-sharing__message-input"/>
+					className="editor-sharing__message-input"
+				/>
 			);
 		}
 	},
@@ -92,12 +93,15 @@ export default React.createClass( {
 		return (
 			<div className="editor-sharing__publicize-message">
 				<h5 className="editor-sharing__message-heading">
-					{ this.translate( 'Customize the message', { context: 'Post editor sharing message heading' } ) }
+					{ this.translate(
+						'Customize the message',
+						{ context: 'Post editor sharing message heading' },
+					) }
 				</h5>
 				<TrackInputChanges onNewValue={ this.recordStats }>
 					{ this.renderTextarea() }
 				</TrackInputChanges>
 			</div>
 		);
-	}
+	},
 } );

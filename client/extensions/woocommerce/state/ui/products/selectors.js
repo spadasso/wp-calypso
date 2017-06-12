@@ -22,10 +22,10 @@ export function getAllProductEdits( state ) {
  */
 export function getProductEdits( state, productId ) {
 	const edits = getAllProductEdits( state );
-	const bucket = isNumber( productId ) && 'updates' || 'creates';
+	const bucket = ( isNumber( productId ) && 'updates' ) || 'creates';
 	const array = get( edits, bucket, [] );
 
-	return find( array, ( p ) => productId === p.id );
+	return find( array, p => productId === p.id );
 }
 
 /**
@@ -41,7 +41,7 @@ export function getProductWithLocalEdits( state, productId ) {
 	const product = existing && getProduct( state, productId );
 	const productEdits = getProductEdits( state, productId );
 
-	return ( product || productEdits ) && { ...product, ...productEdits } || undefined;
+	return ( ( product || productEdits ) && { ...product, ...productEdits } ) || undefined;
 }
 
 /**

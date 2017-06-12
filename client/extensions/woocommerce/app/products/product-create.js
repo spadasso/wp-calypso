@@ -15,7 +15,9 @@ import { successNotice, errorNotice } from 'state/notices/actions';
 
 import { editProduct, editProductAttribute } from 'woocommerce/state/ui/products/actions';
 import { getCurrentlyEditingProduct } from 'woocommerce/state/ui/products/selectors';
-import { getProductVariationsWithLocalEdits } from 'woocommerce/state/ui/products/variations/selectors';
+import {
+	getProductVariationsWithLocalEdits,
+} from 'woocommerce/state/ui/products/variations/selectors';
 import { editProductVariation } from 'woocommerce/state/ui/products/variations/actions';
 import { fetchProductCategories } from 'woocommerce/state/sites/product-categories/actions';
 import { getProductCategories } from 'woocommerce/state/sites/product-categories/selectors';
@@ -40,7 +42,7 @@ class ProductCreate extends React.Component {
 
 		if ( ! product ) {
 			this.props.editProduct( null, {
-				type: 'simple'
+				type: 'simple',
 			} );
 		}
 
@@ -61,7 +63,7 @@ class ProductCreate extends React.Component {
 
 	onTrash = () => {
 		// TODO: Add action dispatch to trash this product.
-	}
+	};
 
 	onSave = () => {
 		const { siteId, product, translate } = this.props;
@@ -70,27 +72,24 @@ class ProductCreate extends React.Component {
 			translate( '%(product)s successfully created.', {
 				args: { product: product.name },
 			} ),
-			{ duration: 4000 }
+			{ duration: 4000 },
 		);
 
 		const errorAction = errorNotice(
 			translate( 'There was a problem saving %(product)s. Please try again.', {
 				args: { product: product.name },
-			} )
+			} ),
 		);
 
 		this.props.createProduct( siteId, product, successAction, errorAction );
-	}
+	};
 
 	render() {
 		const { product, className, variations, productCategories } = this.props;
 
 		return (
 			<Main className={ className }>
-				<ProductHeader
-					onTrash={ this.onTrash }
-					onSave={ this.onSave }
-				/>
+				<ProductHeader onTrash={ this.onTrash } onSave={ this.onSave } />
 				<ProductForm
 					product={ product || { type: 'simple' } }
 					variations={ variations }
@@ -127,7 +126,7 @@ function mapDispatchToProps( dispatch ) {
 			editProductVariation,
 			fetchProductCategories,
 		},
-		dispatch
+		dispatch,
 	);
 }
 

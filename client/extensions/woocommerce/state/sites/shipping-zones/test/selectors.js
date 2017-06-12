@@ -30,10 +30,7 @@ const loadingMethodsState = {
 		woocommerce: {
 			sites: {
 				123: {
-					shippingZones: [
-						{ id: 1, methodIds: [ 3 ] },
-						{ id: 2, methodIds: LOADING },
-					],
+					shippingZones: [ { id: 1, methodIds: [ 3 ] }, { id: 2, methodIds: LOADING } ],
 				},
 			},
 		},
@@ -44,10 +41,7 @@ const loadedWithMethodsState = {
 		woocommerce: {
 			sites: {
 				123: {
-					shippingZones: [
-						{ id: 1, methodIds: [ 3 ] },
-						{ id: 2, methodIds: [ 7, 42 ] },
-					],
+					shippingZones: [ { id: 1, methodIds: [ 3 ] }, { id: 2, methodIds: [ 7, 42 ] } ],
 				},
 			},
 		},

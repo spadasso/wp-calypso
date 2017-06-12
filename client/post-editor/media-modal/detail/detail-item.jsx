@@ -81,12 +81,7 @@ class EditorMediaModalDetailItem extends Component {
 	};
 
 	renderEditButton() {
-		const {
-			item,
-			onEdit,
-			site,
-			translate
-		} = this.props;
+		const { item, onEdit, site, translate } = this.props;
 
 		if ( ! userCan( 'upload_files', site ) ) {
 			return null;
@@ -115,10 +110,7 @@ class EditorMediaModalDetailItem extends Component {
 	};
 
 	renderRestoreButton() {
-		const {
-			item,
-			translate
-		} = this.props;
+		const { item, translate } = this.props;
 
 		//do a simple guid vs url check
 		const guidParts = url.parse( item.guid );
@@ -130,16 +122,12 @@ class EditorMediaModalDetailItem extends Component {
 
 		return (
 			<Button
-				className={ classNames(
-					'editor-media-modal-detail__restore',
-				) }
+				className={ classNames( 'editor-media-modal-detail__restore' ) }
 				onClick={ this.handleOnRestoreClick }
 				disabled={ isItemBeingUploaded( item ) }
 			>
-				<Gridicon
-					icon="refresh"
-					size={ 36 } />
-					{ translate( 'Restore Original' ) }
+				<Gridicon icon="refresh" size={ 36 } />
+				{ translate( 'Restore Original' ) }
 			</Button>
 		);
 	}
@@ -168,28 +156,18 @@ class EditorMediaModalDetailItem extends Component {
 			return null;
 		}
 
-		return (
-			<EditorMediaModalDetailFields
-				site={ site }
-				item={ item } />
-		);
+		return <EditorMediaModalDetailFields site={ site } item={ item } />;
 	}
 
 	renderPreviousItemButton() {
-		const {
-			hasPreviousItem,
-			onShowPreviousItem,
-			translate
-		} = this.props;
+		const { hasPreviousItem, onShowPreviousItem, translate } = this.props;
 
 		if ( ! hasPreviousItem ) {
 			return null;
 		}
 
 		return (
-			<button
-				onClick={ onShowPreviousItem }
-				className="editor-media-modal-detail__previous">
+			<button onClick={ onShowPreviousItem } className="editor-media-modal-detail__previous">
 				<Gridicon icon="chevron-left" size={ 36 } />
 				<span className="screen-reader-text">
 					{ translate( 'Previous' ) }
@@ -199,20 +177,14 @@ class EditorMediaModalDetailItem extends Component {
 	}
 
 	renderNextItemButton() {
-		const {
-			hasNextItem,
-			onShowNextItem,
-			translate
-		} = this.props;
+		const { hasNextItem, onShowNextItem, translate } = this.props;
 
 		if ( ! hasNextItem ) {
 			return null;
 		}
 
 		return (
-			<button
-				onClick={ onShowNextItem }
-				className="editor-media-modal-detail__next">
+			<button onClick={ onShowNextItem } className="editor-media-modal-detail__next">
 				<Gridicon icon="chevron-right" size={ 36 } />
 				<span className="screen-reader-text">
 					{ translate( 'Next' ) }
@@ -222,10 +194,7 @@ class EditorMediaModalDetailItem extends Component {
 	}
 
 	renderItem() {
-		const {
-			item,
-			site
-		} = this.props;
+		const { item, site } = this.props;
 
 		if ( ! item ) {
 			return null;
@@ -236,16 +205,24 @@ class EditorMediaModalDetailItem extends Component {
 		let Item;
 
 		switch ( mimePrefix ) {
-			case 'image': Item = EditorMediaModalDetailPreviewImage; break;
-			case 'video': Item = EditorMediaModalDetailPreviewVideo; break;
-			case 'audio': Item = EditorMediaModalDetailPreviewAudio; break;
-			default: Item = EditorMediaModalDetailPreviewDocument; break;
+			case 'image':
+				Item = EditorMediaModalDetailPreviewImage;
+				break;
+			case 'video':
+				Item = EditorMediaModalDetailPreviewVideo;
+				break;
+			case 'audio':
+				Item = EditorMediaModalDetailPreviewAudio;
+				break;
+			default:
+				Item = EditorMediaModalDetailPreviewDocument;
+				break;
 		}
 
 		return React.createElement( Item, {
 			className: 'editor-media-modal-detail__preview',
 			site: site,
-			item: item
+			item: item,
 		} );
 	}
 
@@ -253,7 +230,7 @@ class EditorMediaModalDetailItem extends Component {
 		const { item } = this.props;
 
 		const classes = classNames( 'editor-media-modal-detail__item', {
-			'is-loading': ! item
+			'is-loading': ! item,
 		} );
 
 		return (
@@ -270,8 +247,7 @@ class EditorMediaModalDetailItem extends Component {
 					<div className="editor-media-modal-detail__sidebar">
 						{ this.renderImageEditorButtons( item, 'is-mobile' ) }
 						{ this.renderFields() }
-						<EditorMediaModalDetailFileInfo
-							item={ item } />
+						<EditorMediaModalDetailFileInfo item={ item } />
 					</div>
 
 				</div>

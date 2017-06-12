@@ -31,49 +31,61 @@ class SocialLoginForm extends Component {
 		bearerToken: null,
 	};
 
-	handleGoogleResponse = ( response ) => {
+	handleGoogleResponse = response => {
 		if ( ! response.Zi || ! response.Zi.id_token ) {
 			return;
 		}
 
-		this.props.loginSocialUser( 'google', response.Zi.id_token ).then( () => {
-			this.props.recordTracksEvent( 'calypso_social_login_form_login_success', {
-				social_account_type: 'google',
-			} );
-
-			this.props.onSuccess();
-		} ).catch( error => {
-			if ( error.code === 'unknown_user' ) {
-				const { notice } = this.props.infoNotice( this.props.translate( 'Creating your account' ) );
-				wpcom.undocumented().usersSocialNew( 'google', response.Zi.id_token, 'login', ( wpcomError, wpcomResponse ) => {
-					this.props.removeNotice( notice.noticeId );
-					if ( wpcomError ) {
-						this.props.recordTracksEvent( 'calypso_social_login_form_signup_fail', {
-							social_account_type: 'google',
-							error: wpcomError.message
-						} );
-
-						this.props.errorNotice( wpcomError.message );
-					} else {
-						this.props.recordTracksEvent( 'calypso_social_login_form_signup_success', {
-							social_account_type: 'google',
-						} );
-
-						this.setState( {
-							username: wpcomResponse.username,
-							bearerToken: wpcomResponse.bearer_token
-						} );
-					}
-				} );
-			} else {
-				this.props.recordTracksEvent( 'calypso_social_login_form_login_fail', {
+		this.props
+			.loginSocialUser( 'google', response.Zi.id_token )
+			.then( () => {
+				this.props.recordTracksEvent( 'calypso_social_login_form_login_success', {
 					social_account_type: 'google',
-					error: error.message
 				} );
 
-				this.props.errorNotice( error.message );
-			}
-		} );
+				this.props.onSuccess();
+			} )
+			.catch( error => {
+				if ( error.code === 'unknown_user' ) {
+					const { notice } = this.props.infoNotice(
+						this.props.translate( 'Creating your account' ),
+					);
+					wpcom
+						.undocumented()
+						.usersSocialNew(
+							'google',
+							response.Zi.id_token,
+							'login',
+							( wpcomError, wpcomResponse ) => {
+								this.props.removeNotice( notice.noticeId );
+								if ( wpcomError ) {
+									this.props.recordTracksEvent( 'calypso_social_login_form_signup_fail', {
+										social_account_type: 'google',
+										error: wpcomError.message,
+									} );
+
+									this.props.errorNotice( wpcomError.message );
+								} else {
+									this.props.recordTracksEvent( 'calypso_social_login_form_signup_success', {
+										social_account_type: 'google',
+									} );
+
+									this.setState( {
+										username: wpcomResponse.username,
+										bearerToken: wpcomResponse.bearer_token,
+									} );
+								}
+							},
+						);
+				} else {
+					this.props.recordTracksEvent( 'calypso_social_login_form_login_fail', {
+						social_account_type: 'google',
+						error: error.message,
+					} );
+
+					this.props.errorNotice( error.message );
+				}
+			} );
 	};
 
 	render() {
@@ -86,28 +98,25 @@ class SocialLoginForm extends Component {
 				<div className="login__social-buttons">
 					<GoogleLoginButton
 						clientId={ config( 'google_oauth_client_id' ) }
-						responseHandler={ this.handleGoogleResponse } />
+						responseHandler={ this.handleGoogleResponse }
+					/>
 				</div>
 
-				{ this.state.bearerToken && (
+				{ this.state.bearerToken &&
 					<WpcomLoginForm
 						log={ this.state.username }
 						authorization={ 'Bearer ' + this.state.bearerToken }
 						redirectTo="/start"
-					/>
-				) }
+					/> }
 			</div>
 		);
 	}
 }
 
-export default connect(
-	null,
-	{
-		errorNotice,
-		infoNotice,
-		removeNotice,
-		loginSocialUser,
-		recordTracksEvent,
-	}
-)( localize( SocialLoginForm ) );
+export default connect( null, {
+	errorNotice,
+	infoNotice,
+	removeNotice,
+	loginSocialUser,
+	recordTracksEvent,
+} )( localize( SocialLoginForm ) );

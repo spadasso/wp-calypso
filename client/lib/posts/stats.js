@@ -92,7 +92,9 @@ export function recordSaveEvent() {
 
 	debug(
 		'recordSaveEvent %s currentStatus=%s nextStatus=%s',
-		tracksEventName, currentStatus, nextStatus
+		tracksEventName,
+		currentStatus,
+		nextStatus,
 	);
 
 	analytics.tracks.recordEvent( tracksEventName, {
@@ -100,7 +102,7 @@ export function recordSaveEvent() {
 		post_type: post.type,
 		visibility: utils.getVisibility( post ),
 		current_status: currentStatus,
-		next_status: nextStatus
+		next_status: nextStatus,
 	} );
 }
 

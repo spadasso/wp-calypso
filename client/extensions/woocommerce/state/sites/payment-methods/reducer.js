@@ -10,12 +10,15 @@ import {
 
 // TODO: Handle error
 
-export default createReducer( {}, {
-	[ WOOCOMMERCE_PAYMENT_METHODS_REQUEST ]: () => {
-		return LOADING;
-	},
+export default createReducer(
+	{},
+	{
+		[ WOOCOMMERCE_PAYMENT_METHODS_REQUEST ]: () => {
+			return LOADING;
+		},
 
-	[ WOOCOMMERCE_PAYMENT_METHODS_REQUEST_SUCCESS ]: ( state, { data } ) => {
-		return data;
+		[ WOOCOMMERCE_PAYMENT_METHODS_REQUEST_SUCCESS ]: ( state, { data } ) => {
+			return data;
+		},
 	},
-} );
+);

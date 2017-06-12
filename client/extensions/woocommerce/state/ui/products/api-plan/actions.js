@@ -1,4 +1,3 @@
-
 /**
  * Internal dependencies
  */
@@ -63,14 +62,13 @@ export function createApiPlan( plan ) {
 export function startApiPlanStep( stepIndex, time = Date.now() ) {
 	return {
 		type: WOOCOMMERCE_EDIT_PRODUCT_APIPLAN_STEP_START,
-		payload: { stepIndex, time }
+		payload: { stepIndex, time },
 	};
 }
 
 export function endApiPlanStep( stepIndex, result, time = Date.now() ) {
 	return {
 		type: WOOCOMMERCE_EDIT_PRODUCT_APIPLAN_STEP_END,
-		payload: { stepIndex, result, time }
+		payload: { stepIndex, result, time },
 	};
 }
-

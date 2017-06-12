@@ -22,9 +22,13 @@ describe( 'Login', () => {
 
 	describe( 'footerLinks', () => {
 		it( 'should have a "Back to WordPress.com" link', () => {
-			const login = shallow( <Login queryArguments={ { redirect_to: '' } } translate={ identity } /> );
+			const login = shallow(
+				<Login queryArguments={ { redirect_to: '' } } translate={ identity } />,
+			);
 
-			expect( login.find( '.wp-login__footer > a' ).contains( 'Back to WordPress.com' ) ).to.equal( true );
+			expect( login.find( '.wp-login__footer > a' ).contains( 'Back to WordPress.com' ) ).to.equal(
+				true,
+			);
 		} );
 	} );
 } );

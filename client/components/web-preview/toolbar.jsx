@@ -12,11 +12,7 @@ import { localize } from 'i18n-calypso';
 import SelectDropdown from 'components/select-dropdown';
 import DropdownItem from 'components/select-dropdown/item';
 
-const possibleDevices = [
-	'computer',
-	'tablet',
-	'phone'
-];
+const possibleDevices = [ 'computer', 'tablet', 'phone' ];
 
 class PreviewToolbar extends Component {
 	static propTypes = {
@@ -39,7 +35,7 @@ class PreviewToolbar extends Component {
 	};
 
 	static defaultProps = {
-		showSEO: true
+		showSEO: true,
 	};
 
 	constructor( props ) {
@@ -49,7 +45,7 @@ class PreviewToolbar extends Component {
 			computer: { title: props.translate( 'Desktop' ), icon: 'computer' },
 			tablet: { title: props.translate( 'Tablet' ), icon: 'tablet' },
 			phone: { title: props.translate( 'Phone' ), icon: 'phone' },
-			seo: { title: props.translate( 'Search & Social' ), icon: 'globe' }
+			seo: { title: props.translate( 'Search & Social' ), icon: 'globe' },
 		};
 	}
 
@@ -64,7 +60,7 @@ class PreviewToolbar extends Component {
 			showDeviceSwitcher,
 			showExternal,
 			showSEO,
-			translate
+			translate,
 		} = this.props;
 
 		const selectedDevice = this.devices[ currentDevice ];
@@ -80,8 +76,7 @@ class PreviewToolbar extends Component {
 						onClick={ onClose }
 					>
 						<Gridicon icon="cross" />
-					</button>
-				}
+					</button> }
 				{ showDeviceSwitcher &&
 					<SelectDropdown
 						compact
@@ -99,8 +94,7 @@ class PreviewToolbar extends Component {
 								{ this.devices[ device ].title }
 							</DropdownItem>
 						) ) }
-					</SelectDropdown>
-				}
+					</SelectDropdown> }
 				{ showExternal &&
 					<a
 						className="web-preview__external"
@@ -109,8 +103,7 @@ class PreviewToolbar extends Component {
 						rel="noopener noreferrer"
 					>
 						<Gridicon icon="external" />
-					</a>
-				}
+					</a> }
 				<div className="web-preview__toolbar-tray">
 					{ this.props.children }
 				</div>

@@ -20,11 +20,10 @@ import MediaLibrarySelectedStore from 'lib/media/library-selected-store';
 import accept from 'lib/accept';
 
 class Media extends Component {
-
 	static propTypes = {
 		selectedSite: PropTypes.object,
 		filter: PropTypes.string,
-		search: PropTypes.string
+		search: PropTypes.string,
 	};
 
 	state = {
@@ -35,11 +34,11 @@ class Media extends Component {
 
 	componentDidMount() {
 		this.setState( {
-			containerWidth: this.refs.container.clientWidth
+			containerWidth: this.refs.container.clientWidth,
 		} );
 	}
 
-	onFilterChange = ( filter ) => {
+	onFilterChange = filter => {
 		let redirect = '/media';
 
 		if ( filter ) {
@@ -53,7 +52,7 @@ class Media extends Component {
 		page( redirect );
 	};
 
-	openDetailsModalForASingleImage = ( image ) => {
+	openDetailsModalForASingleImage = image => {
 		this.setState( {
 			currentDetail: 0,
 			selectedImages: [ image ],
@@ -66,7 +65,7 @@ class Media extends Component {
 
 		this.setState( {
 			currentDetail: 0,
-			selectedImages: selected
+			selectedImages: selected,
 		} );
 	};
 
@@ -78,8 +77,8 @@ class Media extends Component {
 		this.setState( { currentDetail: null, editedItem: this.state.currentDetail } );
 	};
 
-	onImageEditorCancel = ( imageEditorProps ) => {
-		const {	resetAllImageEditorState } = imageEditorProps;
+	onImageEditorCancel = imageEditorProps => {
+		const { resetAllImageEditorState } = imageEditorProps;
 		this.setState( { currentDetail: this.state.editedItem, editedItem: null } );
 
 		resetAllImageEditorState();
@@ -92,12 +91,7 @@ class Media extends Component {
 			return;
 		}
 
-		const {
-			fileName,
-			site,
-			ID,
-			resetAllImageEditorState
-		} = imageEditorProps;
+		const { fileName, site, ID, resetAllImageEditorState } = imageEditorProps;
 
 		const mimeType = MediaUtils.getMimeType( fileName );
 
@@ -106,8 +100,8 @@ class Media extends Component {
 			media: {
 				fileName: fileName,
 				fileContents: blob,
-				mimeType: mimeType
-			}
+				mimeType: mimeType,
+			},
 		};
 
 		MediaActions.update( site.ID, item, true );
@@ -138,7 +132,7 @@ class Media extends Component {
 				isPrimary: true,
 				disabled: false,
 				onClose: this.closeDetailsModal,
-			}
+			},
 		];
 	}
 
@@ -150,7 +144,7 @@ class Media extends Component {
 		this.setState( { currentDetail: null, editedItem: null, selectedImages: [] } );
 	};
 
-	setDetailSelectedIndex = ( index ) => {
+	setDetailSelectedIndex = index => {
 		this.setState( { currentDetail: index } );
 	};
 
@@ -168,7 +162,7 @@ class Media extends Component {
 		const confirmMessage = this.props.translate(
 			'Are you sure you want to permanently delete this item?',
 			'Are you sure you want to permanently delete these items?',
-			{ count: selectedCount }
+			{ count: selectedCount },
 		);
 
 		accept( confirmMessage, accepted => {
@@ -217,28 +211,26 @@ class Media extends Component {
 						buttons={ this.getModalButtons() }
 						onClose={ this.closeDetailsModal }
 					>
-					{ this.state.currentDetail !== null &&
-						<EditorMediaModalDetail
-							site={ site }
-							items={ this.state.selectedImages }
-							selectedIndex={ this.state.currentDetail }
-							onReturnToList={ this.closeDetailsModal }
-							onEditItem={ this.editImage }
-							onRestoreItem={ this.restoreOriginalMedia }
-							onSelectedIndexChange={ this.setDetailSelectedIndex }
-						/>
-					}
-					{ this.state.editedItem !== null &&
-						<ImageEditor
-							siteId={ site && site.ID }
-							media={ this.state.selectedImages[ this.state.editedItem ] }
-							onDone={ this.onImageEditorDone }
-							onCancel={ this.onImageEditorCancel }
-						/>
-					}
-					</Dialog>
-				}
-				{ site && site.ID && (
+						{ this.state.currentDetail !== null &&
+							<EditorMediaModalDetail
+								site={ site }
+								items={ this.state.selectedImages }
+								selectedIndex={ this.state.currentDetail }
+								onReturnToList={ this.closeDetailsModal }
+								onEditItem={ this.editImage }
+								onRestoreItem={ this.restoreOriginalMedia }
+								onSelectedIndexChange={ this.setDetailSelectedIndex }
+							/> }
+						{ this.state.editedItem !== null &&
+							<ImageEditor
+								siteId={ site && site.ID }
+								media={ this.state.selectedImages[ this.state.editedItem ] }
+								onDone={ this.onImageEditorDone }
+								onCancel={ this.onImageEditorCancel }
+							/> }
+					</Dialog> }
+				{ site &&
+					site.ID &&
 					<MediaLibrarySelectedData siteId={ site.ID }>
 						<MediaLibrary
 							{ ...this.props }
@@ -251,9 +243,9 @@ class Media extends Component {
 							onViewDetails={ this.openDetailsModalForAllSelected }
 							onDeleteItem={ this.handleDeleteMediaEvent }
 							modal={ false }
-							containerWidth={ this.state.containerWidth } />
-					</MediaLibrarySelectedData>
-				) }
+							containerWidth={ this.state.containerWidth }
+						/>
+					</MediaLibrarySelectedData> }
 			</div>
 		);
 	}

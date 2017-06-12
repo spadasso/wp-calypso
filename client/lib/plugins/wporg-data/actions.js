@@ -14,8 +14,7 @@ var Dispatcher = require( 'dispatcher' ),
 /**
  * Constants
  */
-var _LIST_DEFAULT_SIZE = 24,
-	_DEFAULT_FIRST_PAGE = 0;
+var _LIST_DEFAULT_SIZE = 24, _DEFAULT_FIRST_PAGE = 0;
 
 /**
  *  Local variables;
@@ -30,7 +29,8 @@ var PluginsDataActions = {
 		// We need to debounce this method to avoid mixing diferent dispatch batches (and get an invariant violation from react)
 		// Since the infinite scroll mixin is launching a bunch of fetch requests at the same time, without debounce is too easy
 		// to get two of those requests running at (almost) the same time and getting react to freak out.
-		_lastFetchedPagePerCategory[ category ] = _lastFetchedPagePerCategory[ category ] || _DEFAULT_FIRST_PAGE;
+		_lastFetchedPagePerCategory[ category ] =
+			_lastFetchedPagePerCategory[ category ] || _DEFAULT_FIRST_PAGE;
 		page = page || _DEFAULT_FIRST_PAGE;
 
 		if ( category === 'search' && page === _DEFAULT_FIRST_PAGE ) {
@@ -51,30 +51,33 @@ var PluginsDataActions = {
 			action: 'FETCH_WPORG_PLUGINS_LIST',
 			page: page,
 			category: category,
-			searchTerm: searchTerm
+			searchTerm: searchTerm,
 		} );
 
-		wporg.fetchPluginsList( {
-			pageSize: _LIST_DEFAULT_SIZE,
-			page: page,
-			category: category,
-			search: searchTerm
-		}, function( error, data ) {
-			if ( ! searchTerm || searchTerm === _currentSearchTerm ) {
-				debug( 'plugin list fetched from .org', category, error, data );
-				_fetchingLists[ category ] = null;
-				_lastFetchedPagePerCategory[ category ] = page;
-				_totalPagesPerCategory[ category ] = data.info.pages;
-				Dispatcher.handleServerAction( {
-					type: 'RECEIVE_WPORG_PLUGINS_LIST',
-					action: 'FETCH_WPORG_PLUGINS_LIST',
-					page: page,
-					category: category,
-					data: data ? utils.normalizePluginsList( data.plugins ) : null,
-					error: error
-				} );
-			}
-		} );
+		wporg.fetchPluginsList(
+			{
+				pageSize: _LIST_DEFAULT_SIZE,
+				page: page,
+				category: category,
+				search: searchTerm,
+			},
+			function( error, data ) {
+				if ( ! searchTerm || searchTerm === _currentSearchTerm ) {
+					debug( 'plugin list fetched from .org', category, error, data );
+					_fetchingLists[ category ] = null;
+					_lastFetchedPagePerCategory[ category ] = page;
+					_totalPagesPerCategory[ category ] = data.info.pages;
+					Dispatcher.handleServerAction( {
+						type: 'RECEIVE_WPORG_PLUGINS_LIST',
+						action: 'FETCH_WPORG_PLUGINS_LIST',
+						page: page,
+						category: category,
+						data: data ? utils.normalizePluginsList( data.plugins ) : null,
+						error: error,
+					} );
+				}
+			},
+		);
 	}, 25 ),
 
 	fetchNextCategoryPage: function( category, searchTerm ) {
@@ -82,7 +85,9 @@ var PluginsDataActions = {
 		if ( typeof _lastFetchedPagePerCategory[ category ] !== 'undefined' ) {
 			lastPage = _lastFetchedPagePerCategory[ category ];
 		}
-		if ( ! _totalPagesPerCategory[ category ] || _totalPagesPerCategory[ category ] >= lastPage + 1 ) {
+		if (
+			! _totalPagesPerCategory[ category ] || _totalPagesPerCategory[ category ] >= lastPage + 1
+		) {
 			return this.fetchPluginsList( category, lastPage + 1, searchTerm );
 		}
 	},
@@ -102,7 +107,7 @@ var PluginsDataActions = {
 		_fetchingLists = {};
 		_lastFetchedPagePerCategory = {};
 		_totalPagesPerCategory = {};
-	}
+	},
 };
 
 module.exports = PluginsDataActions;

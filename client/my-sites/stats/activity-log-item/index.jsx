@@ -17,7 +17,6 @@ import PopoverMenuSeparator from 'components/popover/menu-separator';
 import Gravatar from 'components/gravatar';
 
 class ActivityLogItem extends Component {
-
 	static propTypes = {
 		siteId: PropTypes.number.isRequired,
 		timestamp: PropTypes.number.isRequired,
@@ -30,20 +29,17 @@ class ActivityLogItem extends Component {
 		user: PropTypes.object,
 		onClick: PropTypes.func,
 		actionText: PropTypes.string,
-		description: PropTypes.string
+		description: PropTypes.string,
 	};
 
 	static defaultProps = {
 		onClick: noop,
 		status: 'is-info',
-		icon: 'info-outline'
+		icon: 'info-outline',
 	};
 
 	getTime() {
-		const {
-			moment,
-			timestamp
-		} = this.props;
+		const { moment, timestamp } = this.props;
 
 		return (
 			<div className="activity-log-item__time">
@@ -53,15 +49,9 @@ class ActivityLogItem extends Component {
 	}
 
 	getIcon() {
-		const {
-			icon,
-			status
-		} = this.props;
+		const { icon, status } = this.props;
 
-		const classes = classNames(
-			'activity-log-item__icon',
-			status
-		);
+		const classes = classNames( 'activity-log-item__icon', status );
 
 		return (
 			<div className={ classes }>
@@ -71,9 +61,7 @@ class ActivityLogItem extends Component {
 	}
 
 	getActor() {
-		const {
-			user
-		} = this.props;
+		const { user } = this.props;
 
 		if ( ! user ) {
 			return null;
@@ -91,10 +79,7 @@ class ActivityLogItem extends Component {
 	}
 
 	getContent() {
-		const {
-			title,
-			subTitle
-		} = this.props;
+		const { title, subTitle } = this.props;
 
 		return (
 			<div className="activity-log-item__content">
@@ -105,12 +90,10 @@ class ActivityLogItem extends Component {
 	}
 
 	getSummary() {
-		const {
-			translate,
-			actionText
-		} = this.props;
+		const { translate, actionText } = this.props;
 
-		return ( actionText &&
+		return (
+			actionText &&
 			<div className="activity-log-item__action">
 				<EllipsisMenu position="bottom right">
 					<PopoverMenuItem onClick={ noop } icon="undo">{ actionText }</PopoverMenuItem>
@@ -132,17 +115,11 @@ class ActivityLogItem extends Component {
 	}
 
 	render() {
-		const {
-			className,
-			description
-		} = this.props;
+		const { className, description } = this.props;
 
-		const classes = classNames(
-			'activity-log-item',
-			className
-		);
+		const classes = classNames( 'activity-log-item', className );
 		return (
-			<div className={ classes } >
+			<div className={ classes }>
 				<div className="activity-log-item__type">
 					{ this.getTime() }
 					{ this.getIcon() }

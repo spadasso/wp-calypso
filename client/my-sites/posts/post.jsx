@@ -24,8 +24,8 @@ import { setPreviewUrl } from 'state/ui/preview/actions';
 import { setLayoutFocus } from 'state/ui/layout-focus/actions';
 import { getPostPreviewUrl } from 'state/posts/selectors';
 import { isSingleUserSite, isSitePreviewable } from 'state/sites/selectors';
-import { getSelectedSiteId } from 'state/ui/selectors';
-import { getEditorPath } from 'state/ui/editor/selectors';
+import { getSelectedSiteId } from 'state/ui/selectors';
+import { getEditorPath } from 'state/ui/editor/selectors';
 
 import Comments from 'blocks/comments';
 import PostShare from 'my-sites/post-share';
@@ -47,7 +47,6 @@ function checkPropsChange( currentProps, nextProps, propArr ) {
 }
 
 const Post = React.createClass( {
-
 	displayName: 'Post',
 
 	mixins: [ updatePostStatus ],
@@ -57,7 +56,7 @@ const Post = React.createClass( {
 			showMoreOptions: false,
 			showComments: false,
 			showShare: false,
-			commentsFilter: 'all'
+			commentsFilter: 'all',
 		};
 	},
 
@@ -108,8 +107,7 @@ const Post = React.createClass( {
 		},
 		viewStats() {
 			recordEvent( 'Clicked View Post Stats' );
-		}
-
+		},
 	},
 
 	publishPost() {
@@ -146,7 +144,7 @@ const Post = React.createClass( {
 			updated: translate( 'Updated' ),
 			deleteWarning: translate( 'Delete this post permanently?' ),
 			restoring: translate( 'Restoring' ),
-			restored: translate( 'Restored' )
+			restored: translate( 'Restored' ),
 		};
 	},
 
@@ -158,8 +156,8 @@ const Post = React.createClass( {
 	getPostClass() {
 		return classNames( {
 			post: true,
-			'is-protected': ( this.props.post.password ) ? true : false,
-			'show-more-options': this.state.showMoreOptions
+			'is-protected': this.props.post.password ? true : false,
+			'show-more-options': this.state.showMoreOptions,
 		} );
 	},
 
@@ -170,7 +168,8 @@ const Post = React.createClass( {
 					href={ this.getContentLinkURL() }
 					className="post__title-link post__content-link"
 					target={ this.getContentLinkTarget() }
-					onClick={ this.analyticsEvents.postTitleClick }>
+					onClick={ this.analyticsEvents.postTitleClick }
+				>
 					<h4 className="post__title">{ this.props.post.title }</h4>
 				</a>
 			);
@@ -180,22 +179,18 @@ const Post = React.createClass( {
 	getPostImage() {
 		if ( ! this.props.postImages ) {
 			if ( this.props.post.canonical_image ) {
-				return (
-					<div className="post-image is-placeholder" />
-				);
+				return <div className="post-image is-placeholder" />;
 			}
 
 			return null;
 		}
 
-		return (
-			<PostImage postImages={ this.props.postImages } />
-		);
+		return <PostImage postImages={ this.props.postImages } />;
 	},
 
 	getTrimmedExcerpt() {
 		const excerpt = this.props.post.excerpt;
-		return ( excerpt.length <= 220 ) ? excerpt : excerpt.substring( 0, 220 ) + '\u2026';
+		return excerpt.length <= 220 ? excerpt : excerpt.substring( 0, 220 ) + '\u2026';
 	},
 
 	getExcerpt() {
@@ -212,7 +207,12 @@ const Post = React.createClass( {
 		}
 
 		return (
-			<a href={ this.getContentLinkURL() } className="post__excerpt post__content-link" target={ this.getContentLinkTarget() } onClick={ this.analyticsEvents.postExcerptClick }>
+			<a
+				href={ this.getContentLinkURL() }
+				className="post__excerpt post__content-link"
+				target={ this.getContentLinkTarget() }
+				onClick={ this.analyticsEvents.postExcerptClick }
+			>
 				{ excerptElement }
 			</a>
 		);
@@ -224,10 +224,12 @@ const Post = React.createClass( {
 		}
 
 		return (
-			<PostHeader siteId={ this.props.post.site_ID }
+			<PostHeader
+				siteId={ this.props.post.site_ID }
 				author={ this.props.post.author ? this.props.post.author.name : '' }
 				path={ this.props.path }
-				showAuthor={ ! this.props.isPostFromSingleUserSite } />
+				showAuthor={ ! this.props.isPostFromSingleUserSite }
+			/>
 		);
 	},
 
@@ -265,13 +267,13 @@ const Post = React.createClass( {
 
 	toggleMoreControls( visibility ) {
 		this.setState( {
-			showMoreOptions: ( visibility === 'show' )
+			showMoreOptions: visibility === 'show',
 		} );
 	},
 
 	toggleComments() {
 		this.setState( {
-			showComments: ! this.state.showComments
+			showComments: ! this.state.showComments,
 		} );
 		this.analyticsEvents.commentIconClick();
 	},
@@ -305,9 +307,11 @@ const Post = React.createClass( {
 					{ this.getHeader() }
 					{ this.getPostImage() }
 					{ this.getContent() }
-					<PostActions siteId={ this.props.post.site_ID }
+					<PostActions
+						siteId={ this.props.post.site_ID }
 						post={ this.props.post }
-						toggleComments={ this.toggleComments } />
+						toggleComments={ this.toggleComments }
+					/>
 				</div>
 				<PostControls
 					post={ this.props.post }
@@ -327,7 +331,8 @@ const Post = React.createClass( {
 				<ReactCSSTransitionGroup
 					transitionName="updated-trans"
 					transitionEnterTimeout={ 300 }
-					transitionLeaveTimeout={ 300 }>
+					transitionLeaveTimeout={ 300 }
+				>
 					{ this.buildUpdateTemplate() }
 				</ReactCSSTransitionGroup>
 				{ this.state.showComments &&
@@ -336,17 +341,20 @@ const Post = React.createClass( {
 						post={ this.props.post }
 						showFilters={ isEnabled( 'comments/filters-in-posts' ) }
 						showModerationTools={ isEnabled( 'comments/moderation-tools-in-posts' ) }
-						commentsFilter={ config.isEnabled( 'comments/filters-in-posts' ) ? this.state.commentsFilter : 'approved' }
+						commentsFilter={
+							config.isEnabled( 'comments/filters-in-posts' )
+								? this.state.commentsFilter
+								: 'approved'
+						}
 						onFilterChange={ commentsFilter => this.setState( { commentsFilter } ) }
-						onCommentsUpdate={ () => {} } />
-				}
-				{ this.state.showShare && config.isEnabled( 'republicize' ) &&
-					<PostShare post={ this.props.post } siteId={ this.props.post.site_ID } />
-				}
+						onCommentsUpdate={ () => {} }
+					/> }
+				{ this.state.showShare &&
+					config.isEnabled( 'republicize' ) &&
+					<PostShare post={ this.props.post } siteId={ this.props.post.site_ID } /> }
 			</Card>
 		);
-	}
-
+	},
 } );
 
 export default connect(
@@ -372,10 +380,8 @@ export default connect(
 			 * FIXME(biskobe,mcsf): undo hack
 			 * //previewUrl: getPostPreviewUrl( state, post.site_ID, post.ID ),
 			 */
-			previewUrl: getPostPreviewUrl( state, post.site_ID, post.ID,
-				{ __forceUseRawPost: post }
-			)
+			previewUrl: getPostPreviewUrl( state, post.site_ID, post.ID, { __forceUseRawPost: post } ),
 		};
 	},
-	{ setPreviewUrl, setLayoutFocus }
+	{ setPreviewUrl, setLayoutFocus },
 )( localize( Post ) );

@@ -36,5 +36,7 @@ export const areShippingZonesLoaded = ( state, siteId = getSelectedSiteId( state
  */
 export const areShippingZonesLoading = ( state, siteId = getSelectedSiteId( state ) ) => {
 	const zones = getAPIShippingZones( state, siteId );
-	return LOADING === zones || ( isArray( zones ) && some( zones, zone => LOADING === zone.methodIds ) );
+	return (
+		LOADING === zones || ( isArray( zones ) && some( zones, zone => LOADING === zone.methodIds ) )
+	);
 };

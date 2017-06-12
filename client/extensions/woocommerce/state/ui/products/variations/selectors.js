@@ -11,7 +11,7 @@ import { getVariation } from '../../../variations/selectors';
 function getVariationEditsStateForProduct( state, productId ) {
 	const woocommerce = state.extensions.woocommerce;
 	const variations = get( woocommerce, 'ui.products.variations.edits', [] );
-	return find( variations, ( v ) => productId === v.productId );
+	return find( variations, v => productId === v.productId );
 }
 
 /**
@@ -24,9 +24,9 @@ function getVariationEditsStateForProduct( state, productId ) {
  */
 export function getVariationEdits( state, productId, variationId ) {
 	const edits = getVariationEditsStateForProduct( state, productId );
-	const bucket = isNumber( variationId ) && 'updates' || 'creates';
+	const bucket = ( isNumber( variationId ) && 'updates' ) || 'creates';
 	const array = get( edits, bucket, [] );
-	return find( array, ( v ) => variationId === v.id );
+	return find( array, v => variationId === v.id );
 }
 
 /**
@@ -42,7 +42,7 @@ export function getVariationWithLocalEdits( state, productId, variationId ) {
 	const variation = existing && getVariation( state, productId, variationId );
 	const variationEdits = getVariationEdits( state, productId, variationId );
 
-	return ( variation || variationEdits ) && { ...variation, ...variationEdits } || undefined;
+	return ( ( variation || variationEdits ) && { ...variation, ...variationEdits } ) || undefined;
 }
 
 /**

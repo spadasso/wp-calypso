@@ -27,7 +27,7 @@ describe( 'Domain Details Form', () => {
 	// needed, because some dependency of dependency uses `window`
 	useFakeDom();
 
-	useMockery( ( mockery ) => {
+	useMockery( mockery => {
 		mockery.registerMock( 'lib/analytics', {} );
 		mockery.registerMock( 'i18n-calypso', { localize: identity } );
 		mockery.registerMock( 'lib/wp', wpcomMock );
@@ -51,14 +51,14 @@ describe( 'Domain Details Form', () => {
 		productSlug: 'normal_domain',
 		domain: 'test.test',
 		extra: {
-			privacy_available: true
+			privacy_available: true,
 		},
 	} );
 
 	const domainProductWithoutPrivacy = domainRegistration( {
 		productSlug: 'unprivate_domain',
 		extra: {
-			privacy_available: false
+			privacy_available: false,
 		},
 	} );
 
@@ -78,7 +78,7 @@ describe( 'Domain Details Form', () => {
 		const propsWithDomain = merge(
 			{},
 			defaultProps,
-			{ cart: { products: [ domainProductWithExplicitPrivacy ] } }
+			{ cart: { products: [ domainProductWithExplicitPrivacy ] } },
 		);
 
 		const wrapper = shallow( <DomainDetailsForm { ...propsWithDomain } /> );
@@ -92,7 +92,7 @@ describe( 'Domain Details Form', () => {
 		const propsWithDomainWithPrivacy = merge(
 			{},
 			defaultProps,
-			{ cart: { products: [ domainProduct, privacyProduct ] } }
+			{ cart: { products: [ domainProduct, privacyProduct ] } },
 		);
 
 		const wrapper = shallow( <DomainDetailsForm { ...propsWithDomainWithPrivacy } /> );
@@ -104,7 +104,7 @@ describe( 'Domain Details Form', () => {
 		const propsWithDomainWithNoPrivacy = merge(
 			{},
 			defaultProps,
-			{ cart: { products: [ domainProductWithoutPrivacy ] } }
+			{ cart: { products: [ domainProductWithoutPrivacy ] } },
 		);
 		const wrapper = shallow( <DomainDetailsForm { ...propsWithDomainWithNoPrivacy } /> );
 
@@ -115,7 +115,7 @@ describe( 'Domain Details Form', () => {
 		const mixedSupportProps = merge(
 			{},
 			defaultProps,
-			{ cart: { products: [ domainProductWithExplicitPrivacy, domainProductWithoutPrivacy ] } }
+			{ cart: { products: [ domainProductWithExplicitPrivacy, domainProductWithoutPrivacy ] } },
 		);
 		const wrapper = shallow( <DomainDetailsForm { ...mixedSupportProps } /> );
 
@@ -123,11 +123,7 @@ describe( 'Domain Details Form', () => {
 	} );
 
 	it( 'should render privacy upsell without explicit privacy support', () => {
-		const mixedSupportProps = merge(
-			{},
-			defaultProps,
-			{ cart: { products: [ domainProduct ] } }
-		);
+		const mixedSupportProps = merge( {}, defaultProps, { cart: { products: [ domainProduct ] } } );
 		const wrapper = shallow( <DomainDetailsForm { ...mixedSupportProps } /> );
 
 		expect( wrapper.find( 'PrivacyProtection' ) ).to.have.length( 1 );

@@ -13,11 +13,7 @@ import FormFieldset from 'components/forms/form-fieldset';
 import FormTextInput from 'components/forms/form-text-input';
 import FormTextInputWithAffixes from 'components/forms/form-text-input-with-affixes';
 import FormInputValidation from 'components/forms/form-input-validation';
-import {
-	recordTracksEvent,
-	recordGoogleEvent,
-	composeAnalytics,
-} from 'state/analytics/actions';
+import { recordTracksEvent, recordGoogleEvent, composeAnalytics } from 'state/analytics/actions';
 
 class GoogleAppsUsers extends React.Component {
 	componentWillMount() {
@@ -33,7 +29,7 @@ class GoogleAppsUsers extends React.Component {
 			email: { value: '', error: null },
 			firstName: { value: '', error: null },
 			lastName: { value: '', error: null },
-			domain: { value: this.props.domain, error: null }
+			domain: { value: this.props.domain, error: null },
 		};
 	}
 
@@ -48,8 +44,7 @@ class GoogleAppsUsers extends React.Component {
 
 				{ allUserInputs }
 
-				<button className="google-apps-dialog__add-another-user-button"
-						onClick={ this.addUser }>
+				<button className="google-apps-dialog__add-another-user-button" onClick={ this.addUser }>
 					{ translate( 'Add Another User' ) }
 				</button>
 			</div>
@@ -62,13 +57,10 @@ class GoogleAppsUsers extends React.Component {
 
 	inputsForUser = ( user, index ) => {
 		const { translate } = this.props;
-		const contactText = translate(
-			'contact',
-			{
-				context: 'part of e-mail address',
-				comment: 'As it would be part of an e-mail address contact@example.com'
-			}
-		);
+		const contactText = translate( 'contact', {
+			context: 'part of e-mail address',
+			comment: 'As it would be part of an e-mail address contact@example.com',
+		} );
 
 		return (
 			<div className="google-apps-dialog__user-fields" key={ `google-apps-dialog-user-${ index }` }>
@@ -82,8 +74,11 @@ class GoogleAppsUsers extends React.Component {
 						isError={ !! user.email.error }
 						onChange={ this.updateField.bind( this, index ) }
 						onBlur={ this.props.onBlur }
-						onClick={ this.recordInputFocus.bind( this, index, 'Email' ) } />
-					{ user.email.error ? <FormInputValidation text={ user.email.error } isError={ true } /> : null }
+						onClick={ this.recordInputFocus.bind( this, index, 'Email' ) }
+					/>
+					{ user.email.error
+						? <FormInputValidation text={ user.email.error } isError={ true } />
+						: null }
 				</FormFieldset>
 
 				<FormFieldset className={ this.fieldClasses( 'first-name' ) }>
@@ -95,8 +90,11 @@ class GoogleAppsUsers extends React.Component {
 						isError={ !! user.firstName.error }
 						onChange={ this.updateField.bind( this, index ) }
 						onBlur={ this.props.onBlur }
-						onClick={ this.recordInputFocus.bind( this, index, 'First Name' ) } />
-					{ user.firstName.error ? <FormInputValidation text={ user.firstName.error } isError={ true } /> : null }
+						onClick={ this.recordInputFocus.bind( this, index, 'First Name' ) }
+					/>
+					{ user.firstName.error
+						? <FormInputValidation text={ user.firstName.error } isError={ true } />
+						: null }
 				</FormFieldset>
 
 				<FormFieldset className={ this.fieldClasses( 'last-name' ) }>
@@ -108,8 +106,11 @@ class GoogleAppsUsers extends React.Component {
 						isError={ !! user.lastName.error }
 						onChange={ this.updateField.bind( this, index ) }
 						onBlur={ this.props.onBlur }
-						onClick={ this.recordInputFocus.bind( this, index, 'Last Name' ) } />
-					{ user.lastName.error ? <FormInputValidation text={ user.lastName.error } isError={ true } /> : null }
+						onClick={ this.recordInputFocus.bind( this, index, 'Last Name' ) }
+					/>
+					{ user.lastName.error
+						? <FormInputValidation text={ user.lastName.error } isError={ true } />
+						: null }
 				</FormFieldset>
 			</div>
 		);
@@ -122,7 +123,7 @@ class GoogleAppsUsers extends React.Component {
 		this.props.recordInputFocus( index, fieldName, inputValue );
 	};
 
-	addUser = ( event ) => {
+	addUser = event => {
 		event.preventDefault();
 
 		this.props.recordAddUserClick( this.props.analyticsSection );
@@ -146,28 +147,21 @@ class GoogleAppsUsers extends React.Component {
 	};
 }
 
-const recordAddUserClick = ( section ) => composeAnalytics(
-	recordTracksEvent(
-		'calypso_google_apps_add_user_button_click',
-		{ section }
-	),
+const recordAddUserClick = section =>
+	composeAnalytics(
+		recordTracksEvent( 'calypso_google_apps_add_user_button_click', { section } ),
+		recordGoogleEvent( 'Domain Search', 'Clicked "Add User" Button in Google Apps Dialog' ),
+	);
+
+const recordInputFocus = ( userIndex, fieldName, inputValue ) =>
 	recordGoogleEvent(
 		'Domain Search',
-		'Clicked "Add User" Button in Google Apps Dialog'
-	)
-);
+		`Focused On "${ fieldName }" Input for User #${ userIndex } in Google Apps Dialog`,
+		'Input Value',
+		inputValue,
+	);
 
-const recordInputFocus = ( userIndex, fieldName, inputValue ) => recordGoogleEvent(
-	'Domain Search',
-	`Focused On "${ fieldName }" Input for User #${ userIndex } in Google Apps Dialog`,
-	'Input Value',
-	inputValue
-);
-
-export default connect(
-	null,
-	{
-		recordAddUserClick,
-		recordInputFocus,
-	}
-)( localize( GoogleAppsUsers ) );
+export default connect( null, {
+	recordAddUserClick,
+	recordInputFocus,
+} )( localize( GoogleAppsUsers ) );

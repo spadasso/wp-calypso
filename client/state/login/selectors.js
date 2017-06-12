@@ -10,7 +10,7 @@ import { get } from 'lodash';
  * @param  {Object}   state  Global state tree
  * @return {?Number}         The user ID.
  */
-export const getTwoFactorUserId = ( state ) => {
+export const getTwoFactorUserId = state => {
 	return get( state, 'login.twoFactorAuth.user_id', null );
 };
 
@@ -33,7 +33,7 @@ export const getTwoFactorAuthNonce = ( state, nonceType ) => {
  * @param  {Object}   state  Global state tree
  * @return {?String}         The type of 2FA notification. enum: 'sms', 'push', 'none'.
  */
-export const getTwoFactorNotificationSent = ( state ) => {
+export const getTwoFactorNotificationSent = state => {
 	return get( state, 'login.twoFactorAuth.two_step_notification_sent', null );
 };
 
@@ -43,7 +43,8 @@ export const getTwoFactorNotificationSent = ( state ) => {
  * @param  {Object}   state  Global state tree
  * @return {?String}         Push notification token to be used for polling auth state
  */
-export const getTwoFactorPushToken = state => get( state, 'login.twoFactorAuth.push_web_token', null );
+export const getTwoFactorPushToken = state =>
+	get( state, 'login.twoFactorAuth.push_web_token', null );
 
 /***
  * Retrieve the remember me flag that was set when logging in
@@ -51,7 +52,8 @@ export const getTwoFactorPushToken = state => get( state, 'login.twoFactorAuth.p
  * @param  {Object}   state  Global state tree
  * @return {Boolean}         Remember me flag for authentication
  */
-export const getTwoFactorRememberMe = state => get( state, 'login.twoFactorAuth.remember_me', false );
+export const getTwoFactorRememberMe = state =>
+	get( state, 'login.twoFactorAuth.remember_me', false );
 
 /***
  * Retrieve the progress status of polling for push authentication
@@ -59,7 +61,8 @@ export const getTwoFactorRememberMe = state => get( state, 'login.twoFactorAuth.
  * @param  {Object}   state  Global state tree
  * @return {Boolean}         Whether the polling for push authentication is in progress
  */
-export const getTwoFactorPushPollInProgress = state => get( state, 'login.twoFactorAuthPushPoll.inProgress', false );
+export const getTwoFactorPushPollInProgress = state =>
+	get( state, 'login.twoFactorAuthPushPoll.inProgress', false );
 
 /***
  * Get whether user logged in successfully via push auth
@@ -67,7 +70,8 @@ export const getTwoFactorPushPollInProgress = state => get( state, 'login.twoFac
  * @param  {Object}   state  Global state tree
  * @return {Boolean}         Whether the polling for push authentication completed successfully
  */
-export const getTwoFactorPushPollSuccess = state => get( state, 'login.twoFactorAuthPushPoll.success', false );
+export const getTwoFactorPushPollSuccess = state =>
+	get( state, 'login.twoFactorAuthPushPoll.success', false );
 
 /**
  * True if two factor authentication is enabled for the logging in user.
@@ -76,15 +80,13 @@ export const getTwoFactorPushPollSuccess = state => get( state, 'login.twoFactor
  * @param  {Object}   state  Global state tree
  * @return {?Boolean}        Whether 2FA is enabled
  */
-export const isTwoFactorEnabled = ( state ) => {
+export const isTwoFactorEnabled = state => {
 	const twoFactorAuth = get( state, 'login.twoFactorAuth' );
 	if ( ! twoFactorAuth ) {
 		return null;
 	}
 
-	return (
-		twoFactorAuth.user_id !== ''
-	);
+	return twoFactorAuth.user_id !== '';
 };
 
 /**
@@ -93,7 +95,7 @@ export const isTwoFactorEnabled = ( state ) => {
  * @param  {Object}   state  Global state tree
  * @return {Boolean}         Whether a request to authenticate 2FA is being made.
  */
-export const isRequestingTwoFactorAuth = ( state ) => {
+export const isRequestingTwoFactorAuth = state => {
 	return get( state, 'login.isRequestingTwoFactorAuth', false );
 };
 
@@ -103,7 +105,7 @@ export const isRequestingTwoFactorAuth = ( state ) => {
  * @param  {Object}   state  Global state tree
  * @return {?String}         Error for the request.
  */
-export const getTwoFactorAuthRequestError = ( state ) => {
+export const getTwoFactorAuthRequestError = state => {
 	return get( state, 'login.twoFactorAuthRequestError', null );
 };
 
@@ -114,7 +116,7 @@ export const getTwoFactorAuthRequestError = ( state ) => {
  * @param  {Object}   state  Global state tree
  * @return {?Array}          The supported auth types (of `authenticator`, `sms`, `push` ).
  */
-export const getTwoFactorSupportedAuthTypes = ( state ) => {
+export const getTwoFactorSupportedAuthTypes = state => {
 	return get( state, 'login.twoFactorAuth.two_step_supported_auth_types', null );
 };
 
@@ -137,7 +139,7 @@ export const isTwoFactorAuthTypeSupported = ( state, type ) => {
  * @param  {Object}   state  Global state tree
  * @return {Boolean}         Whether a login request is in-progress.
  */
-export const isRequesting = ( state ) => {
+export const isRequesting = state => {
 	return get( state, 'login.isRequesting', false );
 };
 
@@ -147,7 +149,7 @@ export const isRequesting = ( state ) => {
  * @param  {Object}   state  Global state tree
  * @return {?Object}         Error for the request.
  */
-export const getRequestError = ( state ) => {
+export const getRequestError = state => {
 	return get( state, 'login.requestError', null );
 };
 
@@ -157,6 +159,6 @@ export const getRequestError = ( state ) => {
  * @param  {Object}   state  Global state tree
  * @return {?Object}         Notice for the request.
  */
-export const getRequestNotice = ( state ) => {
+export const getRequestNotice = state => {
 	return get( state, 'login.requestNotice', null );
 };

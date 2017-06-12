@@ -9,19 +9,13 @@ import Gridicon from 'gridicons';
 /**
  * Internal dependencies
  */
-import {
-	getPostShareScheduledActions,
-	getPostSharePublishedActions,
-} from 'state/selectors';
+import { getPostShareScheduledActions, getPostSharePublishedActions } from 'state/selectors';
 import QuerySharePostActions from 'components/data/query-share-post-actions/index.jsx';
 import CompactCard from 'components/card/compact';
 import SocialLogo from 'social-logos';
 import EllipsisMenu from 'components/ellipsis-menu';
 import PopoverMenuItem from 'components/popover/menu-item';
-import {
-	SCHEDULED,
-	PUBLISHED,
-} from './constants';
+import { SCHEDULED, PUBLISHED } from './constants';
 import SectionNav from 'components/section-nav';
 import NavTabs from 'components/section-nav/tabs';
 import NavItem from 'components/section-nav/item';
@@ -40,18 +34,12 @@ class PublicizeActionsList extends PureComponent {
 	state = {
 		selectedShareTab: SCHEDULED,
 		showDeleteDialog: false,
-		selectedScheduledShareId: null
+		selectedScheduledShareId: null,
 	};
 
 	setFooterSection = selectedShareTab => () => this.setState( { selectedShareTab } );
 
-	renderFooterSectionItem( {
-		ID: actionId,
-		connectionName,
-		message,
-		shareDate,
-		service,
-	}, index ) {
+	renderFooterSectionItem( { ID: actionId, connectionName, message, shareDate, service }, index ) {
 		return (
 			<CompactCard className="post-share__footer-items" key={ index }>
 				<div className="post-share__footer-item">
@@ -84,7 +72,7 @@ class PublicizeActionsList extends PureComponent {
 			actions.push(
 				<PopoverMenuItem key="1" icon="visible">
 					{ translate( 'Preview' ) }
-				</PopoverMenuItem>
+				</PopoverMenuItem>,
 			);
 		}
 
@@ -96,33 +84,32 @@ class PublicizeActionsList extends PureComponent {
 					icon="trash"
 				>
 					{ translate( 'Trash' ) }
-				</PopoverMenuItem>
+				</PopoverMenuItem>,
 			);
 		}
 
 		if ( actions.length === 0 ) {
 			return <div />;
 		}
-		return ( <EllipsisMenu>
-			{ actions }
-		</EllipsisMenu> );
+		return (
+			<EllipsisMenu>
+				{ actions }
+			</EllipsisMenu>
+		);
 	}
 
 	deleteScheduledAction( actionId ) {
 		return () => {
 			this.setState( {
 				showDeleteDialog: true,
-				selectedScheduledShareId: actionId
+				selectedScheduledShareId: actionId,
 			} );
 		};
 	}
 
-	closeDeleteDialog = ( dialogAction ) => {
+	closeDeleteDialog = dialogAction => {
 		if ( dialogAction === 'delete' ) {
-			const {
-				siteId,
-				postId
-			} = this.props;
+			const { siteId, postId } = this.props;
 
 			this.props.deletePostShareAction( siteId, postId, this.state.selectedScheduledShareId );
 		}
@@ -130,11 +117,11 @@ class PublicizeActionsList extends PureComponent {
 		this.setState( { showDeleteDialog: false } );
 	};
 
-	renderActionsList = ( actions ) => (
-			<div>
-				{ actions.map( ( item, index ) => this.renderFooterSectionItem( item, index ) ) }
-			</div>
-		);
+	renderActionsList = actions => (
+		<div>
+			{ actions.map( ( item, index ) => this.renderFooterSectionItem( item, index ) ) }
+		</div>
+	);
 
 	renderDeleteDialog() {
 		const { translate } = this.props;
@@ -157,12 +144,7 @@ class PublicizeActionsList extends PureComponent {
 	}
 
 	render() {
-		const {
-			postId,
-			siteId,
-			scheduledActions,
-			publishedActions,
-		} = this.props;
+		const { postId, siteId, scheduledActions, publishedActions } = this.props;
 
 		return (
 			<div>
@@ -190,13 +172,11 @@ class PublicizeActionsList extends PureComponent {
 					{ this.state.selectedShareTab === SCHEDULED &&
 						<div className="post-share__scheduled-list">
 							{ this.renderActionsList( scheduledActions ) }
-						</div>
-					}
+						</div> }
 					{ this.state.selectedShareTab === PUBLISHED &&
 						<div className="post-share__published-list">
 							{ this.renderActionsList( publishedActions ) }
-						</div>
-					}
+						</div> }
 				</div>
 
 				{ this.renderDeleteDialog() }

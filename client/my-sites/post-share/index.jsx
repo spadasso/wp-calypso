@@ -23,10 +23,7 @@ import {
 	getScheduledPublicizeShareActionTime,
 	isSchedulingPublicizeShareActionError,
 } from 'state/selectors';
-import {
-	getSiteSlug,
-	getSitePlanSlug,
-} from 'state/sites/selectors';
+import { getSiteSlug, getSitePlanSlug } from 'state/sites/selectors';
 import { getCurrentUserId, getCurrentUserCurrencyCode } from 'state/current-user/selectors';
 import {
 	getSiteUserConnections,
@@ -39,7 +36,11 @@ import {
 	dismissShareConfirmation,
 } from 'state/sharing/publicize/actions';
 import { schedulePostShareAction } from 'state/sharing/publicize/publicize-actions/actions';
-import { isRequestingSharePost, sharePostFailure, sharePostSuccessMessage } from 'state/sharing/publicize/selectors';
+import {
+	isRequestingSharePost,
+	sharePostFailure,
+	sharePostSuccessMessage,
+} from 'state/sharing/publicize/selectors';
 import PostMetadata from 'lib/post-metadata';
 import PublicizeMessage from 'post-editor/editor-sharing/publicize-message';
 import Notice from 'components/notice';
@@ -127,12 +128,13 @@ class PostShare extends Component {
 		return this.state.skipped.indexOf( keyring_connection_ID ) === -1;
 	}
 
-	isConnectionActive = connection => connection.status !== 'broken' && this.skipConnection( connection );
+	isConnectionActive = connection =>
+		connection.status !== 'broken' && this.skipConnection( connection );
 
 	toggleSharingPreview = () => {
 		const showSharingPreview = ! this.state.showSharingPreview;
 		this.setState( { showSharingPreview } );
-	}
+	};
 
 	setMessage = message => this.setState( { message } );
 
@@ -141,14 +143,12 @@ class PostShare extends Component {
 	};
 
 	sharePost = () => {
-		const {
-			postId,
-			siteId,
-			connections,
-		} = this.props;
+		const { postId, siteId, connections } = this.props;
 		if ( this.state.scheduledDate ) {
 			const servicesToPublish = connections
-				.filter( connection => this.state.skipped.indexOf( connection.keyring_connection_ID ) === -1 )
+				.filter(
+					connection => this.state.skipped.indexOf( connection.keyring_connection_ID ) === -1,
+				)
 				.map( connection => connection.ID );
 			this.props.schedulePostShareAction(
 				siteId,
@@ -170,17 +170,18 @@ class PostShare extends Component {
 		return this.props.connections.filter( this.isConnectionActive ).length < 1;
 	}
 
-	previewSharingPost = () => {
-	}
+	previewSharingPost = () => {};
 
 	renderMessage() {
 		if ( ! this.hasConnections() ) {
 			return;
 		}
 
-		const targeted = this.hasConnections() ? this.props.connections.filter( this.isConnectionActive ) : [];
+		const targeted = this.hasConnections()
+			? this.props.connections.filter( this.isConnectionActive )
+			: [];
 		const requireCount = includes( map( targeted, 'service' ), 'twitter' );
-		const acceptableLength = ( requireCount ) ? 140 - 23 - 23 : null;
+		const acceptableLength = requireCount ? 140 - 23 - 23 : null;
 
 		return (
 			<PublicizeMessage
@@ -188,25 +189,24 @@ class PostShare extends Component {
 				preview={ this.props.post.title }
 				requireCount={ requireCount }
 				onChange={ this.setMessage }
-				acceptableLength={ acceptableLength } />
+				acceptableLength={ acceptableLength }
+			/>
 		);
 	}
 
 	renderSharingButtons() {
-		const {
-			hasRepublicizeSchedulingFeature,
-			siteId,
-			translate,
-		} = this.props;
+		const { hasRepublicizeSchedulingFeature, siteId, translate } = this.props;
 
-		const shareButton = <Button
-			className="post-share__button"
-			primary
-			onClick={ this.sharePost }
-			disabled={ this.isSharingPost() }
-		>
-			{ this.state.scheduledDate ? translate( 'Schedule post' ) : translate( 'Share post' ) }
-		</Button>;
+		const shareButton = (
+			<Button
+				className="post-share__button"
+				primary
+				onClick={ this.sharePost }
+				disabled={ this.isSharingPost() }
+			>
+				{ this.state.scheduledDate ? translate( 'Schedule post' ) : translate( 'Share post' ) }
+			</Button>
+		);
 
 		if ( ! hasRepublicizeSchedulingFeature ) {
 			return (
@@ -218,20 +218,12 @@ class PostShare extends Component {
 
 		return (
 			<div className="post-share__button-actions">
-				{ ( isEnabled( 'publicize-preview' ) ) &&
-					<Button
-						className="post-share__preview-button"
-						onClick={ this.toggleSharingPreview }
-					>
+				{ isEnabled( 'publicize-preview' ) &&
+					<Button className="post-share__preview-button" onClick={ this.toggleSharingPreview }>
 						{ translate( 'Preview' ) }
-					</Button>
-				}
+					</Button> }
 
-				<ButtonGroup
-					className="post-share__share-combo"
-					primary
-					busy={ this.isSharingPost() }
-				>
+				<ButtonGroup className="post-share__share-combo" primary busy={ this.isSharingPost() }>
 					{ shareButton }
 
 					<CalendarButton
@@ -243,7 +235,8 @@ class PostShare extends Component {
 						tabIndex={ 3 }
 						siteId={ siteId }
 						onDateChange={ this.scheduleDate }
-						popoverPosition="bottom left" />
+						popoverPosition="bottom left"
+					/>
 				</ButtonGroup>
 			</div>
 		);
@@ -257,52 +250,40 @@ class PostShare extends Component {
 				feature="republicize"
 				title={ translate( 'Unlock the ability to re-share posts to social media' ) }
 				callToAction={ translate( 'Upgrade to Premium' ) }
-				description={ translate( 'Get unlimited premium themes, video uploads, monetize your site and more.' ) }
+				description={ translate(
+					'Get unlimited premium themes, video uploads, monetize your site and more.',
+				) }
 			/>
 		);
 	}
 
 	renderUpgradeToGetSchedulingNudge() {
-		if (
-			this.props.hasRepublicizeSchedulingFeature ||
-			! isEnabled( 'publicize-scheduling' )
-		) {
+		if ( this.props.hasRepublicizeSchedulingFeature || ! isEnabled( 'publicize-scheduling' ) ) {
 			return null;
 		}
 
-		const {
-			businessDiscountedRawPrice,
-			businessRawPrice,
-			translate,
-			userCurrency,
-		} = this.props;
+		const { businessDiscountedRawPrice, businessRawPrice, translate, userCurrency } = this.props;
 
 		return (
 			<Banner
 				className="post-share__footer-banner"
-				callToAction={
-					translate( 'Upgrade for %s', {
-						args: formatCurrency( businessDiscountedRawPrice || businessRawPrice, userCurrency ),
-						comment: '%s will be replaced by a formatted price, i.e $9.99'
-					} )
-				}
+				callToAction={ translate( 'Upgrade for %s', {
+					args: formatCurrency( businessDiscountedRawPrice || businessRawPrice, userCurrency ),
+					comment: '%s will be replaced by a formatted price, i.e $9.99',
+				} ) }
 				list={ [
 					translate( 'Schedule your social messages in advance.' ),
 					translate( 'Remove all advertising from your site.' ),
 					translate( 'Enjoy live chat support.' ),
 				] }
 				plan={ PLAN_BUSINESS }
-				title={ translate( 'Upgrade to a Business Plan!' ) } />
+				title={ translate( 'Upgrade to a Business Plan!' ) }
+			/>
 		);
 	}
 
 	renderRequestSharingNotice() {
-		const {
-			failure,
-			requesting,
-			success,
-			translate,
-		} = this.props;
+		const { failure, requesting, success, translate } = this.props;
 
 		if ( this.props.scheduling ) {
 			return (
@@ -315,7 +296,7 @@ class PostShare extends Component {
 			return (
 				<Notice status="is-success" onDismissClick={ this.dismiss }>
 					{ translate( 'We`ll share your post on %s.', {
-						args: this.props.scheduledAt.format( 'ddd, MMMM Do YYYY, h:mm:ss a' )
+						args: this.props.scheduledAt.format( 'ddd, MMMM Do YYYY, h:mm:ss a' ),
 					} ) }
 				</Notice>
 			);
@@ -324,7 +305,7 @@ class PostShare extends Component {
 		if ( this.props.schedulingFailed ) {
 			return (
 				<Notice status="is-error" onDismissClick={ this.dismiss }>
-					{ translate( 'Scheduling share failed. Please don\'t be mad.' ) }
+					{ translate( "Scheduling share failed. Please don't be mad." ) }
 				</Notice>
 			);
 		}
@@ -332,7 +313,7 @@ class PostShare extends Component {
 		if ( requesting ) {
 			return (
 				<Notice status="is-warning" showDismiss={ false }>
-						{ translate( 'Sharing…' ) }
+					{ translate( 'Sharing…' ) }
 				</Notice>
 			);
 		}
@@ -348,7 +329,7 @@ class PostShare extends Component {
 		if ( failure ) {
 			return (
 				<Notice status="is-error" onDismissClick={ this.dismiss }>
-					{ translate( 'Something went wrong. Please don\'t be mad.' ) }
+					{ translate( "Something went wrong. Please don't be mad." ) }
 				</Notice>
 			);
 		}
@@ -362,13 +343,17 @@ class PostShare extends Component {
 		const { hasFetchedConnections, siteId, siteSlug, translate } = this.props;
 
 		// enrich connections
-		const connections = map( this.props.connections, connection => (
-			{ ...connection, isActive: this.isConnectionActive( connection ) } )
+		const connections = map(
+			this.props.connections,
+			connection => ( { ...connection, isActive: this.isConnectionActive( connection ) } ),
 		);
 
 		return (
 			<div className="post-share__services">
-				<SectionHeader className="post-share__services-header" label={ translate( 'Connected accounts' ) }>
+				<SectionHeader
+					className="post-share__services-header"
+					label={ translate( 'Connected accounts' ) }
+				>
 					<Button
 						compact
 						href={ '/sharing/' + siteId }
@@ -376,23 +361,26 @@ class PostShare extends Component {
 						onMouseEnter={ this.showAddTooltip }
 						onMouseLeave={ this.hideAddTooltip }
 						ref="addAccountButton"
-						aria-label={ translate( 'Add account' ) }>
+						aria-label={ translate( 'Add account' ) }
+					>
 						<Gridicon icon="plus-small" size={ 18 } /><Gridicon icon="user" size={ 18 } />
 						<Tooltip
 							isVisible={ this.state.showAccountTooltip }
 							context={ this.refs && this.refs.addAccountButton }
-							position="bottom">
+							position="bottom"
+						>
 							{ translate( 'Add account' ) }
 						</Tooltip>
 					</Button>
 				</SectionHeader>
 
-				<ConnectionsList { ...{
-					connections,
-					hasFetchedConnections,
-					siteId,
-					siteSlug,
-				} }
+				<ConnectionsList
+					{ ...{
+						connections,
+						hasFetchedConnections,
+						siteId,
+						siteSlug,
+					} }
 					onToggle={ this.toggleConnection }
 				/>
 			</div>
@@ -408,10 +396,12 @@ class PostShare extends Component {
 
 		if ( ! this.hasConnections() ) {
 			return (
-				<NoConnectionsNotice { ...{
-					siteSlug,
-					translate,
-				} } />
+				<NoConnectionsNotice
+					{ ...{
+						siteSlug,
+						translate,
+					} }
+				/>
 			);
 		}
 
@@ -428,11 +418,7 @@ class PostShare extends Component {
 
 				{ this.renderUpgradeToGetSchedulingNudge() }
 				{ this.props.hasRepublicizeSchedulingFeature &&
-					<ActionsList
-						siteId={ siteId }
-						postId={ postId }
-					/>
-				}
+					<ActionsList siteId={ siteId } postId={ postId } /> }
 			</div>
 		);
 	}
@@ -479,11 +465,12 @@ class PostShare extends Component {
 						<div className="post-share__subtitle">
 							{ translate(
 								'Share your post on all of your connected social media accounts using ' +
-								'{{a}}Publicize{{/a}}.', {
+									'{{a}}Publicize{{/a}}.',
+								{
 									components: {
-										a: <a href={ `/sharing/${ siteSlug }` } />
-									}
-								}
+										a: <a href={ `/sharing/${ siteSlug }` } />,
+									},
+								},
 							) }
 						</div>
 					</div>
@@ -527,9 +514,14 @@ export default connect(
 			success: sharePostSuccessMessage( state, siteId, postId ),
 			scheduledAt: getScheduledPublicizeShareActionTime( state, siteId, postId ),
 			businessRawPrice: getSitePlanRawPrice( state, siteId, PLAN_BUSINESS, { isMonthly: true } ),
-			businessDiscountedRawPrice: getPlanDiscountedRawPrice( state, siteId, PLAN_BUSINESS, { isMonthly: true } ),
+			businessDiscountedRawPrice: getPlanDiscountedRawPrice(
+				state,
+				siteId,
+				PLAN_BUSINESS,
+				{ isMonthly: true },
+			),
 			userCurrency: getCurrentUserCurrencyCode( state ),
 		};
 	},
-	{ requestConnections, sharePost, dismissShareConfirmation, schedulePostShareAction }
+	{ requestConnections, sharePost, dismissShareConfirmation, schedulePostShareAction },
 )( localize( PostShare ) );

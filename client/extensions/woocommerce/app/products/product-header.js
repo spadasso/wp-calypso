@@ -12,11 +12,10 @@ import ActionHeader from 'woocommerce/components/action-header';
 import Button from 'components/button';
 
 const ProductHeader = ( { onTrash, onSave, translate } ) => {
-	const trashButton = onTrash &&
-		<Button borderless onClick={ onTrash }><Gridicon icon="trash" /></Button>;
+	const trashButton =
+		onTrash && <Button borderless onClick={ onTrash }><Gridicon icon="trash" /></Button>;
 
-	const saveButton = onSave &&
-		<Button primary onClick={ onSave }>{ translate( 'Save' ) }</Button>;
+	const saveButton = onSave && <Button primary onClick={ onSave }>{ translate( 'Save' ) }</Button>;
 
 	return (
 		<ActionHeader>
@@ -32,4 +31,3 @@ ProductHeader.propTypes = {
 };
 
 export default localize( ProductHeader );
-

@@ -39,19 +39,19 @@ class SelectDropdown extends Component {
 				value: PropTypes.string.isRequired,
 				label: PropTypes.string.isRequired,
 				path: PropTypes.string,
-				icon: PropTypes.element
-			} )
-		)
-	}
+				icon: PropTypes.element,
+			} ),
+		),
+	};
 
 	static defaultProps = {
 		options: [],
 		onSelect: () => {},
 		onToggle: () => {},
-		style: {}
-	}
+		style: {},
+	};
 
-	static instances = 0
+	static instances = 0;
 
 	constructor( props ) {
 		super( props );
@@ -73,7 +73,7 @@ class SelectDropdown extends Component {
 
 	componentWillMount() {
 		this.setState( {
-			instanceId: ++SelectDropdown.instances
+			instanceId: ++SelectDropdown.instances,
 		} );
 	}
 
@@ -104,7 +104,7 @@ class SelectDropdown extends Component {
 		if ( this.state.isOpen !== prevState.isOpen ) {
 			this.props.onToggle( {
 				target: this,
-				open: this.state.isOpen
+				open: this.state.isOpen,
 			} );
 		}
 	}
@@ -156,45 +156,45 @@ class SelectDropdown extends Component {
 
 		if ( this.props.children ) {
 			// add keys and refs to children
-			return React.Children.map( this.props.children, function( child, index ) {
-				if ( ! child ) {
-					return null;
-				}
-
-				const newChild = React.cloneElement( child, {
-					ref: ( child.type === DropdownItem ) ? 'item-' + refIndex : null,
-					key: 'item-' + index,
-					isDropdownOpen: this.state.isOpen,
-					onClick: function( event ) {
-						self.refs.dropdownContainer.focus();
-						if ( typeof child.props.onClick === 'function' ) {
-							child.props.onClick( event );
-						}
+			return React.Children.map(
+				this.props.children,
+				function( child, index ) {
+					if ( ! child ) {
+						return null;
 					}
-				} );
 
-				if ( child.type === DropdownItem ) {
-					refIndex++;
-				}
+					const newChild = React.cloneElement( child, {
+						ref: child.type === DropdownItem ? 'item-' + refIndex : null,
+						key: 'item-' + index,
+						isDropdownOpen: this.state.isOpen,
+						onClick: function( event ) {
+							self.refs.dropdownContainer.focus();
+							if ( typeof child.props.onClick === 'function' ) {
+								child.props.onClick( event );
+							}
+						},
+					} );
 
-				return newChild;
-			}, this );
+					if ( child.type === DropdownItem ) {
+						refIndex++;
+					}
+
+					return newChild;
+				},
+				this,
+			);
 		}
 
 		return this.props.options.map( function( item, index ) {
 			if ( ! item ) {
 				return (
-					<DropdownSeparator
-						key={ 'dropdown-separator-' + this.state.instanceId + '-' + index }
-					/>
+					<DropdownSeparator key={ 'dropdown-separator-' + this.state.instanceId + '-' + index } />
 				);
 			}
 
 			if ( item.isLabel ) {
 				return (
-					<DropdownLabel
-						key={ 'dropdown-label-' + this.state.instanceId + '-' + index }
-					>
+					<DropdownLabel key={ 'dropdown-label-' + this.state.instanceId + '-' + index }>
 						{ item.label }
 					</DropdownLabel>
 				);
@@ -224,7 +224,7 @@ class SelectDropdown extends Component {
 		const dropdownClasses = {
 			'select-dropdown': true,
 			'is-compact': this.props.compact,
-			'is-open': this.state.isOpen
+			'is-open': this.state.isOpen,
 		};
 
 		if ( this.props.className ) {
@@ -258,17 +258,11 @@ class SelectDropdown extends Component {
 						className="select-dropdown__header"
 					>
 						<span className="select-dropdown__header-text">
-							{
-								selectedIcon && selectedIcon.type === Gridicon
-									? selectedIcon
-									: null
-							}
+							{ selectedIcon && selectedIcon.type === Gridicon ? selectedIcon : null }
 							{ selectedText }
 						</span>
-						{
-							'number' === typeof this.props.selectedCount &&
-							<Count count={ this.props.selectedCount } />
-						}
+						{ 'number' === typeof this.props.selectedCount &&
+							<Count count={ this.props.selectedCount } /> }
 					</div>
 
 					<ul
@@ -287,13 +281,13 @@ class SelectDropdown extends Component {
 
 	toggleDropdown() {
 		this.setState( {
-			isOpen: ! this.state.isOpen
+			isOpen: ! this.state.isOpen,
 		} );
 	}
 
 	openDropdown() {
 		this.setState( {
-			isOpen: true
+			isOpen: true,
 		} );
 	}
 
@@ -301,7 +295,7 @@ class SelectDropdown extends Component {
 		if ( this.state.isOpen ) {
 			delete this.focused;
 			this.setState( {
-				isOpen: false
+				isOpen: false,
 			} );
 		}
 	}
@@ -320,7 +314,7 @@ class SelectDropdown extends Component {
 		}
 
 		this.setState( {
-			selected: option.value
+			selected: option.value,
 		} );
 
 		this.refs.dropdownContainer.focus();
@@ -361,7 +355,7 @@ class SelectDropdown extends Component {
 
 		event.preventDefault();
 
-		const direction = ( event.shiftKey ) ? 'previous' : 'next';
+		const direction = event.shiftKey ? 'previous' : 'next';
 		this.focusSibling( direction );
 	}
 
@@ -381,9 +375,12 @@ class SelectDropdown extends Component {
 		let items, focusedIndex;
 
 		if ( this.props.options.length ) {
-			items = map( filter( this.props.options, item => {
-				return item && ! item.isLabel;
-			} ), 'value' );
+			items = map(
+				filter( this.props.options, item => {
+					return item && ! item.isLabel;
+				} ),
+				'value',
+			);
 
 			focusedIndex = typeof this.focused === 'number'
 				? this.focused
@@ -396,11 +393,11 @@ class SelectDropdown extends Component {
 			focusedIndex = typeof this.focused === 'number'
 				? this.focused
 				: findIndex( items, function( item ) {
-					return item.props.selected;
-				} );
+						return item.props.selected;
+					} );
 		}
 
-		const increment = ( direction === 'previous' ) ? -1 : 1;
+		const increment = direction === 'previous' ? -1 : 1;
 		const newIndex = focusedIndex + increment;
 
 		if ( newIndex >= items.length || newIndex < 0 ) {

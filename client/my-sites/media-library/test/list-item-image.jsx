@@ -34,7 +34,14 @@ describe( 'MediaLibraryListItem image', function() {
 
 	const getPhotonUrl = () => photon( fixtures.media[ 0 ].URL, { width: WIDTH } );
 	const getResizedUrl = () => resize( fixtures.media[ 0 ].URL, { w: WIDTH } );
-	const getItem = usePhoton => <ListItemImage media={ fixtures.media[ 0 ] } scale={ 1 } photon={ usePhoton } maxImageWidth={ WIDTH } />;
+	const getItem = usePhoton => (
+		<ListItemImage
+			media={ fixtures.media[ 0 ] }
+			scale={ 1 }
+			photon={ usePhoton }
+			maxImageWidth={ WIDTH }
+		/>
+	);
 
 	context( 'thumbnail display mode', function() {
 		it( 'defaults to photon when no photon parameter is passed', function() {

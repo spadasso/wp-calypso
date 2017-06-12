@@ -83,7 +83,7 @@ describe( 'get follow subscriptions', () => {
 					query: { page: 1, number: 200, meta: '' },
 					onSuccess: action,
 					onError: action,
-				} )
+				} ),
 			);
 		} );
 	} );
@@ -104,7 +104,7 @@ describe( 'get follow subscriptions', () => {
 				receiveFollowsAction( {
 					follows: subscriptionsFromApi( successfulApiResponse ),
 					totalCount: successfulApiResponse.total_subscriptions,
-				} )
+				} ),
 			);
 		} );
 
@@ -142,10 +142,10 @@ describe( 'get follow subscriptions', () => {
 				receiveFollowsAction( {
 					follows: [],
 					totalCount: 10,
-				} )
+				} ),
 			);
 			expect( dispatch ).to.have.been.calledWith(
-				syncComplete( [ 'http://readerpostcards.wordpress.com', 'https://fivethirtyeight.com/' ] )
+				syncComplete( [ 'http://readerpostcards.wordpress.com', 'https://fivethirtyeight.com/' ] ),
 			);
 		} );
 
@@ -172,10 +172,7 @@ describe( 'get follow subscriptions', () => {
 			syncReaderFollows( { dispatch: ignoredDispatch }, startSyncAction );
 			receivePage( { dispatch: ignoredDispatch }, action, null, successfulApiResponse );
 
-			updateSeenOnFollow(
-				{ dispatch: ignoredDispatch },
-				follow( 'http://feed.example.com' ),
-			);
+			updateSeenOnFollow( { dispatch: ignoredDispatch }, follow( 'http://feed.example.com' ) );
 
 			receivePage( { dispatch, getState }, action, null, {
 				number: 0,
@@ -189,15 +186,17 @@ describe( 'get follow subscriptions', () => {
 				receiveFollowsAction( {
 					follows: [],
 					totalCount: 10,
-				} )
+				} ),
 			);
 
 			expect( dispatch ).to.have.been.calledWith(
-				syncComplete( [
-					'http://readerpostcards.wordpress.com',
-					'https://fivethirtyeight.com/',
-					'http://feed.example.com',
-				] )
+				syncComplete(
+					[
+						'http://readerpostcards.wordpress.com',
+						'https://fivethirtyeight.com/',
+						'http://feed.example.com',
+					],
+				),
 			);
 		} );
 	} );

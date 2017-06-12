@@ -28,7 +28,7 @@ describe( 'requestUnfollow', () => {
 				},
 				onSuccess: action,
 				onFailure: action,
-			} )
+			} ),
 		);
 	} );
 } );

@@ -62,30 +62,22 @@ class ActivityLogDay extends Component {
 	 * @returns { object } Heading to display with date and number of events
 	 */
 	getEventsHeading() {
-		const {
-			dateIsoString,
-			logs,
-			moment,
-			translate,
-		} = this.props;
+		const { dateIsoString, logs, moment, translate } = this.props;
 		return (
 			<div>
 				<div className="activity-log-day__day">{ moment( dateIsoString ).format( 'LL' ) }</div>
-				<div className="activity-log-day__events">{
-					translate( '%d Event', '%d Events', {
+				<div className="activity-log-day__events">
+					{ translate( '%d Event', '%d Events', {
 						args: logs.length,
 						count: logs.length,
-					} )
-				}</div>
+					} ) }
+				</div>
 			</div>
 		);
 	}
 
 	render() {
-		const {
-			logs,
-			dateIsoString,
-		} = this.props;
+		const { logs, dateIsoString } = this.props;
 
 		// FIXME get real props
 		const siteName = 'Placeholder site name';

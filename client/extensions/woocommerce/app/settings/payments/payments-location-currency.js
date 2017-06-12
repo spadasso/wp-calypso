@@ -42,7 +42,7 @@ class SettingsPaymentsLocationCurrency extends Component {
 				name: 'Octopus Outlet Emporium',
 				street: '27 Main Street',
 				city: 'Ellington, CT 06029',
-				country: 'United States'
+				country: 'United States',
 			},
 		};
 	}
@@ -53,7 +53,7 @@ class SettingsPaymentsLocationCurrency extends Component {
 				{ options[ option ] }
 			</option>
 		);
-	}
+	};
 
 	render() {
 		const { currency, translate } = this.props;
@@ -61,29 +61,22 @@ class SettingsPaymentsLocationCurrency extends Component {
 			<div>
 				<ExtendedHeader
 					label={ translate( 'Store location and currency' ) }
-					description={
-						translate(
-							'Different payment methods may be available based on your store' +
-							'location and currency.'
-						)
-					} />
+					description={ translate(
+						'Different payment methods may be available based on your store' +
+							'location and currency.',
+					) }
+				/>
 				<Card>
-					<AddressView
-						address={ this.state.address } />
+					<AddressView address={ this.state.address } />
 
 					<FormSelect className="payments__currency-select" value={ currency.value }>
-						{
-							currency.options &&
-							Object.keys( currency.options ).map(
-								( o ) => this.renderOption( o, currency.options )
-							)
-						}
+						{ currency.options &&
+							Object.keys( currency.options ).map( o => this.renderOption( o, currency.options ) ) }
 					</FormSelect>
 				</Card>
 			</div>
 		);
 	}
-
 }
 
 function mapStateToProps( state ) {
@@ -98,10 +91,12 @@ function mapStateToProps( state ) {
 function mapDispatchToProps( dispatch ) {
 	return bindActionCreators(
 		{
-			fetchSettingsGeneral
+			fetchSettingsGeneral,
 		},
-		dispatch
+		dispatch,
 	);
 }
 
-export default localize( connect( mapStateToProps, mapDispatchToProps )( SettingsPaymentsLocationCurrency ) );
+export default localize(
+	connect( mapStateToProps, mapDispatchToProps )( SettingsPaymentsLocationCurrency ),
+);

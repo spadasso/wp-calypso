@@ -15,7 +15,7 @@ const ActionHeader = ( { children } ) => {
 	return (
 		<StickyPanel>
 			<Card className="action-header__header">
-				<span>Breadcrumbs > go > here</span>
+				<span>Breadcrumbs &gt; go &gt; here</span>
 				<div className="action-header__actions">
 					{ children }
 				</div>
@@ -25,4 +25,3 @@ const ActionHeader = ( { children } ) => {
 };
 
 export default ActionHeader;
-

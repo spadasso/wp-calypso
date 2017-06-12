@@ -50,19 +50,19 @@ class ActivityLog extends Component {
 			description: 'We backed up your site',
 			user: null,
 			type: 'site_backed_up',
-			timestamp: 1485220539222
+			timestamp: 1485220539222,
 		},
 		{
 			title: 'Site has backed up Failed',
-			description: 'We couldn\'t establish a connection to your site.',
+			description: "We couldn't establish a connection to your site.",
 			user: null,
 			type: 'site_backed_up_failed',
-			timestamp: 1485220539222
+			timestamp: 1485220539222,
 		},
 		{
 			title: 'Suspicious code detected in 2 plugin files.',
 			description: 'Rewound in 17 January 2017 at 3:30 PM - We found potential warmful code in two of your ' +
-			'Plugins: Yoast SEO and Advanced Custom Fields.',
+				'Plugins: Yoast SEO and Advanced Custom Fields.',
 			user: null,
 			type: 'suspicious_code',
 			timestamp: 1485220539222,
@@ -73,93 +73,93 @@ class ActivityLog extends Component {
 			description: 'Akismet Plugin was successfully activated.',
 			user: { ID: 123, name: 'Jane A', role: 'Admin' },
 			type: 'plugin_activated',
-			timestamp: 1485220539222
+			timestamp: 1485220539222,
 		},
 		{
 			title: 'Akismet deactivated',
 			description: 'Akismet Plugin was successfully deactivated.',
 			user: { ID: 123, name: 'Jane A', role: 'Admin' },
 			type: 'plugin_deactivated',
-			timestamp: 1485220539222
+			timestamp: 1485220539222,
 		},
 		{
 			title: 'Jetpack version 4.6 is available',
 			description: 'A new version of the Jetpack Plugin was been released. Click here to update, or turn on ' +
-			'auto-updates for Plugins and we\'ll manage those for you',
+				"auto-updates for Plugins and we'll manage those for you",
 			user: null,
 			type: 'plugin_needs_update',
-			timestamp: 1485220539222
+			timestamp: 1485220539222,
 		},
 		{
 			title: 'Akismet updated to version 3.2',
 			description: 'Akismet Plugin was successfully updated to its latest version: 3.2.',
 			user: null,
 			type: 'plugin_updated',
-			timestamp: 1485220539222
+			timestamp: 1485220539222,
 		},
 		{
 			title: 'Twenty Eighteen Theme was activated',
 			description: 'TwentyEighteen Plugin was successfully activated.',
 			user: { ID: 123, name: 'Jane A', role: 'Admin' },
 			type: 'theme_switched',
-			timestamp: 1485220539222
+			timestamp: 1485220539222,
 		},
 		{
 			title: 'Twenty Sixteen updated to version 1.0.1',
 			description: 'Twenty Sixteen Plugin was successfully updated to its latest version: 1.0.1.',
 			user: { ID: 123, name: 'Jane A', role: 'Admin' },
 			type: 'theme_updated',
-			timestamp: 1485220539222
+			timestamp: 1485220539222,
 		},
 		{
 			title: 'Site updated to Professional Plan, Thank you',
 			description: 'Professional Plan was successfully purchased for your site and is valid until February 15, 2018.',
 			user: { ID: 123, name: 'Jane A', role: 'Admin' },
 			type: 'plan_updated',
-			timestamp: 1485220539222
+			timestamp: 1485220539222,
 		},
 		{
 			title: 'Professional Plan Renewed for another month',
 			description: 'Professional Plan was renewed for another month and is valid until February 28, 2017',
 			user: { ID: 123, name: 'Jane A', role: 'Admin' },
 			type: 'plan_renewed',
-			timestamp: 1485220539222
+			timestamp: 1485220539222,
 		},
 		{
 			title: 'Photon was activated',
 			description: 'Photon module was activated in your site. All your images will now be served through the ' +
-			'WordPress.com worldwide network.',
+				'WordPress.com worldwide network.',
 			user: { ID: 123, name: 'Jane A', role: 'Admin' },
 			type: 'activate_jetpack_feature',
-			timestamp: 1485220539222
+			timestamp: 1485220539222,
 		},
 		{
 			title: 'Custom CSS was deactivated',
 			description: 'Custom CSS module was deactivated.',
 			user: { ID: 123, name: 'Jane A', role: 'Admin' },
 			type: 'deactivate_jetpack_feature',
-			timestamp: 1485220539222
+			timestamp: 1485220539222,
 		},
 		{
 			title: 'This is some really cool post',
 			description: '',
 			user: { ID: 123, name: 'Jane A', role: 'Admin' },
 			type: 'site_backed_up',
-			timestamp: 1485220539222
+			timestamp: 1485220539222,
 		},
 		{
 			title: 'This is some really cool post',
 			description: '',
 			user: { ID: 123, name: 'Jane A', role: 'Admin' },
 			type: 'site_backed_up',
-			timestamp: 1485220539222
+			timestamp: 1485220539222,
 		},
 		{
 			title: 'This is some really cool post',
 			description: '',
 			user: { ID: 123, name: 'Jane A', role: 'Admin' },
 			type: 'site_backed_up',
-			timestamp: 1485220539222
+			timestamp: 1485220539222,
 		},
 		{
 			title: 'Jetpack updated to 4.5.1',
@@ -169,7 +169,7 @@ class ActivityLog extends Component {
 			user: { ID: 123, name: 'Jane A', role: 'Admin' },
 			time: '4:32pm',
 			actionText: 'Undo',
-			timestamp: 1483351202400
+			timestamp: 1483351202400,
 		},
 		{
 			title: 'Jetpack updated to 4.5.1',
@@ -179,7 +179,7 @@ class ActivityLog extends Component {
 			user: { ID: 123, name: 'Jane A', role: 'Admin' },
 			time: '4:32pm',
 			actionText: 'Undo',
-			timestamp: 1483351202420
+			timestamp: 1483351202420,
 		},
 		{
 			title: 'Post Title',
@@ -189,8 +189,8 @@ class ActivityLog extends Component {
 			user: { ID: 333, name: 'Jane A', role: 'Admin' },
 			time: '10:55am',
 			actionText: 'Undo',
-			timestamp: 1483264820300
-		}
+			timestamp: 1483264820300,
+		},
 	];
 
 	update_logs( log ) {
@@ -244,7 +244,6 @@ class ActivityLog extends Component {
 				log.icon = 'plugins';
 				log.actionText = 'Revert';
 				break;
-
 			// Themes
 			case 'theme_switched':
 				log.subTitle = translate( 'Theme Activated' );
@@ -284,20 +283,18 @@ class ActivityLog extends Component {
 
 	renderBanner() {
 		// FIXME: Logic to select/show 1 banner
-		return <div>
-			<ErrorBanner />
-			<ProgressBanner />
-			<SuccessBanner />
-		</div>;
+		return (
+			<div>
+				<ErrorBanner />
+				<ProgressBanner />
+				<SuccessBanner />
+			</div>
+		);
 	}
 
 	// FIXME: This is for internal testing
 	renderErrorMessage() {
-		const {
-			isPressable,
-			rewindStatusError,
-			translate,
-		} = this.props;
+		const { isPressable, rewindStatusError, translate } = this.props;
 
 		// FIXME: Do something nicer with the error
 		if ( rewindStatusError ) {
@@ -309,15 +306,12 @@ class ActivityLog extends Component {
 	}
 
 	renderContent() {
-		const {
-			moment,
-			siteId,
-		} = this.props;
+		const { moment, siteId } = this.props;
 		const logs = this.logs();
 		const logsGroupedByDate = map(
 			groupBy(
 				logs.map( this.update_logs, this ),
-				( log ) => moment( log.timestamp ).startOf( 'day' ).toISOString()
+				log => moment( log.timestamp ).startOf( 'day' ).toISOString(),
 			),
 			( daily_logs, isoString ) => (
 				<ActivityLogDay
@@ -327,7 +321,7 @@ class ActivityLog extends Component {
 					siteId={ siteId }
 					isRewindEnabled={ true }
 				/>
-			)
+			),
 		);
 
 		return (
@@ -341,39 +335,29 @@ class ActivityLog extends Component {
 	}
 
 	render() {
-		const {
-			isJetpack,
-			siteId,
-			slug,
-		} = this.props;
+		const { isJetpack, siteId, slug } = this.props;
 
 		return (
 			<Main wideLayout={ true }>
 				<QueryRewindStatus siteId={ siteId } />
 				<StatsFirstView />
 				<SidebarNavigation />
-				<StatsNavigation
-					isJetpack={ isJetpack }
-					slug={ slug }
-					section="activity"
-				/>
+				<StatsNavigation isJetpack={ isJetpack } slug={ slug } section="activity" />
 				{ this.renderErrorMessage() || this.renderContent() }
 			</Main>
 		);
 	}
 }
 
-export default connect(
-	( state ) => {
-		const siteId = getSelectedSiteId( state );
-		return {
-			isJetpack: isJetpackSite( state, siteId ),
-			siteId,
-			slug: getSiteSlug( state, siteId ),
-			rewindStatusError: getRewindStatusError( state, siteId ),
+export default connect( state => {
+	const siteId = getSelectedSiteId( state );
+	return {
+		isJetpack: isJetpackSite( state, siteId ),
+		siteId,
+		slug: getSiteSlug( state, siteId ),
+		rewindStatusError: getRewindStatusError( state, siteId ),
 
-			// FIXME: Testing only
-			isPressable: get( state.activityLog.rewindStatus, [ siteId, 'isPressable' ], false ),
-		};
-	}
-)( localize( ActivityLog ) );
+		// FIXME: Testing only
+		isPressable: get( state.activityLog.rewindStatus, [ siteId, 'isPressable' ], false ),
+	};
+} )( localize( ActivityLog ) );

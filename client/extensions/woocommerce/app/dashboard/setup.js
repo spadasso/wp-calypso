@@ -32,28 +32,28 @@ class Setup extends Component {
 		storePaymentsAreSetUp: false,
 		storeShippingIsSetUp: false,
 		storeTaxesAreSetUp: false,
-	}
+	};
 
 	state = {
 		showShippingTask: true,
 		showTaxesTask: true,
-	}
+	};
 
-	onClickNoShip = ( event ) => {
+	onClickNoShip = event => {
 		event.preventDefault();
 		this.setState( {
-			showShippingTask: false
+			showShippingTask: false,
 		} );
 		// TODO - dispatch an action to record the user preference at WordPress.com
-	}
+	};
 
 	onClickNoTaxes = () => {
 		event.preventDefault();
 		this.setState( {
-			showTaxesTask: false
+			showTaxesTask: false,
 		} );
 		// TODO - dispatch an action to record the user preference at WordPress.com
-	}
+	};
 
 	getSetupTasks = () => {
 		const {
@@ -63,7 +63,7 @@ class Setup extends Component {
 			storePaymentsAreSetUp,
 			storeShippingIsSetUp,
 			storeTaxesAreSetUp,
-			translate
+			translate,
 		} = this.props;
 
 		return [
@@ -82,8 +82,8 @@ class Setup extends Component {
 					{
 						label: 'Add a product',
 						path: getLink( '/store/product/:site', site ),
-					}
-				]
+					},
+				],
 			},
 			{
 				checked: storeShippingIsSetUp,
@@ -97,11 +97,11 @@ class Setup extends Component {
 						path: getLink( '/store/settings/shipping/:site', site ),
 					},
 					{
-						label: translate( 'I won\'t be shipping' ),
+						label: translate( "I won't be shipping" ),
 						isSecondary: true,
-						onClick: this.onClickNoShip
-					}
-				]
+						onClick: this.onClickNoShip,
+					},
+				],
 			},
 			{
 				checked: storePaymentsAreSetUp,
@@ -113,8 +113,8 @@ class Setup extends Component {
 					{
 						label: translate( 'Set up payments' ),
 						path: getLink( '/store/settings/payments/:site', site ),
-					}
-				]
+					},
+				],
 			},
 			{
 				checked: storeTaxesAreSetUp,
@@ -128,11 +128,11 @@ class Setup extends Component {
 						path: getLink( '/store/settings/taxes/:site', site ),
 					},
 					{
-						label: translate( 'I\'m not charging sales tax' ),
+						label: translate( "I'm not charging sales tax" ),
 						isSecondary: true,
-						onClick: this.onClickNoTaxes
-					}
-				]
+						onClick: this.onClickNoTaxes,
+					},
+				],
 			},
 			{
 				checked: storeHasBeenCustomized,
@@ -144,11 +144,11 @@ class Setup extends Component {
 					{
 						label: translate( 'Customize' ),
 						path: getLink( 'https://:site/wp-admin/customize.php?return=%2Fwp-admin%2F', site ),
-					}
-				]
-			}
+					},
+				],
+			},
 		];
-	}
+	};
 
 	renderSetupTask = ( setupTask, index ) => {
 		if ( ! setupTask.show ) {
@@ -159,13 +159,13 @@ class Setup extends Component {
 			<SetupTask
 				actions={ setupTask.actions }
 				checked={ setupTask.checked }
-				docURL= { setupTask.docURL }
+				docURL={ setupTask.docURL }
 				explanation={ setupTask.explanation }
 				key={ index }
 				label={ setupTask.label }
 			/>
 		);
-	}
+	};
 
 	render = () => {
 		const { onFinished, translate } = this.props;
@@ -177,18 +177,20 @@ class Setup extends Component {
 				<SetupHeader
 					imageSource={ '/calypso/images/extensions/woocommerce/woocommerce-setup.svg' }
 					imageWidth={ 160 }
-					title={ translate( 'Howdy! Let\'s set up your store & start selling' ) }
-					subtitle={ translate( 'Below you will find the essential tasks to complete before making your store live.' ) }
+					title={ translate( "Howdy! Let's set up your store & start selling" ) }
+					subtitle={ translate(
+						'Below you will find the essential tasks to complete before making your store live.',
+					) }
 				/>
 				{ tasks.map( this.renderSetupTask ) }
 				<SetupFooter
 					onClick={ onFinished }
-					label={ translate( 'I\'m finished setting up' ) }
+					label={ translate( "I'm finished setting up" ) }
 					primary={ allTasksCompleted }
 				/>
 			</div>
 		);
-	}
+	};
 }
 
 export default localize( Setup );

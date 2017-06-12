@@ -29,7 +29,12 @@ import { cartItems } from 'lib/cart-values';
 import { forDomainRegistrations as countriesListForDomainRegistrations } from 'lib/countries-list';
 import analytics from 'lib/analytics';
 import formState from 'lib/form-state';
-import { addPrivacyToAllDomains, removePrivacyFromAllDomains, setDomainDetails, addGoogleAppsRegistrationData } from 'lib/upgrades/actions';
+import {
+	addPrivacyToAllDomains,
+	removePrivacyFromAllDomains,
+	setDomainDetails,
+	addGoogleAppsRegistrationData,
+} from 'lib/upgrades/actions';
 import FormButton from 'components/forms/form-button';
 import { countries } from 'components/phone-input/data';
 import { toIcannFormat } from 'components/phone-input/phone-number';
@@ -39,8 +44,7 @@ import ExtraInfoFrForm from 'components/domains/registrant-extra-info/fr-form';
 import config from 'config';
 
 const debug = debugFactory( 'calypso:my-sites:upgrades:checkout:domain-details' );
-const wpcom = wp.undocumented(),
-	countriesList = countriesListForDomainRegistrations();
+const wpcom = wp.undocumented(), countriesList = countriesListForDomainRegistrations();
 
 class DomainDetailsForm extends PureComponent {
 	constructor( props, context ) {
@@ -58,13 +62,10 @@ class DomainDetailsForm extends PureComponent {
 			'state',
 			'postalCode',
 			'countryCode',
-			'fax'
+			'fax',
 		];
 
-		const steps = [
-			'mainForm',
-			...this.getRequiredExtraSteps()
-		];
+		const steps = [ 'mainForm', ...this.getRequiredExtraSteps() ];
 
 		this.state = {
 			form: null,
@@ -84,19 +85,22 @@ class DomainDetailsForm extends PureComponent {
 			sanitizerFunction: this.sanitize,
 			validatorFunction: this.validate,
 			onNewState: this.setFormState,
-			onError: this.handleFormControllerError
+			onError: this.handleFormControllerError,
 		} );
 
 		this.setState( { form: this.formStateController.getInitialState() } );
 	}
 
 	componentDidMount() {
-		analytics.pageView.record( '/checkout/domain-contact-information', 'Checkout > Domain Contact Information' );
+		analytics.pageView.record(
+			'/checkout/domain-contact-information',
+			'Checkout > Domain Contact Information',
+		);
 	}
 
 	sanitize = ( fieldValues, onComplete ) => {
 		const sanitizedFieldValues = Object.assign( {}, fieldValues );
-		this.fieldNames.forEach( ( fieldName ) => {
+		this.fieldNames.forEach( fieldName => {
 			if ( typeof fieldValues[ fieldName ] === 'string' ) {
 				// TODO: Deep
 				sanitizedFieldValues[ fieldName ] = deburr( fieldValues[ fieldName ].trim() );
@@ -107,7 +111,7 @@ class DomainDetailsForm extends PureComponent {
 		} );
 
 		onComplete( sanitizedFieldValues );
-	}
+	};
 
 	hasAnotherStep() {
 		return this.state.currentStep !== last( this.state.steps );
@@ -121,70 +125,80 @@ class DomainDetailsForm extends PureComponent {
 
 	validate = ( fieldValues, onComplete ) => {
 		if ( this.needsOnlyGoogleAppsDetails() ) {
-			wpcom.validateGoogleAppsContactInformation( fieldValues, this.generateValidationHandler( onComplete ) );
+			wpcom.validateGoogleAppsContactInformation(
+				fieldValues,
+				this.generateValidationHandler( onComplete ),
+			);
 			return;
 		}
 
 		const allFieldValues = this.getAllFieldValues();
 		const domainNames = map( cartItems.getDomainRegistrations( this.props.cart ), 'meta' );
-		wpcom.validateDomainContactInformation( allFieldValues, domainNames, this.generateValidationHandler( onComplete ) );
-	}
+		wpcom.validateDomainContactInformation(
+			allFieldValues,
+			domainNames,
+			this.generateValidationHandler( onComplete ),
+		);
+	};
 
 	generateValidationHandler( onComplete ) {
 		return ( error, data ) => {
-			const messages = data && data.messages || {};
+			const messages = ( data && data.messages ) || {};
 			onComplete( error, messages );
 		};
 	}
 
-	setFormState = ( form ) => {
+	setFormState = form => {
 		if ( ! this.needsFax() ) {
 			delete form.fax;
 		}
 
 		this.setState( { form } );
-	}
+	};
 
 	needsOnlyGoogleAppsDetails() {
-		return cartItems.hasGoogleApps( this.props.cart ) && ! cartItems.hasDomainRegistration( this.props.cart );
+		return (
+			cartItems.hasGoogleApps( this.props.cart ) &&
+			! cartItems.hasDomainRegistration( this.props.cart )
+		);
 	}
 
-	handleFormControllerError = ( error ) => {
+	handleFormControllerError = error => {
 		throw error;
-	}
+	};
 
-	handleChangeEvent = ( event ) => {
+	handleChangeEvent = event => {
 		// Resets the state field every time the user selects a different country
 		if ( event.target.name === 'country-code' ) {
 			this.formStateController.handleFieldChange( {
 				name: 'state',
 				value: '',
-				hideError: true
+				hideError: true,
 			} );
 
 			if ( ! formState.getFieldValue( this.state.form, 'phone' ) ) {
 				this.setState( {
-					phoneCountryCode: event.target.value
+					phoneCountryCode: event.target.value,
 				} );
 			}
 		}
 
 		this.formStateController.handleFieldChange( {
 			name: event.target.name,
-			value: event.target.value
+			value: event.target.value,
 		} );
-	}
+	};
 
 	handlePhoneChange = ( { value, countryCode } ) => {
 		this.formStateController.handleFieldChange( {
 			name: 'phone',
-			value
+			value,
 		} );
 
 		this.setState( {
-			phoneCountryCode: countryCode
+			phoneCountryCode: countryCode,
 		} );
-	}
+	};
 
 	getAllFieldValues() {
 		const allFieldValues = Object.assign(
@@ -192,9 +206,12 @@ class DomainDetailsForm extends PureComponent {
 			formState.getAllFieldValues( this.state.form ),
 			this.state.registrantExtraInfo
 				? { registrantExtraInfo: this.state.registrantExtraInfo }
-				: {}
+				: {},
 		);
-		allFieldValues.phone = toIcannFormat( allFieldValues.phone, countries[ this.state.phoneCountryCode ] );
+		allFieldValues.phone = toIcannFormat(
+			allFieldValues.phone,
+			countries[ this.state.phoneCountryCode ],
+		);
 		return allFieldValues;
 	}
 
@@ -223,13 +240,17 @@ class DomainDetailsForm extends PureComponent {
 			// The keys are mapped to snake_case when going to API and camelCase when the response is parsed and we are using
 			// kebab-case for HTML, so instead of using different variations all over the place, this accepts kebab-case and
 			// converts it to camelCase which is the format stored in the formState.
-			errorMessage: ( formState.getFieldErrorMessages( this.state.form, camelCase( name ) ) || [] ).join( '\n' ),
-			eventFormName: 'Checkout Form'
+			errorMessage: ( formState.getFieldErrorMessages( this.state.form, camelCase( name ) ) || [] )
+				.join( '\n' ),
+			eventFormName: 'Checkout Form',
 		};
 	}
 
 	needsFax() {
-		return formState.getFieldValue( this.state.form, 'countryCode' ) === 'NL' && cartItems.hasTld( this.props.cart, 'nl' );
+		return (
+			formState.getFieldValue( this.state.form, 'countryCode' ) === 'NL' &&
+			cartItems.hasTld( this.props.cart, 'nl' )
+		);
 	}
 
 	allDomainRegistrationsSupportPrivacy() {
@@ -246,7 +267,10 @@ class DomainDetailsForm extends PureComponent {
 			: this.props.translate( 'Continue to Checkout' );
 
 		return (
-			<FormButton className="checkout__domain-details-form-submit-button" onClick={ this.handleSubmitButtonClick }>
+			<FormButton
+				className="checkout__domain-details-form-submit-button"
+				onClick={ this.handleSubmitButtonClick }
+			>
 				{ continueText }
 			</FormButton>
 		);
@@ -265,14 +289,15 @@ class DomainDetailsForm extends PureComponent {
 				onDialogOpen={ this.openDialog }
 				onDialogSelect={ this.handlePrivacyDialogSelect }
 				isDialogVisible={ this.state.isDialogVisible }
-				productsList={ this.props.productsList } />
+				productsList={ this.props.productsList }
+			/>
 		);
 	}
 
-	handleExtraChange = ( registrantExtraInfo ) => {
+	handleExtraChange = registrantExtraInfo => {
 		// TODO FIXME: sanitize and validate!
 		this.setState( { registrantExtraInfo } );
-	}
+	};
 
 	renderNameFields() {
 		return (
@@ -280,30 +305,35 @@ class DomainDetailsForm extends PureComponent {
 				<Input
 					autoFocus
 					label={ this.props.translate( 'First Name' ) }
-					{ ...this.getFieldProps( 'first-name' ) } />
+					{ ...this.getFieldProps( 'first-name' ) }
+				/>
 
-				<Input label={ this.props.translate( 'Last Name' ) } { ...this.getFieldProps( 'last-name' ) } />
+				<Input
+					label={ this.props.translate( 'Last Name' ) }
+					{ ...this.getFieldProps( 'last-name' ) }
+				/>
 			</div>
 		);
 	}
 
 	renderOrganizationField() {
-		return <HiddenInput
-			label={ this.props.translate( 'Organization' ) }
-			text={ this.props.translate(
-				'Registering this domain for a company? + Add Organization Name',
-				'Registering these domains for a company? + Add Organization Name',
-				{
-					count: this.getNumberOfDomainRegistrations()
-				}
-			) }
-			{ ...this.getFieldProps( 'organization' ) } />;
+		return (
+			<HiddenInput
+				label={ this.props.translate( 'Organization' ) }
+				text={ this.props.translate(
+					'Registering this domain for a company? + Add Organization Name',
+					'Registering these domains for a company? + Add Organization Name',
+					{
+						count: this.getNumberOfDomainRegistrations(),
+					},
+				) }
+				{ ...this.getFieldProps( 'organization' ) }
+			/>
+		);
 	}
 
 	renderEmailField() {
-		return (
-			<Input label={ this.props.translate( 'Email' ) } { ...this.getFieldProps( 'email' ) } />
-		);
+		return <Input label={ this.props.translate( 'Email' ) } { ...this.getFieldProps( 'email' ) } />;
 	}
 
 	renderCountryField() {
@@ -311,14 +341,13 @@ class DomainDetailsForm extends PureComponent {
 			<CountrySelect
 				label={ this.props.translate( 'Country' ) }
 				countriesList={ countriesList }
-				{ ...this.getFieldProps( 'country-code' ) } />
+				{ ...this.getFieldProps( 'country-code' ) }
+			/>
 		);
 	}
 
 	renderFaxField() {
-		return (
-			<Input label={ this.props.translate( 'Fax' ) } { ...this.getFieldProps( 'fax' ) } />
-		);
+		return <Input label={ this.props.translate( 'Fax' ) } { ...this.getFieldProps( 'fax' ) } />;
 	}
 
 	renderPhoneField() {
@@ -330,42 +359,52 @@ class DomainDetailsForm extends PureComponent {
 				countriesList={ countriesList }
 				countryCode={ this.state.phoneCountryCode }
 				onChange={ this.handlePhoneChange }
-				{ ...omit( this.getFieldProps( 'phone' ), 'onChange' ) } />
+				{ ...omit( this.getFieldProps( 'phone' ), 'onChange' ) }
+			/>
 		);
 	}
 
 	renderAddressFields() {
 		return (
 			<div>
-				<Input label={ this.props.translate( 'Address' ) } maxLength={ 40 } { ...this.getFieldProps( 'address-1' ) } />
+				<Input
+					label={ this.props.translate( 'Address' ) }
+					maxLength={ 40 }
+					{ ...this.getFieldProps( 'address-1' ) }
+				/>
 
 				<HiddenInput
 					label={ this.props.translate( 'Address Line 2' ) }
 					text={ this.props.translate( '+ Add Address Line 2' ) }
 					maxLength={ 40 }
-					{ ...this.getFieldProps( 'address-2' ) } />
+					{ ...this.getFieldProps( 'address-2' ) }
+				/>
 			</div>
 		);
 	}
 
 	renderCityField() {
-		return (
-			<Input label={ this.props.translate( 'City' ) } { ...this.getFieldProps( 'city' ) } />
-		);
+		return <Input label={ this.props.translate( 'City' ) } { ...this.getFieldProps( 'city' ) } />;
 	}
 
 	renderStateField() {
 		const countryCode = formState.getFieldValue( this.state.form, 'countryCode' );
 
-		return <StateSelect
-			label={ this.props.translate( 'State' ) }
-			countryCode={ countryCode }
-			{ ...this.getFieldProps( 'state' ) } />;
+		return (
+			<StateSelect
+				label={ this.props.translate( 'State' ) }
+				countryCode={ countryCode }
+				{ ...this.getFieldProps( 'state' ) }
+			/>
+		);
 	}
 
 	renderPostalCodeField() {
 		return (
-			<Input label={ this.props.translate( 'Postal Code' ) } { ...this.getFieldProps( 'postal-code' ) } />
+			<Input
+				label={ this.props.translate( 'Postal Code' ) }
+				{ ...this.getFieldProps( 'postal-code' ) }
+			/>
 		);
 	}
 
@@ -391,12 +430,16 @@ class DomainDetailsForm extends PureComponent {
 	}
 
 	renderExtraDetailsForm() {
-		return ( <ExtraInfoFrForm
-			isProbablyOrganization={ Boolean( formState.getFieldValue( this.state.form, 'organization' ) ) }
-			countryCode={ formState.getFieldValue( this.state.form, 'countryCode' ) }
-			values={ this.state.registrantExtraInfo }
-			countriesList={ countriesList }
-			onStateChange={ this.handleExtraChange } >
+		return (
+			<ExtraInfoFrForm
+				isProbablyOrganization={ Boolean(
+					formState.getFieldValue( this.state.form, 'organization' ),
+				) }
+				countryCode={ formState.getFieldValue( this.state.form, 'countryCode' ) }
+				values={ this.state.registrantExtraInfo }
+				countriesList={ countriesList }
+				onStateChange={ this.handleExtraChange }
+			>
 				{ this.renderSubmitButton() }
 			</ExtraInfoFrForm>
 		);
@@ -404,24 +447,26 @@ class DomainDetailsForm extends PureComponent {
 
 	handleCheckboxChange = () => {
 		this.setPrivacyProtectionSubscriptions( ! this.allDomainRegistrationsHavePrivacy() );
-	}
+	};
 
 	closeDialog = () => {
 		this.setState( { isDialogVisible: false } );
-	}
+	};
 
 	openDialog = () => {
 		this.setState( { isDialogVisible: true } );
-	}
+	};
 
 	focusFirstError() {
-		this.refs[ kebabCase( head( map( formState.getInvalidFields( this.state.form ), 'name' ) ) ) ].focus();
+		this.refs[
+			kebabCase( head( map( formState.getInvalidFields( this.state.form ), 'name' ) ) )
+		 ].focus();
 	}
 
-	handleSubmitButtonClick = ( event ) => {
+	handleSubmitButtonClick = event => {
 		event.preventDefault();
 
-		this.formStateController.handleSubmit( ( hasErrors ) => {
+		this.formStateController.handleSubmit( hasErrors => {
 			this.recordSubmit();
 
 			if ( hasErrors ) {
@@ -433,15 +478,16 @@ class DomainDetailsForm extends PureComponent {
 				return this.switchToNextStep();
 			}
 
-			if ( this.allDomainRegistrationsSupportPrivacy() &&
-				! this.allDomainRegistrationsHavePrivacy() ) {
+			if (
+				this.allDomainRegistrationsSupportPrivacy() && ! this.allDomainRegistrationsHavePrivacy()
+			) {
 				this.openDialog();
 				return;
 			}
 
 			this.finish();
 		} );
-	}
+	};
 
 	recordSubmit() {
 		const errors = formState.getErrorMessages( this.state.form ),
@@ -452,17 +498,17 @@ class DomainDetailsForm extends PureComponent {
 					return result;
 				},
 				{
-					errors_count: errors && errors.length || 0,
-					submission_count: this.state.submissionCount + 1
-				}
+					errors_count: ( errors && errors.length ) || 0,
+					submission_count: this.state.submissionCount + 1,
+				},
 			);
 
 		analytics.tracks.recordEvent( 'calypso_contact_information_form_submit', tracksEventObject );
 		this.setState( { submissionCount: this.state.submissionCount + 1 } );
 	}
 
-	handlePrivacyDialogSelect = ( options ) => {
-		this.formStateController.handleSubmit( ( hasErrors ) => {
+	handlePrivacyDialogSelect = options => {
+		this.formStateController.handleSubmit( hasErrors => {
 			this.recordSubmit();
 
 			if ( hasErrors || options.skipFinish ) {
@@ -473,7 +519,7 @@ class DomainDetailsForm extends PureComponent {
 
 			this.finish( options );
 		} );
-	}
+	};
 
 	finish( options = {} ) {
 		if ( has( options.addPrivacy ) ) {
@@ -509,7 +555,7 @@ class DomainDetailsForm extends PureComponent {
 			classSet = classNames( {
 				'domain-details': true,
 				selected: true,
-				'only-google-apps-details': needsOnlyGoogleAppsDetails
+				'only-google-apps-details': needsOnlyGoogleAppsDetails,
 			} );
 
 		let title;
@@ -524,15 +570,10 @@ class DomainDetailsForm extends PureComponent {
 
 		return (
 			<div>
-				{
-					cartItems.hasDomainRegistration( this.props.cart ) &&
+				{ cartItems.hasDomainRegistration( this.props.cart ) &&
 					this.allDomainRegistrationsSupportPrivacy() &&
-					this.renderPrivacySection()
-				}
-				<PaymentBox
-					currentPage={ this.state.currentStep }
-					classSet={ classSet }
-					title={ title }>
+					this.renderPrivacySection() }
+				<PaymentBox currentPage={ this.state.currentStep } classSet={ classSet } title={ title }>
 					{ this.renderCurrentForm() }
 				</PaymentBox>
 			</div>

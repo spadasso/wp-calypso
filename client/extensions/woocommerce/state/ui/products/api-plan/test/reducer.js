@@ -8,12 +8,7 @@ import { expect } from 'chai';
  */
 import reducer from '../reducer';
 
-import {
-	createApiPlan,
-	startApiPlanStep,
-	endApiPlanStep,
-	clearApiPlan,
-} from '../actions';
+import { createApiPlan, startApiPlanStep, endApiPlanStep, clearApiPlan } from '../actions';
 
 describe( 'reducer', () => {
 	it( 'should initialize to null', () => {
@@ -77,4 +72,3 @@ describe( 'reducer', () => {
 		expect( state2 ).to.equal( null );
 	} );
 } );
-

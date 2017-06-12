@@ -2,13 +2,14 @@
  * Internal dependencies
  */
 import { createReducer } from 'state/utils';
-import {
-	WOOCOMMERCE_PRODUCT_UPDATED,
-} from 'woocommerce/state/action-types';
+import { WOOCOMMERCE_PRODUCT_UPDATED } from 'woocommerce/state/action-types';
 
-export default createReducer( {}, {
-	[ WOOCOMMERCE_PRODUCT_UPDATED ]: productUpdated,
-} );
+export default createReducer(
+	{},
+	{
+		[ WOOCOMMERCE_PRODUCT_UPDATED ]: productUpdated,
+	},
+);
 
 function productUpdated( state, action ) {
 	const { product } = action;
@@ -20,7 +21,7 @@ function updateCachedProduct( state, product ) {
 	const products = state.products || [];
 
 	let found = false;
-	const newProducts = products.map( ( p ) => {
+	const newProducts = products.map( p => {
 		if ( p.id === product.id ) {
 			found = true;
 			return product;
@@ -34,4 +35,3 @@ function updateCachedProduct( state, product ) {
 
 	return { ...state, product: newProducts };
 }
-

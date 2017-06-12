@@ -24,26 +24,29 @@ import { isJetpackSite } from 'state/sites/selectors';
 import { recordTracksEvent } from 'state/analytics/actions';
 import { getPlanBySlug } from 'state/plans/selectors';
 import { getPlan } from 'lib/plans';
-import {
-	PLAN_BUSINESS,
-	PLAN_JETPACK_BUSINESS,
-	FEATURE_ADVANCED_SEO
-} from 'lib/plans/constants';
+import { PLAN_BUSINESS, PLAN_JETPACK_BUSINESS, FEATURE_ADVANCED_SEO } from 'lib/plans/constants';
 
-const SeoPreviewNudge = ( { translate, domain, plan = {}, businessPlan = {}, isJetpack = false, planFeatures = [] } ) => {
+const SeoPreviewNudge = ( {
+	translate,
+	domain,
+	plan = {},
+	businessPlan = {},
+	isJetpack = false,
+	planFeatures = [],
+} ) => {
 	let planPrice = translate( 'Free for life' );
 	if ( ! ( isFreePlan( plan ) || isFreeJetpackPlan( plan ) ) ) {
 		planPrice = isJetpack
 			? translate( '%(price)s per year', {
-				args: {
-					price: formatCurrency( plan.raw_price, plan.currency_code )
-				}
-			} )
+					args: {
+						price: formatCurrency( plan.raw_price, plan.currency_code ),
+					},
+				} )
 			: translate( '%(price)s per month, billed yearly', {
-				args: {
-					price: formatCurrency( plan.raw_price / 12, plan.currency_code )
-				}
-			} );
+					args: {
+						price: formatCurrency( plan.raw_price / 12, plan.currency_code ),
+					},
+				} );
 	}
 	const businessPlanPrice = isJetpack
 		? formatCurrency( businessPlan.raw_price, businessPlan.currency_code )
@@ -53,16 +56,14 @@ const SeoPreviewNudge = ( { translate, domain, plan = {}, businessPlan = {}, isJ
 		: translate( '%(price)s per month, billed yearly', { args: { price: businessPlanPrice } } );
 
 	const featuresToShow = planFeatures.filter(
-		feature =>
-			! planHasFeature( plan.product_slug, feature ) &&
-			feature !== FEATURE_ADVANCED_SEO
+		feature => ! planHasFeature( plan.product_slug, feature ) && feature !== FEATURE_ADVANCED_SEO,
 	);
 	return (
 		<div className="preview-upgrade-nudge">
 			<QueryPlans />
 			<TrackComponentView eventName="calypso_seo_preview_upgrade_nudge_impression" />
 			<div className="preview-upgrade-nudge__plan">
-				<div className="preview-upgrade-nudge__plan-icon"></div>
+				<div className="preview-upgrade-nudge__plan-icon" />
 			</div>
 			<h2 className="preview-upgrade-nudge__title">{ translate( 'SEO Features' ) }</h2>
 			<div className="preview-upgrade-nudge__features">
@@ -71,20 +72,41 @@ const SeoPreviewNudge = ( { translate, domain, plan = {}, businessPlan = {}, isJ
 				</FeatureExample>
 				<div className="preview-upgrade-nudge__features-details">
 					<p className="preview-upgrade-nudge__features-title">
-						{ translate( 'By upgrading to a Business Plan you\'ll enable SEO Tools on your site.' ) }
+						{ translate( "By upgrading to a Business Plan you'll enable SEO Tools on your site." ) }
 					</p>
 					<ul className="preview-upgrade-nudge__features-list">
 						<li className="preview-upgrade-nudge__features-list-item">
-							<Gridicon className="preview-upgrade-nudge__features-list-item-checkmark" icon="checkmark" />
-							{ preventWidows( translate( 'Preview your site\'s posts and pages as they will appear when shared on Facebook, Twitter and the WordPress.com Reader.' ) ) }
+							<Gridicon
+								className="preview-upgrade-nudge__features-list-item-checkmark"
+								icon="checkmark"
+							/>
+							{ preventWidows(
+								translate(
+									"Preview your site's posts and pages as they will appear when shared on Facebook, Twitter and the WordPress.com Reader.",
+								),
+							) }
 						</li>
 						<li className="preview-upgrade-nudge__features-list-item">
-							<Gridicon className="preview-upgrade-nudge__features-list-item-checkmark" icon="checkmark" />
-							{ preventWidows( translate( 'Allow you to control how page titles will appear on Google search results, or when shared on social networks.' ) ) }
+							<Gridicon
+								className="preview-upgrade-nudge__features-list-item-checkmark"
+								icon="checkmark"
+							/>
+							{ preventWidows(
+								translate(
+									'Allow you to control how page titles will appear on Google search results, or when shared on social networks.',
+								),
+							) }
 						</li>
 						<li className="preview-upgrade-nudge__features-list-item">
-							<Gridicon className="preview-upgrade-nudge__features-list-item-checkmark" icon="checkmark" />
-							{ preventWidows( translate( 'Modify front page meta data in order to customize how your site appears to search engines.' ) ) }
+							<Gridicon
+								className="preview-upgrade-nudge__features-list-item-checkmark"
+								icon="checkmark"
+							/>
+							{ preventWidows(
+								translate(
+									'Modify front page meta data in order to customize how your site appears to search engines.',
+								),
+							) }
 						</li>
 					</ul>
 				</div>
@@ -94,14 +116,16 @@ const SeoPreviewNudge = ( { translate, domain, plan = {}, businessPlan = {}, isJ
 					title={ plan.product_name_short || '' }
 					line={ planPrice }
 					buttonName={ translate( 'Your Plan' ) }
-					currentPlan={ true } >
-					<PlanCompareCardItem unavailable={ true } >
+					currentPlan={ true }
+				>
+					<PlanCompareCardItem unavailable={ true }>
 						{ getFeatureTitle( FEATURE_ADVANCED_SEO ) }
 					</PlanCompareCardItem>
 					{ featuresToShow.map( feature => (
 						<PlanCompareCardItem
 							key={ feature }
-							unavailable={ ! planHasFeature( plan.product_slug, feature ) } >
+							unavailable={ ! planHasFeature( plan.product_slug, feature ) }
+						>
 							{ getFeatureTitle( feature ) }
 						</PlanCompareCardItem>
 					) ) }
@@ -114,13 +138,14 @@ const SeoPreviewNudge = ( { translate, domain, plan = {}, businessPlan = {}, isJ
 						recordTracksEvent( 'calypso_upgrade_nudge_cta_click', {
 							cta_size: 'expanded',
 							cta_name: 'calypso_seo_preview_upgrade_nudge',
-							cta_feature: FEATURE_ADVANCED_SEO
+							cta_feature: FEATURE_ADVANCED_SEO,
 						} );
 						page( '/checkout/' + domain + ( isJetpack ? '/professional' : '/business' ) );
 					} }
 					currentPlan={ false }
-					popularRibbon={ true } >
-					<PlanCompareCardItem highlight={ true } >
+					popularRibbon={ true }
+				>
+					<PlanCompareCardItem highlight={ true }>
 						{ getFeatureTitle( FEATURE_ADVANCED_SEO ) }
 					</PlanCompareCardItem>
 					{ featuresToShow.map( feature => (
@@ -138,7 +163,7 @@ SeoPreviewNudge.propTypes = {
 	translate: PropTypes.func.isRequired,
 	domain: PropTypes.string.isRequired,
 	plan: PropTypes.object,
-	businessPlan: PropTypes.object
+	businessPlan: PropTypes.object,
 };
 
 const mapStateToProps = ( state, ownProps ) => {
@@ -150,7 +175,7 @@ const mapStateToProps = ( state, ownProps ) => {
 		plan: getPlanBySlug( state, site.plan.product_slug ),
 		businessPlan: getPlanBySlug( state, isJetpack ? PLAN_JETPACK_BUSINESS : PLAN_BUSINESS ),
 		isJetpack,
-		planFeatures: getPlan( isJetpack ? PLAN_JETPACK_BUSINESS : PLAN_BUSINESS ).getFeatures()
+		planFeatures: getPlan( isJetpack ? PLAN_JETPACK_BUSINESS : PLAN_BUSINESS ).getFeatures(),
 	};
 };
 

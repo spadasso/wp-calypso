@@ -34,15 +34,17 @@ const loadedState = {
 		woocommerce: {
 			sites: {
 				123: {
-					paymentMethods: [ {
-						id: 'bacs',
-						title: 'Direct bank transfer',
-						description: 'Make your payment directly into our bank account.',
-						enabled: false,
-						method_title: 'BACS',
-						methodType: 'offline',
-						method_description: 'Allows payments by BACS, more commonly known as direct bank/wire transfer.',
-					} ],
+					paymentMethods: [
+						{
+							id: 'bacs',
+							title: 'Direct bank transfer',
+							description: 'Make your payment directly into our bank account.',
+							enabled: false,
+							method_title: 'BACS',
+							methodType: 'offline',
+							method_description: 'Allows payments by BACS, more commonly known as direct bank/wire transfer.',
+						},
+					],
 				},
 			},
 		},
@@ -111,27 +113,31 @@ describe( 'selectors', () => {
 		} );
 
 		it( 'should get the payments methods matching the given type.', () => {
-			expect( getPaymentMethodsGroup( loadedState, 'offline', 123 ) ).to.eql( [ {
-				id: 'bacs',
-				title: 'Direct bank transfer',
-				description: 'Make your payment directly into our bank account.',
-				enabled: false,
-				method_title: 'BACS',
-				methodType: 'offline',
-				method_description: 'Allows payments by BACS, more commonly known as direct bank/wire transfer.',
-			} ] );
+			expect( getPaymentMethodsGroup( loadedState, 'offline', 123 ) ).to.eql( [
+				{
+					id: 'bacs',
+					title: 'Direct bank transfer',
+					description: 'Make your payment directly into our bank account.',
+					enabled: false,
+					method_title: 'BACS',
+					methodType: 'offline',
+					method_description: 'Allows payments by BACS, more commonly known as direct bank/wire transfer.',
+				},
+			] );
 		} );
 
 		it( 'should use the siteId in the UI tree if not provided.', () => {
-			expect( getPaymentMethodsGroup( loadedStateWithUi, 'offline' ) ).to.eql( [ {
-				id: 'bacs',
-				title: 'Direct bank transfer',
-				description: 'Make your payment directly into our bank account.',
-				enabled: false,
-				method_title: 'BACS',
-				methodType: 'offline',
-				method_description: 'Allows payments by BACS, more commonly known as direct bank/wire transfer.',
-			} ] );
+			expect( getPaymentMethodsGroup( loadedStateWithUi, 'offline' ) ).to.eql( [
+				{
+					id: 'bacs',
+					title: 'Direct bank transfer',
+					description: 'Make your payment directly into our bank account.',
+					enabled: false,
+					method_title: 'BACS',
+					methodType: 'offline',
+					method_description: 'Allows payments by BACS, more commonly known as direct bank/wire transfer.',
+				},
+			] );
 		} );
 	} );
 } );

@@ -57,16 +57,13 @@ class EditorMediaModalDetailPreviewVideoPress extends Component {
 		loadScript( videoPressUrl, this.onScriptLoaded );
 	}
 
-	onScriptLoaded = ( error ) => {
+	onScriptLoaded = error => {
 		if ( error ) {
 			log( `Script${ error.src } failed to load.` );
 			return;
 		}
 
-		const {
-			isPlaying,
-			item,
-		} = this.props;
+		const { isPlaying, item } = this.props;
 
 		if ( typeof window !== 'undefined' && window.videopress ) {
 			this.player = window.videopress( item.videopress_guid, this.video, {
@@ -93,12 +90,7 @@ class EditorMediaModalDetailPreviewVideoPress extends Component {
 	render() {
 		const classes = classNames( this.props.className, 'is-video' );
 
-		return (
-			<div
-				className={ classes }
-				ref={ this.setVideoInstance }>
-			</div>
-		);
+		return <div className={ classes } ref={ this.setVideoInstance } />;
 	}
 }
 

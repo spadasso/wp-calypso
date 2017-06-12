@@ -24,7 +24,6 @@ import { getSiteUserConnections } from 'state/sharing/publicize/selectors';
 import { getCurrentUserId } from 'state/current-user/selectors';
 
 class SharingPreviewPane extends PureComponent {
-
 	static propTypes = {
 		siteId: PropTypes.number,
 		postId: PropTypes.number,
@@ -37,20 +36,14 @@ class SharingPreviewPane extends PureComponent {
 	};
 
 	static defaultProps = {
-		services: [
-			'facebook',
-			'google_plus',
-			'linkedin',
-			'twitter',
-			'tumblr',
-		]
+		services: [ 'facebook', 'google_plus', 'linkedin', 'twitter', 'tumblr' ],
 	};
 
 	state = {
-		selectedService: 'facebook'
+		selectedService: 'facebook',
 	};
 
-	selectPreview = ( selectedService ) => {
+	selectPreview = selectedService => {
 		this.setState( { selectedService } );
 	};
 
@@ -97,9 +90,7 @@ class SharingPreviewPane extends PureComponent {
 			case 'linkedin':
 				return <LinkedinSharePreview { ...previewProps } />;
 			case 'twitter':
-				return <TwitterSharePreview
-					{ ...previewProps }
-					externalDisplay={ externalDisplay } />;
+				return <TwitterSharePreview { ...previewProps } externalDisplay={ externalDisplay } />;
 			default:
 				return null;
 		}
@@ -118,8 +109,9 @@ class SharingPreviewPane extends PureComponent {
 						<p className="sharing-preview-pane__description">
 							{ translate(
 								'This is how your post will appear ' +
-								'when people view or share it on any of ' +
-								'the networks below' ) }
+									'when people view or share it on any of ' +
+									'the networks below',
+							) }
 						</p>
 					</div>
 					<VerticalMenu onClick={ this.selectPreview }>

@@ -26,9 +26,7 @@ export const closeModal = ( state = false, { type } ) => type === VIDEO_EDITOR_C
  * @return {String} Updated poster URL
  */
 export const url = ( state = null, { type, posterUrl } ) =>
-	VIDEO_EDITOR_SET_POSTER_URL === type
-		? posterUrl
-		: state;
+	( VIDEO_EDITOR_SET_POSTER_URL === type ? posterUrl : state );
 
 /**
  * Tracks poster upload progress state.

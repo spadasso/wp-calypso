@@ -25,8 +25,7 @@ describe( 'selectors', () => {
 						{ id: 1 },
 					],
 					ui: {
-						products: {
-						}
+						products: {},
 					},
 				},
 			},

@@ -55,11 +55,7 @@ class ReaderInfiniteStream extends Component {
 				parent={ parent }
 			>
 				{ ( { measure } ) => (
-					<div
-						key={ key }
-						style={ style }
-						className="reader-infinite-stream__row-wrapper"
-					>
+					<div key={ key } style={ style } className="reader-infinite-stream__row-wrapper">
 						<ConnectedSubscriptionListItem
 							url={ feedUrl }
 							feedId={ feedId }

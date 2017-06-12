@@ -31,9 +31,8 @@ describe( 'selectors', () => {
 					],
 					ui: {
 						products: {
-							variations: {
-							}
-						}
+							variations: {},
+						},
 					},
 				},
 			},

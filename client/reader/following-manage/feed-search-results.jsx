@@ -56,7 +56,7 @@ const FollowingManageSearchFeedsResults = ( {
 			recordTracksRailcarRender(
 				'following_manage_search',
 				railcar,
-				{ ui_algo: 'following_manage_search', ui_position: index }
+				{ ui_algo: 'following_manage_search', ui_position: index },
 			);
 		};
 	}
@@ -75,7 +75,7 @@ const FollowingManageSearchFeedsResults = ( {
 					railcar={ site.railcar }
 					onComponentMountWithNewRailcar={ recordResultRender( index ) }
 				/>
-			)
+			),
 		);
 
 		return (

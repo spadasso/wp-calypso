@@ -34,10 +34,7 @@ export default class ProductForm extends Component {
 
 		return (
 			<div className={ classNames( 'products__form', this.props.className ) }>
-				<ProductFormDetailsCard
-					product={ product }
-					editProduct={ editProduct }
-				/>
+				<ProductFormDetailsCard product={ product } editProduct={ editProduct } />
 				<ProductFormAdditionalDetailsCard
 					product={ product }
 					editProduct={ this.props.editProduct }
@@ -56,16 +53,11 @@ export default class ProductForm extends Component {
 					editProductVariation={ editProductVariation }
 				/>
 
-				{ 'simple' === product.type && (
+				{ 'simple' === product.type &&
 					<div className="products__product-simple-cards">
-						<ProductFormSimpleCard
-							product={ product }
-							editProduct={ this.props.editProduct }
-						/>
-					</div>
-				) }
+						<ProductFormSimpleCard product={ product } editProduct={ this.props.editProduct } />
+					</div> }
 			</div>
 		);
 	}
-
 }

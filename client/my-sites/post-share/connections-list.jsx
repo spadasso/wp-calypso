@@ -43,12 +43,7 @@ class ConnectionsList extends PureComponent {
 	}
 
 	renderWarnings() {
-		const {
-			connections,
-			hasFetchedConnections,
-			siteSlug,
-			translate,
-		} = this.props;
+		const { connections, hasFetchedConnections, siteSlug, translate } = this.props;
 
 		if ( ! hasFetchedConnections || ! this.hasConnections() ) {
 			return null;
@@ -62,8 +57,8 @@ class ConnectionsList extends PureComponent {
 
 		return (
 			<div>
-				{ brokenConnections
-					.map( connection => <Notice
+				{ brokenConnections.map( connection => (
+					<Notice
 						key={ connection.keyring_connection_ID }
 						status="is-warning"
 						showDismiss={ false }
@@ -72,8 +67,8 @@ class ConnectionsList extends PureComponent {
 						<NoticeAction href={ `/sharing/${ siteSlug }` }>
 							{ translate( 'Reconnect' ) }
 						</NoticeAction>
-					</Notice> )
-				}
+					</Notice>
+				) ) }
 			</div>
 		);
 	}
@@ -93,15 +88,16 @@ class ConnectionsList extends PureComponent {
 			<div className="post-share__connections">
 				{ this.renderWarnings() }
 
-				{ connections.map( connection =>
-					<Connection { ...{
-						connection,
-						onToggle,
-						isActive: connection.isActive,
-						key: connection.keyring_connection_ID,
-					} }
+				{ connections.map( connection => (
+					<Connection
+						{ ...{
+							connection,
+							onToggle,
+							isActive: connection.isActive,
+							key: connection.keyring_connection_ID,
+						} }
 					/>
-				) }
+				) ) }
 			</div>
 		);
 	}

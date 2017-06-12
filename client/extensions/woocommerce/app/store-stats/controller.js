@@ -17,8 +17,9 @@ function isValidParameters( context ) {
 		type: [ 'orders' ],
 		unit: [ 'day', 'week', 'month', 'year' ],
 	};
-	return Object.keys( validParameters )
-		.every( param => includes( validParameters[ param ], context.params[ param ] ) );
+	return Object.keys( validParameters ).every(
+		param => includes( validParameters[ param ], context.params[ param ] ),
+	);
 }
 
 export default function StatsController( context ) {
@@ -41,6 +42,6 @@ export default function StatsController( context ) {
 			{ ...props }
 		/>,
 		document.getElementById( 'primary' ),
-		context.store
+		context.store,
 	);
 }

@@ -13,21 +13,13 @@ import {
 	VIDEO_EDITOR_SHOW_UPLOAD_PROGRESS,
 } from 'state/action-types';
 
-import reducer, {
-	closeModal,
-	showError,
-	uploadProgress,
-	url,
-} from '../reducer';
+import reducer, { closeModal, showError, uploadProgress, url } from '../reducer';
 
 describe( 'reducer', () => {
 	it( 'should export expected reducer keys', () => {
-		expect( reducer( undefined, {} ) ).to.have.keys( [
-			'closeModal',
-			'showError',
-			'uploadProgress',
-			'url',
-		] );
+		expect( reducer( undefined, {} ) ).to.have.keys(
+			[ 'closeModal', 'showError', 'uploadProgress', 'url' ],
+		);
 	} );
 
 	describe( '#closeModal()', () => {

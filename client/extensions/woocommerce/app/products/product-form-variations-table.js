@@ -18,7 +18,6 @@ import ProductFormVariationsModal from './product-form-variations-modal';
 import ProductFormVariationsRow from './product-form-variations-row';
 
 class ProductFormVariationsTable extends React.Component {
-
 	static propTypes = {
 		variations: PropTypes.array,
 		product: PropTypes.object,
@@ -50,23 +49,23 @@ class ProductFormVariationsTable extends React.Component {
 		} );
 	}
 
-	setPrice = ( e ) => {
+	setPrice = e => {
 		this.editAllVariations( 'regular_price', e.target.value );
-	}
+	};
 
-	setWeight = ( e ) => {
+	setWeight = e => {
 		this.editAllVariations( 'weight', e.target.value );
-	}
+	};
 
-	setStockQuantity = ( e ) => {
+	setStockQuantity = e => {
 		const stock_quantity = Number( e.target.value ) >= 0 ? e.target.value : '';
 		this.editAllVariations( 'stock_quantity', stock_quantity );
-	}
+	};
 
-	setDimension = ( e ) => {
+	setDimension = e => {
 		const dimensions = { ...this.state.dimensions, [ e.target.name ]: e.target.value };
 		this.editAllVariations( 'dimensions', dimensions );
-	}
+	};
 
 	toggleStock = () => {
 		const manage_stock = ! this.state.manage_stock;
@@ -94,9 +93,7 @@ class ProductFormVariationsTable extends React.Component {
 		const { variations, product, editProductVariation, translate } = this.props;
 		const { showDialog, selectedVariation } = this.state;
 
-		const buttons = [
-			{ action: 'close', label: translate( 'Close' ) },
-		];
+		const buttons = [ { action: 'close', label: translate( 'Close' ) } ];
 
 		return (
 			<Dialog
@@ -119,8 +116,8 @@ class ProductFormVariationsTable extends React.Component {
 
 	renderVariationRow( variation ) {
 		const { product, variations, editProductVariation } = this.props;
-		const id = isNumber( variation.id ) && variation.id || 'index_' + variation.id.index;
-		const manageStock = ( find( variations, ( v ) => v.manage_stock ) ) ? true : false;
+		const id = ( isNumber( variation.id ) && variation.id ) || 'index_' + variation.id.index;
+		const manageStock = find( variations, v => v.manage_stock ) ? true : false;
 
 		return (
 			<ProductFormVariationsRow
@@ -137,7 +134,7 @@ class ProductFormVariationsTable extends React.Component {
 	renderBulkRow() {
 		const { translate, variations } = this.props;
 		const { regular_price, dimensions, weight, stock_quantity } = this.state;
-		const manageStock = ( find( variations, ( v ) => v.manage_stock ) ) ? true : false;
+		const manageStock = find( variations, v => v.manage_stock ) ? true : false;
 
 		return (
 			<tr className="products__product-form-variation-all-row">
@@ -147,7 +144,8 @@ class ProductFormVariationsTable extends React.Component {
 					</div>
 				</td>
 				<td>
-					<FormCurrencyInput noWrap
+					<FormCurrencyInput
+						noWrap
 						currencySymbolPrefix="$"
 						name="price"
 						value={ regular_price }
@@ -165,29 +163,23 @@ class ProductFormVariationsTable extends React.Component {
 							onChange={ this.setDimension }
 						/>
 						<div className="products__product-weight-input">
-							<FormWeightInput
-								value={ weight }
-								onChange={ this.setWeight }
-								noWrap
-							/>
+							<FormWeightInput value={ weight } onChange={ this.setWeight } noWrap />
 						</div>
 					</div>
 				</td>
 				<td>
 					<div className="products__product-manage-stock">
 						<div className="products__product-manage-stock-toggle">
-							<CompactFormToggle
-								checked={ manageStock }
-								onChange={ this.toggleStock }
-							/>
+							<CompactFormToggle checked={ manageStock } onChange={ this.toggleStock } />
 						</div>
-						{ manageStock && ( <FormTextInput
-							name="stock_quantity"
-							value={ stock_quantity }
-							type="number"
-							placeholder={ translate( 'Quantity' ) }
-							onChange={ this.setStockQuantity }
-						/> ) }
+						{ manageStock &&
+							<FormTextInput
+								name="stock_quantity"
+								value={ stock_quantity }
+								type="number"
+								placeholder={ translate( 'Quantity' ) }
+								onChange={ this.setStockQuantity }
+							/> }
 					</div>
 				</td>
 			</tr>
@@ -207,7 +199,7 @@ class ProductFormVariationsTable extends React.Component {
 					<table className="products__product-form-variation-table">
 						<thead>
 							<tr>
-								<th></th>
+								<th />
 								<th className="products__product-price">{ translate( 'Price' ) }</th>
 								<th>{ translate( 'Dimensions & weight' ) }</th>
 								<th>{ translate( 'Manage stock' ) }</th>
@@ -215,7 +207,7 @@ class ProductFormVariationsTable extends React.Component {
 						</thead>
 						<tbody>
 							{ this.renderBulkRow() }
-							{ variations.map( ( v ) => this.renderVariationRow( v ) ) }
+							{ variations.map( v => this.renderVariationRow( v ) ) }
 						</tbody>
 					</table>
 					{ this.renderModal() }
@@ -223,7 +215,6 @@ class ProductFormVariationsTable extends React.Component {
 			</div>
 		);
 	}
-
 }
 
 export default localize( ProductFormVariationsTable );

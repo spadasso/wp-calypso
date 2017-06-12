@@ -4,7 +4,6 @@
 
 import { assert } from 'chai';
 
-
 /**
  * Internal dependencies
  */
@@ -36,7 +35,7 @@ describe( 'WPorg Data Actions', () => {
 		assert.isFunction( WPorgActions.fetchNextCategoryPage );
 	} );
 
-	it( 'when fetching a plugin list, it shouldn\'t do the wporg request if there\'s a previous one still not finished for the same category', () => {
+	it( "when fetching a plugin list, it shouldn't do the wporg request if there's a previous one still not finished for the same category", () => {
 		mockedWporg.deactivatedCallbacks = true;
 		WPorgActions.fetchPluginsList( 'new', 1 );
 		WPorgActions.fetchPluginsList( 'new', 1 );

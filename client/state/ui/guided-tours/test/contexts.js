@@ -24,8 +24,9 @@ describe( 'selectors', () => {
 
 	useMockery( mockery => {
 		mockery.registerSubstitute(
-				'layout/guided-tours/config',
-				'state/ui/guided-tours/test/fixtures/config' );
+			'layout/guided-tours/config',
+			'state/ui/guided-tours/test/fixtures/config',
+		);
 
 		const contexts = require( '../contexts' );
 		hasUserRegisteredBefore = contexts.hasUserRegisteredBefore;
@@ -39,23 +40,23 @@ describe( 'selectors', () => {
 
 		const oldUser = {
 			currentUser: {
-				id: 73705554
+				id: 73705554,
 			},
 			users: {
 				items: {
-					73705554: { ID: 73705554, login: 'testonesite2016', date: '2014-10-18T17:14:52+00:00' }
-				}
+					73705554: { ID: 73705554, login: 'testonesite2016', date: '2014-10-18T17:14:52+00:00' },
+				},
 			},
 		};
 
 		const newUser = {
 			currentUser: {
-				id: 73705554
+				id: 73705554,
 			},
 			users: {
 				items: {
-					73705554: { ID: 73705554, login: 'testonesite2016', date: '2016-10-18T17:14:52+00:00' }
-				}
+					73705554: { ID: 73705554, login: 'testonesite2016', date: '2016-10-18T17:14:52+00:00' },
+				},
 			},
 		};
 
@@ -72,8 +73,8 @@ describe( 'selectors', () => {
 		it( 'should return false when no actions', () => {
 			const state = {
 				ui: {
-					actionLog: []
-				}
+					actionLog: [],
+				},
 			};
 			expect( hasUserPastedFromGoogleDocs( state ) ).to.be.false;
 		} );
@@ -81,11 +82,8 @@ describe( 'selectors', () => {
 		it( 'should return false when last action is not the paste event', () => {
 			const state = {
 				ui: {
-					actionLog: [
-						{ type: EDITOR_PASTE_EVENT },
-						{ type: 'NO_PASTE_EVENT' }
-					]
-				}
+					actionLog: [ { type: EDITOR_PASTE_EVENT }, { type: 'NO_PASTE_EVENT' } ],
+				},
 			};
 			expect( hasUserPastedFromGoogleDocs( state ) ).to.be.false;
 		} );
@@ -96,8 +94,8 @@ describe( 'selectors', () => {
 					actionLog: [
 						{ type: 'NO_PASTE_EVENT' },
 						{ type: EDITOR_PASTE_EVENT, source: SOURCE_GOOGLE_DOCS },
-					]
-				}
+					],
+				},
 			};
 			expect( hasUserPastedFromGoogleDocs( state ) ).to.be.true;
 		} );
@@ -108,8 +106,8 @@ describe( 'selectors', () => {
 					actionLog: [
 						{ type: 'NO_PASTE_EVENT' },
 						{ type: EDITOR_PASTE_EVENT, source: SOURCE_UNKNOWN },
-					]
-				}
+					],
+				},
 			};
 			expect( hasUserPastedFromGoogleDocs( state ) ).to.be.false;
 		} );
@@ -119,52 +117,56 @@ describe( 'selectors', () => {
 		it( 'should return false when no actions', () => {
 			const state = {
 				ui: {
-					actionLog: []
-				}
+					actionLog: [],
+				},
 			};
 			expect( hasUserClicked( state ) ).to.be.false;
 		} );
 		it( 'should return true when matching action', () => {
 			const state = {
 				ui: {
-					actionLog: [ {
-						type: 'ANALYTICS_EVENT_RECORD',
-						meta: {
-							analytics: [
-								{
-									type: 'ANALYTICS_EVENT_RECORD',
-									payload: {
-										service: 'tracks',
-										name: 'calypso_themeshowcase_theme_click',
-										properties: {}
-									}
-								}
-							]
-						}
-					} ]
-				}
+					actionLog: [
+						{
+							type: 'ANALYTICS_EVENT_RECORD',
+							meta: {
+								analytics: [
+									{
+										type: 'ANALYTICS_EVENT_RECORD',
+										payload: {
+											service: 'tracks',
+											name: 'calypso_themeshowcase_theme_click',
+											properties: {},
+										},
+									},
+								],
+							},
+						},
+					],
+				},
 			};
 			expect( hasUserClicked( state ) ).to.be.true;
 		} );
 		it( 'should return false when mis-matching event', () => {
 			const state = {
 				ui: {
-					actionLog: [ {
-						type: 'ANALYTICS_EVENT_RECORD',
-						meta: {
-							analytics: [
-								{
-									type: 'ANALYTICS_EVENT_RECORD',
-									payload: {
-										service: 'tracks',
-										name: 'wrong_name',
-										properties: {}
-									}
-								}
-							]
-						}
-					} ]
-				}
+					actionLog: [
+						{
+							type: 'ANALYTICS_EVENT_RECORD',
+							meta: {
+								analytics: [
+									{
+										type: 'ANALYTICS_EVENT_RECORD',
+										payload: {
+											service: 'tracks',
+											name: 'wrong_name',
+											properties: {},
+										},
+									},
+								],
+							},
+						},
+					],
+				},
 			};
 			expect( hasUserClicked( state ) ).to.be.false;
 		} );

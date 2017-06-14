@@ -68,6 +68,8 @@ class RegistrantExtraInfoForm extends React.PureComponent {
 			...defaults,
 			...this.props.contactDetails.extra
 		};
+
+		this.state = {};
 	}
 
 	componentDidUpdate( prevProps, prevState ) {
@@ -86,7 +88,7 @@ class RegistrantExtraInfoForm extends React.PureComponent {
 	}
 
 	compileDateOfBirth() {
-		const { dobYears, dobMonths, dobDays } = this.state || {};
+		const { dobYears, dobMonths, dobDays } = this.state;
 		let dateOfBirth = false;
 
 		if ( new Date().getFullYear() - toInteger( dobYears ) > currentPlausibleHumanLifespan ) {

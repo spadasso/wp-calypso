@@ -3,7 +3,7 @@
  */
 import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
-import { isEqual, noop, toInteger } from 'lodash';
+import { defaults, isEqual, noop, toInteger } from 'lodash';
 import { localize } from 'i18n-calypso';
 import moment from 'moment';
 import debugFactory from 'debug';
@@ -173,7 +173,7 @@ class RegistrantExtraInfoForm extends React.PureComponent {
 			dobDays,
 			placeOfBirth,
 			postalCodeOfBirth,
-		} = { ...emptyValues, ...extra, ...this.state };
+		} = defaults( this.state, extra, emptyValues );
 
 		return (
 			<div>
@@ -285,7 +285,7 @@ class RegistrantExtraInfoForm extends React.PureComponent {
 			registrantVatId,
 			sirenSiret,
 			trademarkNumber
-		} = { ...emptyValues, ...extra };
+		} = defaults( extra, emptyValues );;
 
 		return (
 			<div>

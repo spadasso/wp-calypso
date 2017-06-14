@@ -22,6 +22,7 @@ import ProgressBanner from '../activity-log-banner/progress-banner';
 import SuccessBanner from '../activity-log-banner/success-banner';
 import QueryRewindStatus from 'components/data/query-rewind-status';
 import ActivityLogRewindToggle from './activity-log-rewind-toggle';
+import { isRewindActive } from 'state/selectors';
 
 class ActivityLog extends Component {
 	static propTypes = {
@@ -313,6 +314,7 @@ class ActivityLog extends Component {
 		const {
 			moment,
 			siteId,
+			isRewindActive,
 		} = this.props;
 		const logs = this.logs();
 		const logsGroupedByDate = map(
@@ -326,7 +328,7 @@ class ActivityLog extends Component {
 					dateIsoString={ isoString }
 					logs={ daily_logs }
 					siteId={ siteId }
-					isRewindEnabled={ true }
+					isRewindEnabled={ isRewindActive }
 				/>
 			)
 		);
@@ -334,7 +336,7 @@ class ActivityLog extends Component {
 		return (
 			<div>
 				{ this.renderBanner() }
-				<ActivityLogRewindToggle siteId={ siteId } />
+				{ ! isRewindActive && <ActivityLogRewindToggle siteId={ siteId } /> }
 				<section className="activity-log__wrapper">
 					{ logsGroupedByDate }
 				</section>
@@ -373,6 +375,7 @@ export default connect(
 			siteId,
 			slug: getSiteSlug( state, siteId ),
 			rewindStatusError: getRewindStatusError( state, siteId ),
+			isRewindActive: isRewindActive( state, siteId ),
 
 			// FIXME: Testing only
 			isPressable: get( state.activityLog.rewindStatus, [ siteId, 'isPressable' ], false ),

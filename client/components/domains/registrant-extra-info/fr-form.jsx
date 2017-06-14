@@ -57,19 +57,14 @@ class RegistrantExtraInfoForm extends React.PureComponent {
 
 	constructor( props ) {
 		super( props );
-
-		const defaults = {
-			registrantType: this.props.contactDetails.organization
-				? 'organization' : 'individual',
-			countryOfBirth: this.props.contactDetails.countryCode || 'FR',
-		};
-
-		this.props.contactDetails.extra = {
-			...defaults,
-			...this.props.contactDetails.extra
-		};
-
 		this.state = {};
+	}
+
+	componentWillMount() {
+		this.props.updateContactDetailsCache( { extra: {
+			registrantType: this.props.contactDetails.organization ? 'organization' : 'individual',
+			countryOfBirth: this.props.contactDetails.countryCode || 'FR'
+		} } );
 	}
 
 	componentDidUpdate( prevProps, prevState ) {

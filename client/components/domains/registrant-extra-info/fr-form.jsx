@@ -91,21 +91,23 @@ class RegistrantExtraInfoForm extends React.PureComponent {
 		const { dobYears, dobMonths, dobDays } = this.state;
 		let dateOfBirth = false;
 
+		if ( ! dobYears || ! dobMonths || ! dobDays ) {
+			return false;
+		}
+
+		dateOfBirth = [ dobYears, dobMonths, dobDays ].join( '-' );
+
+		if ( ! dateOfBirth || ! moment( dateOfBirth, 'YYYY-MM-DD' ).isValid() ) {
+			// @todo: set error state
+			return false;
+		}
+
 		if ( new Date().getFullYear() - toInteger( dobYears ) > currentPlausibleHumanLifespan ) {
 			// @todo: set error state
 			return false;
 		}
 
-		if ( dobYears && dobMonths && dobDays ) {
-			dateOfBirth = [ dobYears, dobMonths, dobDays ].join( '-' );
-		}
-
-		if ( dateOfBirth && moment( dateOfBirth, 'YYYY-MM-DD' ).isValid() ) {
-			return dateOfBirth;
-		}
-
-		// @todo: set error state
-		return false;
+		return dateOfBirth;
 	}
 
 	setDateOfBirth( dateOfBirth ) {

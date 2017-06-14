@@ -165,7 +165,7 @@ class RegistrantExtraInfoForm extends React.PureComponent {
 
 	renderPersonalFields() {
 		const translate = this.props.translate;
-		const extra = this.props.contactDetails.extra;
+		const { extra } = this.props.contactDetails;
 		const screenReaderText = 'screen-reader-text';
 		const {
 			countryOfBirth,
@@ -281,7 +281,7 @@ class RegistrantExtraInfoForm extends React.PureComponent {
 
 	renderOrganizationFields() {
 		const translate = this.props.translate;
-		const extra = this.props.contactDetails.extra;
+		const { extra } = this.props.contactDetails;
 		const {
 			registrantVatId,
 			sirenSiret,

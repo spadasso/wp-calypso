@@ -24,8 +24,8 @@ class QueryContactDetailsCache extends Component {
 }
 
 QueryContactDetailsCache.propTypes = {
-	requesting: PropTypes.bool,
-	requestContactDetailsCache: PropTypes.func
+	requesting: PropTypes.bool.isRequired,
+	requestContactDetailsCache: PropTypes.func.isRequired
 };
 
 export default connect(

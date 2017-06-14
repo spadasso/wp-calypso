@@ -24,9 +24,9 @@ class QueryWhois extends Component {
 }
 
 QueryWhois.propTypes = {
-	domain: PropTypes.string,
-	requesting: PropTypes.bool,
-	requestWhois: PropTypes.func
+	domain: PropTypes.string.isRequired,
+	requesting: PropTypes.bool.isRequired,
+	requestWhois: PropTypes.func.isRequired
 };
 
 export default connect(

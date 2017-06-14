@@ -75,13 +75,6 @@ class RegistrantExtraInfoForm extends React.PureComponent {
 		}
 	}
 
-	handleDobChangeEvent = ( event ) => {
-		this.setState( {
-			...this.state,
-			[ event.target.id ]: event.target.value,
-		} );
-	}
-
 	compileDateOfBirth() {
 		const { dobYears, dobMonths, dobDays } = this.state;
 		let dateOfBirth = false;
@@ -108,6 +101,10 @@ class RegistrantExtraInfoForm extends React.PureComponent {
 	setDateOfBirth( dateOfBirth ) {
 		debug( 'Setting dateOfBirth to ' + dateOfBirth );
 		this.props.updateContactDetailsCache( { extra: { dateOfBirth } } );
+	}
+
+	handleDobChangeEvent = ( event ) => {
+		this.setState( { [ event.target.id ]: event.target.value } );
 	}
 
 	handleChangeEvent = ( event ) => {

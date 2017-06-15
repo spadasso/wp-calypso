@@ -164,7 +164,6 @@ class RegistrantExtraInfoForm extends React.PureComponent {
 
 	renderPersonalFields() {
 		const translate = this.props.translate;
-		const { extra } = this.props.contactDetails;
 		const screenReaderText = 'screen-reader-text';
 		const {
 			countryOfBirth,
@@ -173,7 +172,7 @@ class RegistrantExtraInfoForm extends React.PureComponent {
 			dobDays,
 			placeOfBirth,
 			postalCodeOfBirth,
-		} = { ...emptyValues, ...extra, ...this.state };
+		} = { ...emptyValues, ...this.props.contactDetails.extra, ...this.state };
 
 		return (
 			<div>

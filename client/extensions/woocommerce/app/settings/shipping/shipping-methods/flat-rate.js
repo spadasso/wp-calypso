@@ -20,8 +20,8 @@ import {
 	setShippingCost
 } from 'woocommerce/state/ui/shipping/zones/methods/flat-rate/actions';
 
-const FreeShippingMethod = ( { id, siteId, cost, taxable, translate, actions } ) => {
-	const isTaxable = 'taxable' === taxable;
+const FreeShippingMethod = ( { id, siteId, cost, tax_status, translate, actions } ) => {
+	const isTaxable = 'taxable' === tax_status;
 	const advancedCostInput = isString( cost );
 	const onTaxableChange = () => ( actions.setShippingIsTaxable( siteId, id, ! isTaxable ) );
 	const onCostChange = ( event ) => ( actions.setShippingCost( siteId, id, event.target.value ) );
@@ -62,7 +62,7 @@ FreeShippingMethod.propTypes = {
 	siteId: PropTypes.number,
 	id: PropTypes.oneOfType( [ PropTypes.number, PropTypes.object ] ),
 	cost: PropTypes.oneOfType( [ PropTypes.number, PropTypes.string ] ),
-	taxable: PropTypes.string
+	tax_status: PropTypes.string
 };
 
 export default connect(

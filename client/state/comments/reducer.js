@@ -16,6 +16,7 @@ import {
 	COMMENTS_LIKE,
 	COMMENTS_LIKE_UPDATE,
 	COMMENTS_UNLIKE,
+	COMMENTS_LIST_REQUEST
 } from '../action-types';
 import { combineReducers } from 'state/utils';
 import {
@@ -126,7 +127,24 @@ export function totalCommentsCount( state = {}, action ) {
 	return state;
 }
 
+/**
+ * Keeps track of if a comment list request is in flight
+ * @param {object} state  - global redux state
+ * @param {object} action - redux action
+ * @returns {boolean} new redux state
+ */
+export function isCommentListLoading( state = false, action ) {
+	switch ( action.type ) {
+		case COMMENTS_LIST_REQUEST:
+			return true;
+		case COMMENTS_RECEIVE: //we may need a more specific success/error action here
+			return false;
+	}
+	return state;
+}
+
 export default combineReducers( {
 	items,
-	totalCommentsCount
+	totalCommentsCount,
+	isCommentListLoading
 } );

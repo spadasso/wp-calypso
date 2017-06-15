@@ -11,6 +11,7 @@ import deepFreeze from 'deep-freeze';
 import {
 	items,
 	totalCommentsCount,
+	isCommentListLoading,
 } from '../reducer';
 import {
 	COMMENTS_LIKE,
@@ -20,6 +21,7 @@ import {
 	COMMENTS_COUNT_RECEIVE,
 	COMMENTS_RECEIVE,
 	COMMENTS_REMOVE,
+	COMMENTS_LIST_REQUEST,
 } from '../../action-types';
 import {
 	PLACEHOLDER_STATE
@@ -160,6 +162,24 @@ describe( 'reducer', () => {
 			} );
 
 			expect( response[ '1-1' ] ).to.eql( 123 );
+		} );
+	} ); // end of totalCommentsCount
+
+	describe( '#isCommentListLoading()', () => {
+		it( 'should track loading state', () => {
+			const isLoading = isCommentListLoading( undefined, {
+				type: COMMENTS_LIST_REQUEST,
+			} );
+
+			expect( isLoading ).to.eql( true );
+		} );
+
+		it( 'should reset loading state', () => {
+			const isLoading = isCommentListLoading( true, {
+				type: COMMENTS_RECEIVE,
+			} );
+
+			expect( isLoading ).to.eql( false );
 		} );
 	} ); // end of totalCommentsCount
 } );

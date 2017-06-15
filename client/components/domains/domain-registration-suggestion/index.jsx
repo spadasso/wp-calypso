@@ -2,7 +2,7 @@
  * External dependencies
  */
 import React from 'react';
-import { endsWith } from 'lodash';
+import { includes } from 'lodash';
 import { localize } from 'i18n-calypso';
 
 /**
@@ -15,6 +15,7 @@ import { shouldBundleDomainWithPlan, getDomainPriceRule, hasDomainInCart } from 
 
 const DomainRegistrationSuggestion = React.createClass( {
 	propTypes: {
+		isSignupStep: React.PropTypes.bool,
 		cart: React.PropTypes.object,
 		suggestion: React.PropTypes.shape( {
 			domain_name: React.PropTypes.string.isRequired,
@@ -27,24 +28,37 @@ const DomainRegistrationSuggestion = React.createClass( {
 	},
 
 	render() {
-		const { suggestion, translate } = this.props,
-			isAdded = hasDomainInCart( this.props.cart, suggestion.domain_name ),
+		const { cart, domainsWithPlansOnly, isSignupStep, selectedSite, suggestion, translate } = this.props,
+			domain = suggestion.domain_name,
+			isAdded = hasDomainInCart( cart, domain ),
 			domainFlags = [];
+
 		let buttonClasses, buttonContent;
 
-		if ( suggestion.domain_name ) {
+		if ( domain ) {
 			const newTLDs = [];
+			const testTLDs = [ '.ca', '.de', '.fr' ];
+			// Grab everything after the first dot, so 'example.co.uk' will
+			// match '.co.uk' but not '.uk'
+			// This won't work if we add subdomains.
+			const tld = domain.substring( domain.indexOf( '.' ) );
 
-			if ( newTLDs.some(
-					( tld ) =>
-						endsWith( suggestion.domain_name, tld ) &&
-						suggestion.domain_name.substring( 0, suggestion.domain_name.length - ( tld.length + 1 ) ).indexOf( '.' ) === -1
-				) ) {
+			if ( includes( newTLDs, tld ) ) {
 				domainFlags.push(
 					<DomainSuggestionFlag
-						key={ `${ suggestion.domain_name }-new` }
+						key={ `${ domain }-new` }
 						content={ translate( 'New' ) }
 						status="success"
+					/>
+				);
+			}
+
+			if ( includes( testTLDs, tld ) ) {
+				domainFlags.push(
+					<DomainSuggestionFlag
+						key={ `${ domain }-testing` }
+						content={ 'Testing only' }
+						status="warning"
 					/>
 				);
 			}
@@ -53,7 +67,7 @@ const DomainRegistrationSuggestion = React.createClass( {
 		if ( suggestion.isRecommended ) {
 			domainFlags.push(
 				<DomainSuggestionFlag
-					key={ `${ suggestion.domain_name }-recommended` }
+					key={ `${ domain }-recommended` }
 					content={ translate( 'Recommended' ) }
 					status="success"
 				/>
@@ -63,7 +77,7 @@ const DomainRegistrationSuggestion = React.createClass( {
 		if ( suggestion.isBestAlternative ) {
 			domainFlags.push(
 				<DomainSuggestionFlag
-					key={ `${ suggestion.domain_name }-best-alternative` }
+					key={ `${ domain }-best-alternative` }
 					content={ translate( 'Best Alternative' ) }
 				/>
 			);
@@ -74,23 +88,23 @@ const DomainRegistrationSuggestion = React.createClass( {
 			buttonContent = <Gridicon icon="checkmark" />;
 		} else {
 			buttonClasses = 'add is-primary';
-			buttonContent = shouldBundleDomainWithPlan( this.props.domainsWithPlansOnly, this.props.selectedSite, this.props.cart, suggestion )
+			buttonContent = ! isSignupStep && shouldBundleDomainWithPlan( domainsWithPlansOnly, selectedSite, cart, suggestion )
 				? translate( 'Upgrade', { context: 'Domain mapping suggestion button with plan upgrade' } )
 				: translate( 'Select', { context: 'Domain mapping suggestion button' } );
 		}
 
 		return (
 			<DomainSuggestion
-					priceRule={ getDomainPriceRule( this.props.domainsWithPlansOnly, this.props.selectedSite, this.props.cart, suggestion ) }
+					priceRule={ getDomainPriceRule( domainsWithPlansOnly, selectedSite, cart, suggestion ) }
 					price={ suggestion.product_slug && suggestion.cost }
-					domain={ suggestion.domain_name }
+					domain={ domain }
 					buttonClasses={ buttonClasses }
 					buttonContent={ buttonContent }
-					cart={ this.props.cart }
-					domainsWithPlansOnly={ this.props.domainsWithPlansOnly }
+					cart={ cart }
+					domainsWithPlansOnly={ domainsWithPlansOnly }
 					onButtonClick={ this.props.onButtonClick }>
 				<h3>
-					{ suggestion.domain_name }
+					{ domain }
 					{ domainFlags }
 				</h3>
 			</DomainSuggestion>

@@ -83,18 +83,22 @@ function UndocumentedSite( id, wpcom ) {
 }
 
 UndocumentedSite.prototype.domains = function( callback ) {
-	return this.wpcom.req.get( '/sites/' + this._id + '/domains', function( error, response ) {
-		if ( error ) {
-			callback( error );
-			return;
-		}
+	return this.wpcom.req.get(
+		`/sites/${ this._id }/domains`,
+		{ apiVersion: '1.2' },
+		function( error, response ) {
+			if ( error ) {
+				callback( error );
+				return;
+			}
 
-		callback( null, response );
-	} );
+			callback( null, response );
+		}
+	);
 };
 
 UndocumentedSite.prototype.postFormatsList = function( callback ) {
-	return this.wpcom.withLocale().req.get( '/sites/' + this._id + '/post-formats', {}, callback );
+	return this.wpcom.req.get( '/sites/' + this._id + '/post-formats', {}, callback );
 };
 
 UndocumentedSite.prototype.postAutosave = function( postId, attributes, callback ) {
@@ -124,7 +128,7 @@ UndocumentedSite.prototype.shortcodes = function( attributes, callback ) {
 };
 
 UndocumentedSite.prototype.getRoles = function( callback ) {
-	return this.wpcom.withLocale().req.get( '/sites/' + this._id + '/roles', {}, callback );
+	return this.wpcom.req.get( '/sites/' + this._id + '/roles', {}, callback );
 };
 
 UndocumentedSite.prototype.getViewers = function( query, callback ) {
@@ -253,6 +257,25 @@ UndocumentedSite.prototype.getConnection = function( connectionId ) {
 };
 
 /**
+ * Upload an external media item to the WordPress media library
+ *
+ * @param {string} service - external media service name (i.e 'google_photos')
+ * @param {array} files - array of external media file IDs
+ *
+ * @return {Object} promise - resolves on completion of the GET request
+ */
+UndocumentedSite.prototype.uploadExternalMedia = function( service, files ) {
+	debug( '/sites/:site_id:/external-media-upload query' );
+
+	return this.wpcom.req.post( {
+		path: '/sites/' + this._id + '/external-media-upload',
+	}, {
+		external_ids: files,
+		service
+	} );
+};
+
+/**
  * Runs Theme Setup (Headstart).
  *
  * @return {Promise} A Promise to resolve when complete.
@@ -262,6 +285,19 @@ UndocumentedSite.prototype.runThemeSetup = function() {
 		path: '/sites/' + this._id + '/theme-setup',
 		apiNamespace: 'wpcom/v2',
 	} );
+};
+
+/**
+ * Requests Store orders stats
+ *
+ * @param {object} query query parameters
+ * @return {Promise} A Promise to resolve when complete.
+ */
+UndocumentedSite.prototype.statsOrders = function( query ) {
+	return this.wpcom.req.get( {
+		path: `/sites/${ this._id }/stats/orders`,
+		apiNamespace: 'wpcom/v2',
+	}, query );
 };
 
 /**

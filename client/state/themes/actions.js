@@ -10,7 +10,6 @@ import page from 'page';
  */
 import wpcom from 'lib/wp';
 import wporg from 'lib/wporg';
-import { prependFilterKeys } from 'my-sites/themes/theme-filters';
 import {
 	ACTIVE_THEME_REQUEST,
 	ACTIVE_THEME_REQUEST_SUCCESS,
@@ -23,6 +22,7 @@ import {
 	THEME_DELETE,
 	THEME_DELETE_SUCCESS,
 	THEME_DELETE_FAILURE,
+	THEME_FILTERS_REQUEST,
 	THEME_INSTALL,
 	THEME_INSTALL_SUCCESS,
 	THEME_INSTALL_FAILURE,
@@ -68,7 +68,7 @@ import {
 	normalizeWporgTheme
 } from './utils';
 import { getSiteTitle, isJetpackSite } from 'state/sites/selectors';
-import { isSiteAutomatedTransfer } from 'state/selectors';
+import { isSiteAutomatedTransfer, prependThemeFilterKeys } from 'state/selectors';
 import i18n from 'i18n-calypso';
 import accept from 'lib/accept';
 
@@ -151,7 +151,7 @@ export function receiveThemes( themes, siteId, query, foundCount ) {
  * @return {Function}                    Action thunk
  */
 export function requestThemes( siteId, query = {} ) {
-	return ( dispatch ) => {
+	return ( dispatch, getState ) => {
 		const startTime = new Date().getTime();
 
 		dispatch( {
@@ -185,7 +185,7 @@ export function requestThemes( siteId, query = {} ) {
 
 			if ( ( query.search || query.filter ) && query.page === 1 ) {
 				const responseTime = ( new Date().getTime() ) - startTime;
-				const search_taxonomies = prependFilterKeys( query.filter );
+				const search_taxonomies = prependThemeFilterKeys( getState(), query.filter );
 				const search_term = search_taxonomies + ( query.search || '' );
 				const trackShowcaseSearch = recordTracksEvent(
 					'calypso_themeshowcase_search',
@@ -409,7 +409,7 @@ export function themeActivated( themeStylesheet, siteId, source = 'unknown', pur
 		};
 		const previousThemeId = getActiveTheme( getState(), siteId );
 		const query = getLastThemeQuery( getState(), siteId );
-		const search_taxonomies = prependFilterKeys( query.filter );
+		const search_taxonomies = prependThemeFilterKeys( getState(), query.filter );
 		const search_term = search_taxonomies + ( query.search || '' );
 		const trackThemeActivation = recordTracksEvent(
 			'calypso_themeshowcase_theme_activate',
@@ -631,11 +631,17 @@ export function clearThemeUpload( siteId ) {
  * @returns {Promise} for testing purposes only
  */
 export function initiateThemeTransfer( siteId, file, plugin ) {
+	const context = !! plugin ? 'plugins' : 'themes';
 	return dispatch => {
-		dispatch( {
+		const themeInitiateRequest = {
 			type: THEME_TRANSFER_INITIATE_REQUEST,
 			siteId,
-		} );
+		};
+
+		dispatch( withAnalytics(
+			recordTracksEvent( 'calypso_automated_transfer_initiate_transfer', { plugin, context } ),
+			themeInitiateRequest
+		) );
 		return wpcom.undocumented().initiateTransfer( siteId, plugin, file, ( event ) => {
 			dispatch( {
 				type: THEME_TRANSFER_INITIATE_PROGRESS,
@@ -656,7 +662,7 @@ export function initiateThemeTransfer( siteId, file, plugin ) {
 					transferId: transfer_id,
 				};
 				dispatch( withAnalytics(
-					recordTracksEvent( 'calypso_automated_transfer_inititate_success', { plugin } ),
+					recordTracksEvent( 'calypso_automated_transfer_initiate_success', { plugin, context } ),
 					themeInitiateSuccessAction
 				) );
 				dispatch( pollThemeTransferStatus( siteId, transfer_id ) );
@@ -691,6 +697,7 @@ function transferStatusFailure( siteId, transferId, error ) {
 
 // receive a transfer initiation failure
 function transferInitiateFailure( siteId, error, plugin ) {
+	const context = !! plugin ? 'plugin' : 'theme';
 	return dispatch => {
 		const themeInitiateFailureAction = {
 			type: THEME_TRANSFER_INITIATE_FAILURE,
@@ -698,7 +705,7 @@ function transferInitiateFailure( siteId, error, plugin ) {
 			error,
 		};
 		dispatch( withAnalytics(
-			recordTracksEvent( 'calypso_automated_transfer_inititate_failure', { plugin } ),
+			recordTracksEvent( 'calypso_automated_transfer_initiate_failure', { plugin, context } ),
 			themeInitiateFailureAction
 		) );
 	};
@@ -731,7 +738,8 @@ export function pollThemeTransferStatus( siteId, transferId, interval = 3000, ti
 					dispatch( transferStatus( siteId, transferId, status, message, uploaded_theme_slug ) );
 					if ( status === 'complete' ) {
 						// finished, stop polling
-						dispatch( recordTracksEvent( 'calypso_automated_transfer_complete', { transfer_id: transferId } ) );
+						const context = !! uploaded_theme_slug ? 'themes' : 'plugins';
+						dispatch( recordTracksEvent( 'calypso_automated_transfer_complete', { transfer_id: transferId, context } ) );
 						return resolve();
 					}
 					// poll again
@@ -831,6 +839,17 @@ export function hideThemePreview() {
 	return {
 		type: THEME_PREVIEW_STATE,
 		themeId: null
+	};
+}
+
+/**
+ * Triggers a network request to fetch all available theme filters.
+ *
+ * @return {Object} A nested list of theme filters, keyed by filter slug
+ */
+export function requestThemeFilters() {
+	return {
+		type: THEME_FILTERS_REQUEST,
 	};
 }
 

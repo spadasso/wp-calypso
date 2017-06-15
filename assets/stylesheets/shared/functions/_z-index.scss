@@ -54,6 +54,8 @@ $z-layers: (
 		'.reader-feed-header__back-and-follow': 0,
 		'.reader-related-card-v2.card': 0,
 		'.list-stream__header-follow': 0,
+		'.following__intro-close-icon-bg' : 0,
+		'.following__intro-close-icon': 1,
 		'.post-trends__title': 1,
 		'.plugin-item__label': 1,
 		'.wp-editor-tools': 1,
@@ -64,10 +66,8 @@ $z-layers: (
 		'.chart__empty': 1,
 		'.chart__bar-marker': 1,
 		'.chart__bar-section.is-ghost::after': 1,
-		'.billing-history-page .filter-popover-content': 1,
 		'.module-content-table::after': 1,
 		'.stats-popular__empty': 1,
-		'.menus__menu-item.is-lander': 1,
 		'.people-list-item__label': 1,
 		'.is-actionable .theme__active-focus': 1,
 		'.accessible-focus .current-theme__button:focus': 1,
@@ -83,8 +83,6 @@ $z-layers: (
 		'.people-list-item .card__link-indicator': 2,
 		'.updated-confirmation': 2,
 		'.auth__form .form-fieldset input:focus': 2,
-		'.menus__menu-item': 2,
-		'.menus__menu-item-open:before': 2,
 		'.chart__bar-section': 2,
 		'.module-content-table tbody th:first-child': 2,
 		'ul.module-header-actions .module-header-action-link': 2,
@@ -107,6 +105,7 @@ $z-layers: (
 		//'tinymce-toolbar': 20, client/components/tinymce/index.jsx
 		'.search': 22,
 		'.editor-ground-control': 22,
+		'.billing-history-page .filter-popover-content': 23,
 		'.reader-mobile-sidebar': 23,
 		'.community-translator': 99,
 		'.author-selector__popover.popover': 100,
@@ -114,6 +113,8 @@ $z-layers: (
 		'.accessible-focus .select-dropdown.is-open .select-dropdown__container': 170,
 		'.sites-dropdown.is-open .sites-dropdown__wrapper' : 170,
 		'.first-view': 175,
+		'.editor-confirmation-sidebar__overlay': 176,
+		'.editor-confirmation-sidebar__sidebar': 177,
 		'.popover.editor-visibility__popover': 179,
 		'.feature-example__gradient': 179,
 		'.global-notices': 179,
@@ -147,12 +148,15 @@ $z-layers: (
 		'.dialog__backdrop': 100200,
 		'.wplink__dialog.dialog.card': 100200,
 		'.web-preview': 100200,
+		'.web-preview .editor-notice': 100201,
 		'.design-menu.is-visible': 100201,
+		'.popover.gallery__order-popover': 100300,
 		'popover.is-dialog-visible': 100300,
 		'body .webui-popover': 100300,
 		'.fullscreen-fader': 200000,
 		'.guided-tours__overlay': 200050,
 		'.guided-tours__step': 201000,
+		'.wpcom-site__global-noscript': 300000, // JS off always visible
 		'#habla_window_div.habla_window_div_base': 99999999 //olark
 	),
 	'.ribbon': (
@@ -199,11 +203,6 @@ $z-layers: (
 		'.editor-media-modal .notice': 10,
 		'.editor-media-modal-gallery__preview-toggle': 100,
 		'.editor-contact-form-modal .section-nav': 10
-	),
-	'.following-edit': ( //aka 'main'
-		'.following-edit__subscribe-form .gridicons-add-outline': 23,
-		'.following-edit__subscribe-form .card.is-search-result': 35,
-		'.following-edit__subscribe-form .search': 36
 	),
 	'.site-settings__taxonomies': (
 		'.card__link-indicator': 1

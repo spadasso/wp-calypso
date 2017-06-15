@@ -10,85 +10,39 @@ import {
 	COMMENTS_EDIT,
 	COMMENTS_EDIT_FAILURE,
 	COMMENTS_EDIT_SUCCESS,
+	COMMENTS_LIST_REQUEST,
 	COMMENTS_RECEIVE,
 	COMMENTS_COUNT_RECEIVE,
 	COMMENTS_REQUEST,
-	COMMENTS_REQUEST_SUCCESS,
 	COMMENTS_REQUEST_FAILURE,
 	COMMENTS_LIKE,
 	COMMENTS_LIKE_UPDATE,
 	COMMENTS_UNLIKE,
 	COMMENTS_REMOVE,
-	COMMENTS_ERROR
+	COMMENTS_ERROR,
 } from '../action-types';
 import {
 	createRequestId
 } from './utils';
-import {
-	getPostOldestCommentDate,
-	getPostCommentRequests
-} from './selectors';
 import {
 	NUMBER_OF_COMMENTS_PER_FETCH,
 	PLACEHOLDER_STATE
 } from './constants';
 
 /***
- * Internal handler for comments request success
- * @param {Object} options handler options
- * @param {Function} options.dispatch redux dispatch function
- * @param {String} options.requestId request identifier
- * @param {Number} options.siteId site identifier
- * @param {Number} options.postId post identifier
- * @param {Object[]} options.comments comments array
- * @param {Number} options.totalCommentsCount comments count that the server have on that post
- */
-function commentsRequestSuccess( options ) {
-	const {
-		dispatch,
-		requestId,
-		siteId,
-		postId,
-		comments,
-		totalCommentsCount
-	} = options;
-
-	dispatch( {
-		type: COMMENTS_REQUEST_SUCCESS,
-		requestId: requestId
-	} );
-
-	dispatch( {
-		type: COMMENTS_RECEIVE,
-		siteId: siteId,
-		postId: postId,
-		comments: comments
-	} );
-
-	// if the api have returned comments count, dispatch it
-	// the api will produce a count only when the request has no
-	// query modifiers such as 'before', 'after', 'type' and more.
-	// in our case it'll be only on the first request
-	if ( totalCommentsCount > -1 ) {
-		dispatch( {
-			type: COMMENTS_COUNT_RECEIVE,
-			siteId,
-			postId,
-			totalCommentsCount
-		} );
-	}
-}
-
-/***
  * Internal handler for comments request failure
  * @param {Function} dispatch redux dispatch function
+ * @param {String} siteId site identifier
+ * @param {String} postId post identifier
  * @param {String} requestId request identifier
  * @param {Object} err error object
  */
-function commentsRequestFailure( dispatch, requestId, err ) {
+function commentsRequestFailure( dispatch, siteId, postId, requestId, err ) {
 	dispatch( {
 		type: COMMENTS_REQUEST_FAILURE,
-		requestId: requestId,
+		siteId,
+		postId,
+		requestId,
 		error: err
 	} );
 }
@@ -105,41 +59,22 @@ export function requestPostComments( siteId, postId, status = 'approved' ) {
 		status = 'approved';
 	}
 
-	return ( dispatch, getState ) => {
-		const postCommentRequests = getPostCommentRequests( getState(), siteId, postId );
-		const oldestCommentDateForPost = getPostOldestCommentDate( getState(), siteId, postId );
-
-		const query = {
+	return {
+		type: COMMENTS_REQUEST,
+		siteId,
+		postId,
+		query: {
 			order: 'DESC',
 			number: NUMBER_OF_COMMENTS_PER_FETCH,
 			status
-		};
-
-		if ( oldestCommentDateForPost && oldestCommentDateForPost.toISOString ) {
-			query.before = oldestCommentDateForPost.toISOString();
 		}
-
-		const requestId = createRequestId( siteId, postId, query );
-
-		// if the request status is in-flight or completed successfully, no need to re-fetch it
-		if ( postCommentRequests && [ COMMENTS_REQUEST, COMMENTS_REQUEST_SUCCESS ].indexOf( postCommentRequests.get( requestId ) ) !== -1 ) {
-			return;
-		}
-
-		dispatch( {
-			type: COMMENTS_REQUEST,
-			requestId: requestId
-		} );
-
-		// promise returned here is mainly for testing purposes
-		return wpcom.site( siteId )
-					.post( postId )
-					.comment()
-					.replies( query )
-					.then( ( { comments, found } ) => commentsRequestSuccess( { dispatch, requestId, siteId, postId, comments, totalCommentsCount: found } ) )
-					.catch( ( err ) => commentsRequestFailure( dispatch, requestId, err ) );
 	};
 }
+
+export const requestCommentsList = query => ( {
+	type: COMMENTS_LIST_REQUEST,
+	query,
+} );
 
 /***
  * Creates a placeholder comment for a given text and postId
@@ -240,8 +175,13 @@ export function writeComment( commentText, siteId, postId, parentCommentId ) {
 				.post( postId )
 				.comment()
 				.replies()
-				.then( ( { found: totalCommentsCount } ) => dispatch( { type: COMMENTS_COUNT_RECEIVE, siteId, postId, totalCommentsCount } ) )
-				.catch( ( err ) => commentsRequestFailure( dispatch, requestId, err ) );
+				.then( ( { found: totalCommentsCount } ) => dispatch( {
+					type: COMMENTS_COUNT_RECEIVE,
+					siteId,
+					postId,
+					totalCommentsCount
+				} ) )
+				.catch( ( err ) => commentsRequestFailure( dispatch, siteId, postId, requestId, err ) );
 
 			return comment;
 		} )

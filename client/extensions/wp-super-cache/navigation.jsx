@@ -25,10 +25,6 @@ const Navigation = ( { activeTab, site, translate } ) => {
 				return translate( 'Contents' );
 			case Tabs.PRELOAD:
 				return translate( 'Preload' );
-			case Tabs.PLUGINS:
-				return translate( 'Plugins' );
-			case Tabs.DEBUG:
-				return translate( 'Debug' );
 		}
 	};
 
@@ -52,7 +48,9 @@ const Navigation = ( { activeTab, site, translate } ) => {
 				path = `${ path }/${ tab }`;
 			}
 
-			path += `/${ site.slug }`;
+			if ( site ) {
+				path += `/${ site.slug }`;
+			}
 
 			return (
 				<SectionNavTabItem
@@ -76,12 +74,12 @@ const Navigation = ( { activeTab, site, translate } ) => {
 
 Navigation.propTypes = {
 	activeTab: PropTypes.string,
-	site: React.PropTypes.object.isRequired,
+	site: PropTypes.object,
 	translate: PropTypes.func.isRequired,
 };
 
 Navigation.defaultProps = {
-	activeTab: ''
+	activeTab: '',
 };
 
 export default localize( Navigation );

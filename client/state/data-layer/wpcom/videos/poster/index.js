@@ -5,7 +5,6 @@ import { http } from 'state/data-layer/wpcom-http/actions';
 import { dispatchRequest } from 'state/data-layer/wpcom-http/utils';
 import { VIDEO_EDITOR_UPDATE_POSTER } from 'state/action-types';
 import {
-	closeModal,
 	setPosterUrl,
 	showError,
 	showUploadProgress,
@@ -17,11 +16,10 @@ import {
  * @param  {Object} store Redux store
  * @param  {Object} action Action object
  * @param {Function} next Dispatches to next middleware in chain
- * @returns {Object} original action
  */
-export const updatePoster = ( { dispatch }, action, next ) => {
+export const updatePoster = ( { dispatch }, action ) => {
 	if ( ! ( 'file' in action.params || 'atTime' in action.params ) ) {
-		return next( action );
+		return;
 	}
 
 	const { atTime, file } = action.params;
@@ -36,13 +34,10 @@ export const updatePoster = ( { dispatch }, action, next ) => {
 	);
 
 	dispatch( http( params, action ) );
-
-	return next( action );
 };
 
 export const receivePosterUrl = ( { dispatch }, action, next, { poster: posterUrl } ) => {
 	dispatch( setPosterUrl( posterUrl ) );
-	dispatch( closeModal() );
 };
 
 export const receivePosterError = ( { dispatch } ) => {

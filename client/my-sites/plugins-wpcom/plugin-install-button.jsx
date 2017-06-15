@@ -15,8 +15,8 @@ import { getAutomatedTransferStatus } from 'state/automated-transfer/selectors';
 import { getSelectedSite } from 'state/ui/selectors';
 import { getEligibility } from 'state/automated-transfer/selectors';
 import { initiateThemeTransfer } from 'state/themes/actions';
-import { transferStates } from 'state/automated-transfer/constants';
 import { recordTracksEvent } from 'state/analytics/actions';
+import { transferStates } from 'state/automated-transfer/constants';
 
 export const WpcomPluginInstallButton = props => {
 	const {
@@ -28,7 +28,8 @@ export const WpcomPluginInstallButton = props => {
 		eligibilityData,
 		navigateTo,
 		initiateTransfer,
-		transferState
+		transferState,
+		trackButtonAction,
 	} = props;
 
 	if ( transferStates.COMPLETE === transferState ) {
@@ -37,24 +38,16 @@ export const WpcomPluginInstallButton = props => {
 
 	function installButtonAction( event ) {
 		event.preventDefault();
-
+		trackButtonAction( plugin.slug );
 		const eligibilityHolds = get( eligibilityData, 'eligibilityHolds', [] );
 		const eligibilityWarnings = get( eligibilityData, 'eligibilityWarnings', [] );
 
 		const hasErrors = !! eligibilityHolds.length;
 		const hasWarnings = !! eligibilityWarnings.length;
-
 		if ( ! hasErrors && ! hasWarnings ) {
 			// No need to show eligibility warnings page, initiate transfer immediately
 			initiateTransfer( siteId, null, plugin.slug );
 		} else {
-			props.recordTracksEvent( 'calypso_automated_transfer_plugin_install_ineligible',
-				{
-					eligibilityHolds: eligibilityHolds.join( ', ' ),
-					eligibilityWarnings: eligibilityWarnings.join( ', ' ),
-					plugin_slug: plugin.slug
-				} );
-
 			// Show eligibility warnings before proceeding
 			navigateTo( `/plugins/${ plugin.slug }/eligibility/${ siteSlug }` );
 		}
@@ -84,7 +77,7 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = {
 	initiateTransfer: initiateThemeTransfer,
-	recordTracksEvent,
+	trackButtonAction: ( plugin ) => recordTracksEvent( 'calypso_automated_transfer_click_plugin_install', { plugin } )
 };
 
 const withNavigation = WrappedComponent => props => <WrappedComponent { ...{ ...props, navigateTo: page } } />;

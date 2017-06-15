@@ -5,7 +5,6 @@
 	"hostname": "calypso.localhost",
 	"port": 3000,
 	"i18n_default_locale_slug": "en",
-	"wpcom_user_bootstrap": false,
 	"rtl": false,
 	"jetpack_min_version": "3.3",
 	"siftscience_key": "e00e878351",
@@ -17,6 +16,7 @@
 	"google_analytics_enabled": false,
 	"google_analytics_key": "UA-10673494-15",
 	"google_adwords_conversion_id": 1067250390,
+	"hotjar_enabled": true,
 	"olark": {
 		"business_account_id": "3146-815-10-9343",
 		"business_group_id": false
@@ -26,6 +26,7 @@
 	"logout_url": "https://wordpress.com/wp-login.php?action=logout&redirect_to=https%3A%2F%2F|subdomain|wordpress.com",
 	"facebook_api_key": "249643311490",
 	"discover_logged_out_redirect_url": "https://discover.wordpress.com",
+	"support_locales": [ "en", "es", "pt-br" ],
 	"features": {
 		"ad-tracking": false,
 		"apple-pay": true,
@@ -38,16 +39,14 @@
 		"devdocs/components-usage-stats": false,
 		"help": true,
 		"jetpack_core_inline_update": true,
+		"login/wp-login": true,
 		"keyboard-shortcuts": true,
 		"manage/customize": true,
-		"manage/drafts": true,
 		"manage/edit-user": true,
 		"manage/export": true,
 		"manage/import/medium": true,
 		"manage/jetpack": true,
 		"manage/media": true,
-		"manage/menus": true,
-		"manage/menus-jetpack": true,
 		"manage/option_sync_non_public_post_stati": true,
 		"manage/pages": true,
 		"manage/people": true,
@@ -61,7 +60,6 @@
 		"manage/security": true,
 		"manage/site-settings/analytics": true,
 		"manage/site-settings/categories": true,
-		"manage/site-settings/delete-site": true,
 		"manage/stats": true,
 		"manage/themes": true,
 		"manage/themes-jetpack": true,
@@ -85,7 +83,7 @@
 		"post-editor/media-advanced": true,
 		"press-this": true,
 		"reader": true,
-		"reader/combined-cards": true,
+		"reader/following-intro": true,
 		"reader/full-errors": true,
 		"reader/list-management": false,
 		"republicize": true,
@@ -103,6 +101,7 @@
 		"upgrades/domain-search": true,
 		"upgrades/in-app-purchase": false,
 		"upgrades/paypal": true,
-		"upgrades/premium-themes": true
+		"upgrades/premium-themes": true,
+		"wpcom-user-bootstrap": false
 	}
 }

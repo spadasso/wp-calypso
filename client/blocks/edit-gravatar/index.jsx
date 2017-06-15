@@ -28,9 +28,18 @@ import {
 import Spinner from 'components/spinner';
 import {
 	receiveGravatarImageFailed,
-	uploadGravatar
+	uploadGravatar,
 } from 'state/current-user/gravatar-status/actions';
 import ImageEditor from 'blocks/image-editor';
+import InfoPopover from 'components/info-popover';
+import ExternalLink from 'components/external-link';
+import VerifyEmailDialog from 'components/email-verification/email-verification-dialog';
+import DropZone from 'components/drop-zone';
+import {
+	recordTracksEvent,
+	recordGoogleEvent,
+	composeAnalytics,
+} from 'state/analytics/actions';
 
 /**
  * Module dependencies
@@ -38,12 +47,10 @@ import ImageEditor from 'blocks/image-editor';
 const debug = debugFactory( 'calypso:edit-gravatar' );
 
 export class EditGravatar extends Component {
-	constructor() {
-		super( ...arguments );
-		this.state = {
-			isEditingImage: false,
-			image: false
-		};
+	state = {
+		isEditingImage: false,
+		image: false,
+		showEmailVerificationNotice: false,
 	}
 
 	static propTypes = {
@@ -53,32 +60,42 @@ export class EditGravatar extends Component {
 		resetAllImageEditorState: PropTypes.func,
 		uploadGravatar: PropTypes.func,
 		user: PropTypes.object,
+		recordClickButtonEvent: PropTypes.func,
+		recordReceiveImageEvent: PropTypes.func,
 	};
 
 	onReceiveFile = ( files ) => {
 		const {
 			receiveGravatarImageFailed: receiveGravatarImageFailedAction,
-			translate
+			translate,
+			recordReceiveImageEvent,
 		} = this.props;
 		const extension = path.extname( files[ 0 ].name )
 			.toLowerCase()
 			.substring( 1 );
+
+		recordReceiveImageEvent();
 
 		if ( ALLOWED_FILE_EXTENSIONS.indexOf( extension ) === -1 ) {
 			let errorMessage = '';
 
 			if ( extension ) {
 				errorMessage = translate(
-					'An image of filetype %s is not allowed',
+					'Sorry, %s files are not supported' +
+					' — please make sure your image is in JPG, GIF, or PNG format.',
 					{
 						args: extension
 					}
 				);
 			} else {
-				errorMessage = translate( 'An image of that filetype is not allowed' );
+				errorMessage = translate( 'Sorry, images of that filetype are not supported ' +
+				'— please make sure your image is in JPG, GIF, or PNG format.' );
 			}
 
-			receiveGravatarImageFailedAction( errorMessage );
+			receiveGravatarImageFailedAction( {
+				errorMessage,
+				statName: 'bad_filetype',
+			} );
 			return;
 		}
 
@@ -100,9 +117,10 @@ export class EditGravatar extends Component {
 		this.hideImageEditor();
 
 		if ( error ) {
-			receiveGravatarImageFailedAction(
-				translate( "We couldn't save that image, please try another one" )
-			);
+			receiveGravatarImageFailedAction( {
+				errorMessage: translate( "We couldn't save that image — please try another one." ),
+				statName: 'image_editor_error',
+			} );
 			return;
 		}
 
@@ -119,9 +137,10 @@ export class EditGravatar extends Component {
 			debug( 'Got the bearerToken, sending request' );
 			uploadGravatarAction( imageBlob, bearerToken, user.email );
 		} else {
-			receiveGravatarImageFailedAction(
-				translate( "We can't save a new Gravatar now. Please try again later." )
-			);
+			receiveGravatarImageFailedAction( {
+				errorMessage: translate( "Hmm, we can't save a new Gravatar now. Please try again later." ),
+				statName: 'no_bearer_token',
+			} );
 		}
 	};
 
@@ -149,57 +168,138 @@ export class EditGravatar extends Component {
 						media={ { src: this.state.image } }
 						onDone={ this.onImageEditorDone }
 						onCancel={ this.hideImageEditor }
+						doneButtonText={ this.props.translate( 'Change My Photo' ) }
 					/>
 				</Dialog>
 			);
 		}
 	}
 
+	handleUnverifiedUserClick = () => {
+		this.props.recordClickButtonEvent( { isVerified: this.props.user.email_verified } );
+
+		if ( this.props.user.email_verified ) {
+			return;
+		}
+
+		this.setState( {
+			showEmailVerificationNotice: true
+		} );
+	};
+
+	closeVerifyEmailDialog = () => {
+		this.setState( {
+			showEmailVerificationNotice: false
+		} );
+	};
+
 	render() {
 		const {
 			isUploading,
+			translate,
 			user
 		} = this.props;
+		const gravatarLink = `https://gravatar.com/${ user.username || '' }`;
+		// use imgSize = 400 for caching
+		// it's the popular value for large Gravatars in Calypso
+		const GRAVATAR_IMG_SIZE = 400;
+		const icon = ( user.email_verified ? 'cloud-upload' : 'notice' );
+		const buttonText = ( user.email_verified
+			? translate( 'Click to change photo' )
+			: translate( 'Verify your email' )
+		);
 		return (
-			<div className="edit-gravatar">
-				{ this.renderImageEditor() }
-				<FilePicker accept="image/*" onPick={ this.onReceiveFile }>
-					<div
-						className={
-							classnames( 'edit-gravatar__image-container',
-								{ 'is-uploading': isUploading }
-							)
-						}
-					>
-						<Gravatar
-							imgSize={ 400 }
-							size={ 150 }
-							user={ user }
+			<div
+				className={
+					classnames( 'edit-gravatar',
+						{ 'is-unverified': ! user.email_verified }
+					)
+				}
+			>
+				<div onClick={ this.handleUnverifiedUserClick }>
+					{ this.state.showEmailVerificationNotice &&
+						<VerifyEmailDialog
+							onClose={ this.closeVerifyEmailDialog }
 						/>
-						{ ! isUploading && (
-							<div className="edit-gravatar__label-container">
-								<Gridicon icon="cloud-upload" size={ 36 } />
-								<span className="edit-gravatar__label">
-									{ this.props.translate( 'Click to change photo' ) }
-								</span>
-							</div>
-						) }
-						{ isUploading && <Spinner className="edit-gravatar__spinner" /> }
+					}
+					{ this.renderImageEditor() }
+					<FilePicker accept="image/*" onPick={ this.onReceiveFile }>
+						<div
+							className={
+								classnames( 'edit-gravatar__image-container',
+									{ 'is-uploading': isUploading }
+								)
+							}
+						>
+							{ user.email_verified && (
+								<DropZone
+									textLabel={ translate( 'Drop to upload profile photo' ) }
+									onFilesDrop={ this.onReceiveFile }
+								/>
+							) }
+							<Gravatar
+								imgSize={ GRAVATAR_IMG_SIZE }
+								size={ 150 }
+								user={ user }
+							/>
+							{ ! isUploading && (
+								<div className="edit-gravatar__label-container">
+									<Gridicon icon={ icon } size={ 36 } />
+									<span className="edit-gravatar__label">{ buttonText }</span>
+									</div>
+								) }
+								{ isUploading && <Spinner className="edit-gravatar__spinner" /> }
 						</div>
-				</FilePicker>
+					</FilePicker>
+				</div>
+				<div>
+					<p className="edit-gravatar__explanation">Your profile photo is public.</p>
+					<InfoPopover
+						className="edit-gravatar__pop-over"
+						position="left" >
+						{ translate( '{{p}}The avatar you use on WordPress.com comes ' +
+							'from {{ExternalLink}}Gravatar{{/ExternalLink}}, a universal avatar service ' +
+							'(it stands or "Global Avatar," get it?).{{/p}}' +
+							'{{p}}Your image may also appear on other sites using Gravatar ' +
+							"whenever you're logged in with your email address %(email)s.{{/p}}",
+							{
+								components: {
+									ExternalLink: <ExternalLink
+										href={ gravatarLink }
+										target="_blank"
+										rel="noopener noreferrer"
+										icon={ true } />,
+									p: <p />
+								},
+								args: {
+									email: user.email
+								}
+							}
+						) }
+					</InfoPopover>
+				</div>
 			</div>
 		);
 	}
 }
 
+const recordClickButtonEvent = ( { isVerified } ) => composeAnalytics(
+	recordTracksEvent( 'calypso_edit_gravatar_click', { userVerified: isVerified } ),
+	recordGoogleEvent( 'Me', 'Clicked on Edit Gravatar Button in Profile' )
+);
+
+const recordReceiveImageEvent = () => recordTracksEvent( 'calypso_edit_gravatar_file_receive' );
+
 export default connect(
 	state => ( {
-		user: getCurrentUser( state ),
+		user: getCurrentUser( state ) || {},
 		isUploading: isCurrentUserUploadingGravatar( state ),
 	} ),
 	{
 		resetAllImageEditorState,
 		receiveGravatarImageFailed,
-		uploadGravatar
+		uploadGravatar,
+		recordClickButtonEvent,
+		recordReceiveImageEvent,
 	}
 )( localize( EditGravatar ) );

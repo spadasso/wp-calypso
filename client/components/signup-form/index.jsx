@@ -1,11 +1,12 @@
 /**
  * External dependencies
  */
-import React, { PropTypes } from 'react';
-import { map, forEach, head, includes, isEmpty, keys } from 'lodash';
+import React, { Component, PropTypes } from 'react';
+import { connect } from 'react-redux';
+import { map, forEach, head, includes, keys } from 'lodash';
 import debugModule from 'debug';
 import classNames from 'classnames';
-import i18n from 'i18n-calypso';
+import i18n, { localize } from 'i18n-calypso';
 
 /**
  * Internal dependencies
@@ -22,13 +23,14 @@ import FormButton from 'components/forms/form-button';
 import notices from 'notices';
 import Notice from 'components/notice';
 import LoggedOutForm from 'components/logged-out-form';
+import { login } from 'lib/paths';
 import formState from 'lib/form-state';
 import LoggedOutFormLinks from 'components/logged-out-form/links';
 import LoggedOutFormLinkItem from 'components/logged-out-form/link-item';
 import LoggedOutFormFooter from 'components/logged-out-form/footer';
 import { mergeFormWithValue } from 'signup/utils';
 import SocialSignupForm from './social';
-import HrWithText from 'components/hr-with-text';
+import { recordTracksEvent } from 'state/analytics/actions';
 
 const VALIDATION_DELAY_AFTER_FIELD_CHANGES = 1500,
 	debug = debugModule( 'calypso:signup-form:form' );
@@ -43,11 +45,8 @@ const resetAnalyticsData = () => {
 	timesPasswordValidationFailed = 0;
 };
 
-export default React.createClass( {
-
-	displayName: 'SignupForm',
-
-	propTypes: {
+class SignupForm extends Component {
+	static propTypes = {
 		className: PropTypes.string,
 		disableEmailExplanation: PropTypes.bool,
 		disableEmailInput: PropTypes.bool,
@@ -67,23 +66,20 @@ export default React.createClass( {
 		submitButtonText: PropTypes.string.isRequired,
 		submitting: PropTypes.bool,
 		suggestedUsername: PropTypes.string.isRequired,
-	},
+		translate: PropTypes.func.isRequired
+	};
 
-	getDefaultProps() {
-		return {
-			isSocialSignupEnabled: false,
-		};
-	},
+	static defaultProps = {
+		isSocialSignupEnabled: false,
+	};
 
-	getInitialState() {
-		return {
-			notice: null,
-			submitting: false,
-			form: null,
-			signedUp: false,
-			validationInitialized: false
-		};
-	},
+	state = {
+		notice: null,
+		submitting: false,
+		form: null,
+		signedUp: false,
+		validationInitialized: false
+	};
 
 	getInitialFields() {
 		return {
@@ -91,7 +87,7 @@ export default React.createClass( {
 			username: '',
 			password: ''
 		};
-	},
+	}
 
 	autoFillUsername( form ) {
 		return mergeFormWithValue( {
@@ -99,7 +95,7 @@ export default React.createClass( {
 			fieldName: 'username',
 			fieldValue: this.props.suggestedUsername || ''
 		} );
-	},
+	}
 
 	componentWillMount() {
 		debug( 'Mounting the SignupForm React component.' );
@@ -118,24 +114,17 @@ export default React.createClass( {
 		const stateWithFilledUsername = this.autoFillUsername( initialState );
 
 		this.setState( { form: stateWithFilledUsername } );
-	},
-
-	componentDidMount() {
-		// If we initialized the form with an email, we need to validate the email
-		if ( this.props.email ) {
-			this.handleBlur();
-		}
-	},
+	}
 
 	sanitizeEmail( email ) {
 		return email && email.replace( /\s+/g, '' ).toLowerCase();
-	},
+	}
 
 	sanitizeUsername( username ) {
 		return username && username.replace( /[^a-zA-Z0-9]/g, '' ).toLowerCase();
-	},
+	}
 
-	sanitize( fields, onComplete ) {
+	sanitize = ( fields, onComplete ) => {
 		const sanitizedEmail = this.sanitizeEmail( fields.email ),
 			sanitizedUsername = this.sanitizeUsername( fields.username );
 
@@ -145,11 +134,11 @@ export default React.createClass( {
 				username: sanitizedUsername
 			} );
 		}
-	},
+	};
 
-	validate( fields, onComplete ) {
+	validate = ( fields, onComplete ) => {
 		wpcom.undocumented().validateNewUser( fields, ( error, response ) => {
-			if ( this.state.readyToLogin || this.props.submitting ) {
+			if ( this.props.submitting ) {
 				// this is a stale callback, we have already signed up or are logging in
 				return;
 			}
@@ -195,7 +184,7 @@ export default React.createClass( {
 						// show an error message.
 						messages = Object.assign( {}, messages, {
 							email: {
-								invalid: this.translate( 'Use a working email address, so you can receive our messages.' )
+								invalid: this.props.translate( 'Use a working email address, so you can receive our messages.' )
 							}
 						} );
 					}
@@ -207,19 +196,19 @@ export default React.createClass( {
 				this.setState( { validationInitialized: true } );
 			}
 		} );
-	},
+	};
 
-	setFormState( state ) {
+	setFormState = ( state ) => {
 		this.setState( { form: state } );
-	},
+	};
 
 	handleFormControllerError( error ) {
 		if ( error ) {
 			throw error;
 		}
-	},
+	}
 
-	handleChangeEvent( event ) {
+	handleChangeEvent = ( event ) => {
 		const name = event.target.name,
 			value = event.target.value;
 
@@ -229,15 +218,15 @@ export default React.createClass( {
 			name: name,
 			value: value
 		} );
-	},
+	};
 
-	handleBlur() {
+	handleBlur = () => {
 		this.formStateController.sanitize();
 		this.formStateController.validate();
 		this.props.save && this.props.save( this.state.form );
-	},
+	};
 
-	handleSubmit( event ) {
+	handleSubmit = ( event ) => {
 		event.preventDefault();
 
 		if ( this.state.submitting ) {
@@ -260,15 +249,17 @@ export default React.createClass( {
 				return;
 			}
 
-			let analyticsData = {
+			const analyticsData = {
 				unique_usernames_searched: usernamesSearched.length,
 				times_username_validation_failed: timesUsernameValidationFailed,
 				times_password_validation_failed: timesPasswordValidationFailed
 			};
+
 			this.props.submitForm( this.state.form, this.getUserData(), analyticsData );
+
 			resetAnalyticsData();
 		} );
-	},
+	};
 
 	globalNotice( notice ) {
 		return <Notice
@@ -277,7 +268,7 @@ export default React.createClass( {
 			showDismiss={ false }
 			status={ notices.getStatusHelper( notice ) }
 			text={ notice.message } />;
-	},
+	}
 
 	getUserData() {
 		return {
@@ -285,7 +276,7 @@ export default React.createClass( {
 			password: formState.getFieldValue( this.state.form, 'password' ),
 			email: formState.getFieldValue( this.state.form, 'email' )
 		};
-	},
+	}
 
 	getErrorMessagesWithLogin( fieldName ) {
 		const messages = formState.getFieldErrorMessages( this.state.form, fieldName );
@@ -293,7 +284,11 @@ export default React.createClass( {
 			return;
 		}
 
-		let link = config( 'login_url' ) + '?redirect_to=' + this.props.getRedirectToAfterLoginUrl;
+		let link = login( {
+			isNative: config.isEnabled( 'login/native-login-links' ),
+			redirectTo: this.props.getRedirectToAfterLoginUrl
+		} );
+
 		return map( messages, ( message, error_code ) => {
 			if ( error_code === 'taken' ) {
 				link += '&email_address=' + encodeURIComponent( formState.getFieldValue( this.state.form, fieldName ) );
@@ -301,9 +296,9 @@ export default React.createClass( {
 					<span>
 						<p>
 							{ message }&nbsp;
-							{ this.translate( 'If this is you {{a}}log in now{{/a}}.', {
+							{ this.props.translate( 'If this is you {{a}}log in now{{/a}}.', {
 								components: {
-									a: <a href={ link } />
+									a: <a href={ link } onClick={ this.props.trackLoginMidFlow } />
 								}
 							} ) }
 						</p>
@@ -312,15 +307,17 @@ export default React.createClass( {
 			}
 			return message;
 		} );
-	},
+	}
 
 	formFields() {
+		const isEmailValid = ! this.props.disableEmailInput && formState.isFieldValid( this.state.form, 'email' );
+
 		return (
 			<div>
 				<ValidationFieldset errorMessages={ this.getErrorMessagesWithLogin( 'email' ) }>
-					<FormLabel htmlFor="email">{ this.translate( 'Your email address' ) }</FormLabel>
+					<FormLabel htmlFor="email">{ this.props.translate( 'Your email address' ) }</FormLabel>
 					<FormTextInput
-						autoFocus={ isEmpty( this.props.email ) && ! this.props.isSocialSignupEnabled }
+						autoFocus={ ! this.props.isSocialSignupEnabled }
 						autoCapitalize="off"
 						autoCorrect="off"
 						className="signup-form__input"
@@ -330,16 +327,15 @@ export default React.createClass( {
 						type="email"
 						value={ formState.getFieldValue( this.state.form, 'email' ) }
 						isError={ formState.isFieldInvalid( this.state.form, 'email' ) }
-						isValid={ ! this.props.disableEmailInput && this.state.validationInitialized && formState.isFieldValid( this.state.form, 'email' ) }
+						isValid={ this.state.validationInitialized && isEmailValid }
 						onBlur={ this.handleBlur }
 						onChange={ this.handleChangeEvent } />
 					{ this.emailDisableExplanation() }
 				</ValidationFieldset>
 
 				<ValidationFieldset errorMessages={ this.getErrorMessagesWithLogin( 'username' ) }>
-					<FormLabel htmlFor="username">{ this.translate( 'Choose a username' ) }</FormLabel>
+					<FormLabel htmlFor="username">{ this.props.translate( 'Choose a username' ) }</FormLabel>
 					<FormTextInput
-						autoFocus={ ! isEmpty( this.props.email ) }
 						autoCapitalize="off"
 						autoCorrect="off"
 						className="signup-form__input"
@@ -354,7 +350,7 @@ export default React.createClass( {
 				</ValidationFieldset>
 
 				<ValidationFieldset errorMessages={ formState.getFieldErrorMessages( this.state.form, 'password' ) }>
-					<FormLabel htmlFor="password">{ this.translate( 'Choose a password' ) }</FormLabel>
+					<FormLabel htmlFor="password">{ this.props.translate( 'Choose a password' ) }</FormLabel>
 					<FormPasswordInput
 						className="signup-form__input"
 						disabled={ this.state.submitting || this.props.disabled }
@@ -367,29 +363,29 @@ export default React.createClass( {
 						onChange={ this.handleChangeEvent }
 						submitting={ this.state.submitting || this.props.submitting } />
 					<FormSettingExplanation>
-						{ this.translate( 'Your password must be at least six characters long.' ) }
+						{ this.props.translate( 'Your password must be at least six characters long.' ) }
 					</FormSettingExplanation>
 				</ValidationFieldset>
 			</div>
 		);
-	},
+	}
 
-	handleOnClickTos() {
+	handleOnClickTos = () => {
 		analytics.tracks.recordEvent.bind(
 			analytics,
 			'calypso_signup_tos_link_click'
 		);
-	},
+	};
 
 	getTermsOfServiceUrl() {
 		// locales where we don't have translated TOS will simply show the English one
 		return 'https://' + i18n.getLocaleSlug() + '.wordpress.com/tos/';
-	},
+	}
 
 	termsOfServiceLink() {
 		return (
 			<p className="signup-form__terms-of-service-link">{
-				this.translate(
+				this.props.translate(
 					'By creating an account you agree to our {{a}}fascinating Terms of Service{{/a}}.',
 					{
 						components: {
@@ -403,7 +399,7 @@ export default React.createClass( {
 				)
 			}</p>
 		);
-	},
+	}
 
 	getNotice() {
 		if ( this.props.step && 'invalid' === this.props.step.status ) {
@@ -413,7 +409,7 @@ export default React.createClass( {
 			return this.globalNotice( this.state.notice );
 		}
 		return false;
-	},
+	}
 
 	emailDisableExplanation() {
 		if ( this.props.disableEmailInput && this.props.disableEmailExplanation ) {
@@ -421,18 +417,18 @@ export default React.createClass( {
 				<FormSettingExplanation noValidate={ true }>{ this.props.disableEmailExplanation }</FormSettingExplanation>
 			);
 		}
-	},
+	}
 
 	formFooter() {
 		return (
-			<LoggedOutFormFooter>
+			<LoggedOutFormFooter isBlended={ this.props.isSocialSignupEnabled }>
 				{ this.termsOfServiceLink() }
 				<FormButton className="signup-form__submit" disabled={ this.state.submitting || this.props.disabled }>
 					{ this.props.submitButtonText }
 				</FormButton>
 			</LoggedOutFormFooter>
 		);
-	},
+	}
 
 	localizeUrlWithSubdomain( url ) {
 		const urlArray = url.split( '//' );
@@ -441,48 +437,56 @@ export default React.createClass( {
 			returnUrl += this.props.locale + '.';
 		}
 		return returnUrl + urlArray[ 1 ];
-	},
-
-	localizeUrlWithLastSlug( url ) {
-		return ( this.props.locale ) ? '/log-in/' + this.props.locale : url;
-	},
+	}
 
 	footerLink() {
 		if ( this.props.positionInFlow !== 0 ) {
 			return;
 		}
 
-		const logInUrl = this.localizeUrlWithSubdomain( config( 'login_url' ) );
+		const logInUrl = config.isEnabled( 'login/native-login-links' )
+			? login( { isNative: true } )
+			: this.localizeUrlWithSubdomain( config( 'login_url' ) );
 
 		return (
 			<LoggedOutFormLinks>
 				<LoggedOutFormLinkItem href={ logInUrl }>
-					{ this.translate( 'Already have a WordPress.com account? Log in now.' ) }
+					{ this.props.translate( 'Already have a WordPress.com account? Log in now.' ) }
 				</LoggedOutFormLinkItem>
 			</LoggedOutFormLinks>
 		);
-	},
+	}
 
 	render() {
 		return (
 			<div className={ classNames( 'signup-form', this.props.className ) }>
 				<LoggedOutForm onSubmit={ this.handleSubmit } noValidate={ true }>
-					{ this.props.formHeader &&
+					{ this.props.formHeader && (
 						<header className="signup-form__header">
 							{ this.props.formHeader }
 						</header>
-					}
-					{ this.props.isSocialSignupEnabled && <SocialSignupForm handleResponse={ this.props.handleSocialResponse } /> }
-					{ this.props.isSocialSignupEnabled && <HrWithText>
-						{ i18n.translate( 'Or sign up with your email address:' ) }
-					</HrWithText> }
+					) }
+
 					{ this.getNotice() }
+
 					{ this.formFields() }
+
 					{ this.props.formFooter || this.formFooter() }
+
+					{ this.props.isSocialSignupEnabled && (
+						<SocialSignupForm handleResponse={ this.props.handleSocialResponse } />
+					) }
 				</LoggedOutForm>
 
 				{ this.props.footerLink || this.footerLink() }
 			</div>
 		);
 	}
-} );
+}
+
+export default connect(
+	null,
+	{
+		trackLoginMidFlow: () => recordTracksEvent( 'calypso_signup_login_midflow' )
+	}
+)( localize( SignupForm ) );

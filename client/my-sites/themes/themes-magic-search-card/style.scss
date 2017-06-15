@@ -2,6 +2,10 @@
 /*
  * Search card and text input
  */
+.themes-magic-search {
+	margin-top: 24px;
+}
+
 .themes-magic-search-card {
 	display: flex;
 	align-items: center;
@@ -189,7 +193,6 @@
 	flex-direction: column;
 	text-align: center;
 	flex: 1 0 auto;
-	width: 28%;
 	overflow: hidden;
 	padding: 10px 6px;
 	margin: 0;

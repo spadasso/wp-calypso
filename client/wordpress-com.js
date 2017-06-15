@@ -66,13 +66,6 @@ const sections = [
 		secondary: true
 	},
 	{
-		name: 'menus',
-		paths: [ '/menus' ],
-		module: 'my-sites/menus',
-		secondary: true,
-		group: 'sites'
-	},
-	{
 		name: 'people',
 		paths: [ '/people' ],
 		module: 'my-sites/people',
@@ -101,16 +94,37 @@ const sections = [
 		group: 'sites'
 	},
 	{
-		name: 'settings',
-		paths: [ '/settings' ],
-		module: 'my-sites/site-settings',
+		name: 'settings-writing',
+		paths: [ '/settings/writing', '/settings/taxonomies' ],
+		module: 'my-sites/site-settings/settings-writing',
+		secondary: true,
+		group: 'sites'
+	},
+	{
+		name: 'settings-discussion',
+		paths: [ '/settings/discussion' ],
+		module: 'my-sites/site-settings/settings-discussion',
 		secondary: true,
 		group: 'sites'
 	},
 	{
 		name: 'settings-traffic',
 		paths: [ '/settings/traffic', '/settings/seo', '/settings/analytics' ],
-		module: 'my-sites/site-settings/traffic',
+		module: 'my-sites/site-settings/settings-traffic',
+		secondary: true,
+		group: 'sites'
+	},
+	{
+		name: 'settings-security',
+		paths: [ '/settings/security' ],
+		module: 'my-sites/site-settings/settings-security',
+		secondary: true,
+		group: 'sites'
+	},
+	{
+		name: 'settings',
+		paths: [ '/settings' ],
+		module: 'my-sites/site-settings',
 		secondary: true,
 		group: 'sites'
 	},
@@ -122,8 +136,15 @@ const sections = [
 		group: 'sites'
 	},
 	{
+		name: 'jetpack-connect',
+		paths: [ '/jetpack' ],
+		module: 'jetpack-connect',
+		secondary: false,
+		enableLoggedOut: true,
+	},
+	{
 		name: 'signup',
-		paths: [ '/start', '/jetpack' ],
+		paths: [ '/start' ],
 		module: 'signup',
 		secondary: false,
 		enableLoggedOut: true,
@@ -136,22 +157,24 @@ const sections = [
 		secondary: true,
 		group: 'sites'
 	},
+	// Since we're using find() and startsWith() on paths, 'themes' needs to go before 'theme',
+	// or it'll be falsely associated with the latter section.
+	{
+		name: 'themes',
+		paths: [ '/themes', '/design' ],
+		module: 'my-sites/themes',
+		enableLoggedOut: true,
+		secondary: true,
+		group: 'sites',
+		isomorphic: true,
+		title: 'Themes'
+	},
 	{
 		name: 'theme',
 		paths: [ '/theme' ],
 		module: 'my-sites/theme',
 		enableLoggedOut: true,
 		secondary: false,
-		group: 'sites',
-		isomorphic: true,
-		title: 'Themes'
-	},
-	{
-		name: 'themes',
-		paths: [ '/design' ],
-		module: 'my-sites/themes',
-		enableLoggedOut: true,
-		secondary: true,
 		group: 'sites',
 		isomorphic: true,
 		title: 'Themes'
@@ -205,14 +228,6 @@ sections.push( {
 	module: 'account-recovery',
 	secondary: false,
 	enableLoggedOut: true,
-} );
-
-sections.push( {
-	name: 'posts-pages',
-	paths: [ '/drafts' ],
-	module: 'my-sites/drafts',
-	secondary: true,
-	group: 'sites'
 } );
 
 // this MUST be the first section for /read paths so subsequent sections under /read can override settings
@@ -306,8 +321,17 @@ sections.push( {
 } );
 
 sections.push( {
+	name: 'login',
+	paths: [ '/log-in' ],
+	module: 'login',
+	enableLoggedOut: true,
+	secondary: false,
+	isomorphic: true
+} );
+
+sections.push( {
 	name: 'auth',
-	paths: [ '/login', '/authorize', '/api/oauth/token' ],
+	paths: [ '/oauth-login', '/authorize', '/api/oauth/token' ],
 	module: 'auth',
 	secondary: false,
 	enableLoggedOut: true
@@ -326,6 +350,22 @@ sections.push( {
 	paths: [ '/me/chat' ],
 	module: 'me/happychat',
 	group: 'me',
+	secondary: true
+} );
+
+sections.push( {
+	name: 'comments',
+	paths: [ '/comments' ],
+	module: 'my-sites/comments',
+	group: 'sites',
+	secondary: true
+} );
+
+sections.push( {
+	name: 'preview',
+	paths: [ '/view' ],
+	module: 'my-sites/preview',
+	group: 'sites',
 	secondary: true
 } );
 

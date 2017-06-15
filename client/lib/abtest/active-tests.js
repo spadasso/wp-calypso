@@ -8,69 +8,6 @@ module.exports = {
 		},
 		defaultVariation: 'singlePurchaseFlow'
 	},
-	userFirstSignup: {
-		datestamp: '20160124',
-		variations: {
-			userLast: 100,
-			userFirst: 0,
-		},
-		defaultVariation: 'userLast',
-		allowExistingUsers: false,
-	},
-	signupStepOneCopyChanges: {
-		datestamp: '20170307',
-		variations: {
-			original: 0,
-			modified: 100, //Test completed. Sending copy for translation.
-		},
-		defaultVariation: 'original',
-	},
-	signupStepOneMobileOptimize: {
-		datestamp: '20170322',
-		variations: {
-			original: 50,
-			modified: 50,
-		},
-		defaultVariation: 'original',
-	},
-	readerPostCardTagCount: {
-		datestamp: '20170315',
-		variations: {
-			showOne: 50,
-			showThree: 50
-		},
-		defaultVariation: 'showThree',
-		allowExistingUsers: true
-	},
-	automatedTransfer2: {
-		datestamp: '20170316',
-		variations: {
-			enabled: 100,
-			disabled: 0
-		},
-		defaultVariation: 'disabled',
-		allowExistingUsers: false
-	},
-	domainSuggestionNudgeLabels: {
-		datestamp: '20170327',
-		variations: {
-			original: 50,
-			withLabels: 50
-		},
-		defaultVariation: 'original',
-		allowExistingUsers: false
-	},
-	jetpackNewDescriptions: {
-		datestamp: '20170327',
-		variations: {
-			showNew: 0,
-			showOld: 100 /* test completed. I'm disabling it here first because
-						it need some work to remove the added code for the
-						new variation that's not going to be used */
-		},
-		defaultVariation: 'showOld',
-		allowExistingUsers: true
-	},
 	signupSurveyStep: {
 		datestamp: '20170329',
 		variations: {
@@ -78,5 +15,100 @@ module.exports = {
 			hideSurveyStep: 80,
 		},
 		defaultVariation: 'hideSurveyStep',
+	},
+	businessPlanDescriptionAT: {
+		datestamp: '20170605',
+		variations: {
+			original: 50,
+			pluginsAndThemes: 50,
+		},
+		defaultVariation: 'original',
+	},
+	presaleChatButton: {
+		datestamp: '20170328',
+		variations: {
+			showChatButton: 20,
+			original: 80
+		},
+		defaultVariation: 'original',
+		localeTargets: 'any',
+	},
+	newSiteWithJetpack: {
+		datestamp: '20170419',
+		variations: {
+			showNewJetpackSite: 10,
+			onlyDotComSites: 90,
+		},
+		defaultVariation: 'onlyDotComSites',
+	},
+	chatOfferOnCancel: {
+		datestamp: '20170421',
+		variations: {
+			show: 50,
+			hide: 50,
+		},
+		defaultVariation: 'show',
+		allowExistingUsers: true,
+	},
+	domainToPaidPlanUpsellNudge: {
+		datestamp: '20170607',
+		variations: {
+			skip: 50,
+			show: 50,
+		},
+		defaultVariation: 'skip',
+		allowExistingUsers: true,
+	},
+	ATPromptOnCancel: {
+		datestamp: '20170515',
+		variations: {
+			hide: 20,
+			show: 80,
+		},
+		defaultVariation: 'hide',
+		allowExistingUsers: true,
+	},
+	ATUpgradeOnCancel: {
+		datestamp: '20170515',
+		variations: {
+			hide: 20,
+			show: 80,
+		},
+		defaultVariation: 'hide',
+		allowExistingUsers: true,
+	},
+	reduceThemesInSignupTest: {
+		datestamp: '20170518',
+		variations: {
+			original: 0,
+			modified: 100,
+		},
+		defaultVariation: 'original',
+	},
+	savingsInCheckoutSummary: {
+		datestamp: '20170516',
+		variations: {
+			hide: 50,
+			show: 50,
+		},
+		defaultVariation: 'show',
+	},
+	pulsingCartTestingAB: {
+		datestamp: '20170601',
+		variations: {
+			original: 50,
+			modified: 50,
+		},
+		defaultVariation: 'original',
+		allowExistingUsers: true,
+		localeTargets: 'any',
+	},
+	signupProgressIndicator: {
+		datestamp: '20170612',
+		variations: {
+			original: 50,
+			wizardbar: 50,
+		},
+		defaultVariation: 'original',
 	},
 };

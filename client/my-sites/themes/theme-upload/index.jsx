@@ -20,7 +20,6 @@ import ProgressBar from 'components/progress-bar';
 import Button from 'components/button';
 import ThanksModal from 'my-sites/themes/thanks-modal';
 import QueryCanonicalTheme from 'components/data/query-canonical-theme';
-import { isATEnabledForCurrentSite } from 'lib/automated-transfer';
 // Necessary for ThanksModal
 import QueryActiveTheme from 'components/data/query-active-theme';
 import { localize } from 'i18n-calypso';
@@ -58,6 +57,9 @@ import {
 } from 'state/automated-transfer/selectors';
 import isSiteAutomatedTransfer from 'state/selectors/is-site-automated-transfer';
 import WpAdminAutoLogin from 'components/wpadmin-auto-login';
+import {
+	MAX_UPLOADED_THEME_SIZE
+} from 'lib/automated-transfer/constants';
 
 const debug = debugFactory( 'calypso:themes:theme-upload' );
 
@@ -133,10 +135,13 @@ class Upload extends React.Component {
 		const errorCauses = {
 			exists: translate( 'Upload problem: Theme already installed on site.' ),
 			already_installed: translate( 'Upload problem: Theme already installed on site.' ),
-			'too large': translate( 'Upload problem: Zip file too large to upload.' ),
+			'too large': translate( 'Upload problem: Theme zip must be under 10MB.' ),
 			incompatible: translate( 'Upload problem: Incompatible theme.' ),
 			unsupported_mime_type: translate( 'Upload problem: Not a valid zip file' ),
-			initiate_failure: translate( 'Upload problem: Theme may not be valid' ),
+			initiate_failure: translate(
+				'Upload problem: Theme may not be valid. Check that your zip file contains only the theme ' +
+				'you are trying to upload.'
+			),
 		};
 
 		const errorString = JSON.stringify( error ).toLowerCase();
@@ -160,6 +165,14 @@ class Upload extends React.Component {
 		// DropZone supplies an array, FilePicker supplies a FileList
 		const file = files[ 0 ] || files.item( 0 );
 		debug( 'zip file:', file );
+
+		if ( file.size > MAX_UPLOADED_THEME_SIZE ) {
+			notices.error(
+				translate( 'Theme zip is too large. Please upload a theme under 50 MB.' )
+			);
+
+			return;
+		}
 
 		const action = this.props.isJetpack
 			? this.props.uploadTheme : this.props.initiateThemeTransfer;
@@ -277,19 +290,7 @@ class Upload extends React.Component {
 				line={ this.props.translate( 'Use the WP Admin interface instead' ) }
 				action={ this.props.translate( 'Open WP Admin' ) }
 				actionURL={ this.props.siteAdminUrl }
-				illustration={ '/calypso/images/drake/drake-jetpack.svg' }
-			/>
-		);
-	}
-
-	renderNotAvailable() {
-		return (
-			<EmptyContent
-				title={ this.props.translate( 'Upload not available for this site' ) }
-				line={ this.props.translate( 'Please select a different site' ) }
-				action={ this.props.translate( 'Back to themes' ) }
-				actionURL={ this.props.backPath }
-				illustration={ '/calypso/images/drake/drake-whoops.svg' }
+				illustration={ '/calypso/images/illustrations/illustration-jetpack.svg' }
 			/>
 		);
 	}
@@ -302,7 +303,6 @@ class Upload extends React.Component {
 			themeId,
 			upgradeJetpack,
 			backPath,
-			isJetpack,
 			isMultisite
 		} = this.props;
 
@@ -310,10 +310,6 @@ class Upload extends React.Component {
 
 		if ( isMultisite ) {
 			return this.renderNotAvailableForMultisite();
-		}
-
-		if ( ! isJetpack && ! isATEnabledForCurrentSite() ) {
-			return this.renderNotAvailable();
 		}
 
 		return (
@@ -381,7 +377,7 @@ export default connect(
 			backPath: getBackPath( state ),
 			showEligibility: ! isJetpack && ( hasEligibilityMessages || ! isEligible ),
 			isSiteAutomatedTransfer: isSiteAutomatedTransfer( state, siteId ),
-			siteAdminUrl: getSiteAdminUrl( state, siteId )
+			siteAdminUrl: getSiteAdminUrl( state, siteId ),
 		};
 	},
 	{ uploadTheme, clearThemeUpload, initiateThemeTransfer },

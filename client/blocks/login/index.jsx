@@ -3,131 +3,181 @@
  */
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
+import { includes } from 'lodash';
 import { localize } from 'i18n-calypso';
+import page from 'page';
 
 /**
  * Internal dependencies
  */
-import FormsButton from 'components/forms/form-button';
-import Card from 'components/card';
-import FormTextInput from 'components/forms/form-text-input';
-import { loginUser } from 'state/login/actions';
-import Notice from 'components/notice';
-import { externalRedirect } from 'lib/route/path';
-
+import DocumentHead from 'components/data/document-head';
+import LoginForm from './login-form';
 import {
-	isRequestingLogin,
-	isLoginSuccessful,
-	getError
+	getRedirectTo,
+	getRequestError,
+	getRequestNotice,
+	getTwoFactorAuthRequestError,
+	getTwoFactorNotificationSent,
+	isTwoFactorEnabled,
 } from 'state/login/selectors';
+import { recordTracksEvent } from 'state/analytics/actions';
+import VerificationCodeForm from './two-factor-authentication/verification-code-form';
+import WaitingTwoFactorNotificationApproval from './two-factor-authentication/waiting-notification-approval';
+import { login } from 'lib/paths';
+import Notice from 'components/notice';
+import PushNotificationApprovalPoller from './two-factor-authentication/push-notification-approval-poller';
 
-export class Login extends Component {
+class Login extends Component {
 	static propTypes = {
-		isRequestingLogin: PropTypes.bool.isRequired,
-		loginUser: PropTypes.func.isRequired,
-		translate: PropTypes.func.isRequired,
-		isLoginSuccessful: PropTypes.bool,
-		loginError: PropTypes.string,
-		redirectLocation: PropTypes.string,
-		title: PropTypes.string,
+		recordTracksEvent: PropTypes.func.isRequired,
+		redirectTo: PropTypes.string,
+		requestError: PropTypes.object,
+		requestNotice: PropTypes.object,
+		twoFactorAuthType: PropTypes.string,
+		twoFactorAuthRequestError: PropTypes.object,
+		twoFactorEnabled: PropTypes.bool,
+		twoFactorNotificationSent: PropTypes.string,
 	};
 
-	static defaultProps = {
-		title: '',
-	};
-
-	constructor() {
-		super();
-		this.state = {
-			usernameOrEmail: '',
-			password: '',
-		};
-		this.onChangeField = this.onChangeField.bind( this );
-		this.onSubmitForm = this.onSubmitForm.bind( this );
-	}
-
-	componentDidUpdate() {
-		if ( this.props.isLoginSuccessful ) {
-			externalRedirect( this.props.redirectLocation || '/' );
+	componentDidMount = () => {
+		if ( ! this.props.twoFactorEnabled && this.props.twoFactorAuthType ) {
+			// Disallow access to the 2FA pages unless the user has 2FA enabled
+			page( login( { isNative: true } ) );
 		}
-	}
+	};
 
-	onChangeField( event ) {
-		this.setState( {
-			[ event.target.name ]: event.target.value
+	componentWillReceiveProps = ( nextProps ) => {
+		const hasLoginError = this.props.requestError !== nextProps.requestError;
+		const hasTwoFactorAuthError = this.props.twoFactorAuthRequestError !== nextProps.twoFactorAuthRequestError;
+		const hasNotice = this.props.requestNotice !== nextProps.requestNotice;
+		const isNewPage = this.props.twoFactorAuthType !== nextProps.twoFactorAuthType;
+
+		if ( isNewPage || hasLoginError || hasTwoFactorAuthError || hasNotice ) {
+			window.scrollTo( 0, 0 );
+		}
+	};
+
+	handleValidUsernamePassword = () => {
+		if ( ! this.props.twoFactorEnabled ) {
+			this.rebootAfterLogin();
+		} else {
+			page( login( {
+				isNative: true,
+				// If no notification is sent, the user is using the authenticator for 2FA by default
+				twoFactorAuthType: this.props.twoFactorNotificationSent.replace( 'none', 'authenticator' )
+			} ) );
+		}
+	};
+
+	rebootAfterLogin = () => {
+		const { redirectTo } = this.props;
+
+		this.props.recordTracksEvent( 'calypso_login_success', {
+			two_factor_enabled: this.props.twoFactorEnabled
 		} );
-	}
 
-	onSubmitForm( event ) {
-		event.preventDefault();
-		this.props.loginUser( this.state.usernameOrEmail, this.state.password );
-	}
+		// Redirects to / if no redirect url is available
+		const url = redirectTo ? redirectTo : window.location.origin;
 
-	renderNotices() {
-		if ( this.props.loginError ) {
-			return (
-				<Notice status="is-error" text={ this.props.loginError } />
-			);
-		}
-	}
+		window.location.href = url;
+	};
 
-	render() {
-		const isDisabled = {};
-		if ( this.props.isRequestingLogin ) {
-			isDisabled.disabled = true;
+	renderError() {
+		const error = this.props.requestError || this.props.twoFactorAuthRequestError;
+
+		if ( ! error || error.field !== 'global' ) {
+			return null;
 		}
 
 		return (
-			<div className="login">
+			<Notice status={ 'is-error' } showDismiss={ false }>
+				{ error.message }
+			</Notice>
+		);
+	}
 
-				{ this.renderNotices() }
+	renderNotice() {
+		const { requestNotice } = this.props;
 
-				<form onSubmit={ this.onSubmitForm }>
-					<Card className="login__form-userdata">
-						<div className="login__form-header">
-							<div className="login__form-header-title">
-								{ this.props.title }
-							</div>
-						</div>
-						<div className="login__form-userdata">
-							<label className="login__form-userdata-username">
-								{ this.props.translate( 'Username or Email' ) }
-								<FormTextInput
-									className="login__form-userdata-username-input"
-									onChange={ this.onChangeField }
-									name="usernameOrEmail"
-									value={ this.state.usernameOrEmail }
-									{ ...isDisabled } />
-							</label>
-							<label className="login__form-userdata-username">
-								{ this.props.translate( 'Password' ) }
-								<input
-									className="login__form-userdata-username-password"
-									onChange={ this.onChangeField }
-									type="password"
-									name="password"
-									value={ this.state.password }
-									{ ...isDisabled } />
-							</label>
-						</div>
-						<div className="login__form-action">
-							<FormsButton primary { ...isDisabled }>
-								{ this.props.translate( 'Sign in' ) }
-							</FormsButton>
-						</div>
-					</Card>
-				</form>
+		if ( ! requestNotice ) {
+			return null;
+		}
+
+		return (
+			<Notice status={ requestNotice.status } showDismiss={ false }>
+				{ requestNotice.message }
+			</Notice>
+		);
+	}
+
+	renderContent() {
+		const {
+			twoFactorAuthType,
+			twoFactorEnabled,
+			twoFactorNotificationSent,
+		} = this.props;
+
+		let poller;
+		if ( twoFactorEnabled && twoFactorAuthType && twoFactorNotificationSent === 'push' ) {
+			poller = <PushNotificationApprovalPoller onSuccess={ this.rebootAfterLogin } />;
+		}
+
+		if ( twoFactorEnabled && includes( [ 'authenticator', 'sms', 'backup' ], twoFactorAuthType ) ) {
+			return (
+				<div>
+					{ poller }
+					<VerificationCodeForm
+						onSuccess={ this.rebootAfterLogin }
+						twoFactorAuthType={ twoFactorAuthType }
+					/>
+				</div>
+			);
+		}
+
+		if ( twoFactorEnabled && twoFactorAuthType === 'push' ) {
+			return (
+				<div>
+					{ poller }
+					<WaitingTwoFactorNotificationApproval />
+				</div>
+			);
+		}
+
+		return (
+			<LoginForm onSuccess={ this.handleValidUsernamePassword } />
+		);
+	}
+
+	render() {
+		const { translate, twoStepNonce } = this.props;
+
+		return (
+			<div>
+				<DocumentHead title={ translate( 'Log In', { textOnly: true } ) } />
+
+				<div className="login__form-header">
+					{ twoStepNonce ? translate( 'Two-Step Authentication' ) : translate( 'Log in to your account.' ) }
+				</div>
+
+				{ this.renderError() }
+
+				{ this.renderNotice() }
+
+				{ this.renderContent() }
 			</div>
 		);
 	}
 }
 
-export default connect( state => {
-	return {
-		isRequestingLogin: isRequestingLogin( state ),
-		isLoginSuccessful: isLoginSuccessful( state ),
-		loginError: getError( state )
-	};
-}, {
-	loginUser
-} )( localize( Login ) );
+export default connect(
+	( state ) => ( {
+		redirectTo: getRedirectTo( state ),
+		requestError: getRequestError( state ),
+		requestNotice: getRequestNotice( state ),
+		twoFactorAuthRequestError: getTwoFactorAuthRequestError( state ),
+		twoFactorEnabled: isTwoFactorEnabled( state ),
+		twoFactorNotificationSent: getTwoFactorNotificationSent( state ),
+	} ), {
+		recordTracksEvent,
+	}
+)( localize( Login ) );

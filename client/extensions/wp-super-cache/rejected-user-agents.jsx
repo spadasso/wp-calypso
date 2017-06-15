@@ -17,27 +17,38 @@ import WrapSettingsForm from './wrap-settings-form';
 
 const RejectedUserAgents = ( {
 	fields: {
-		wp_rejected_user_agent,
+		cache_rejected_user_agent,
 	},
 	handleChange,
+	handleSubmitForm,
+	isReadOnly,
+	isRequesting,
+	isSaving,
 	translate,
 } ) => {
+	const isDisabled = isRequesting || isSaving || isReadOnly;
+
 	return (
 		<div>
 			<SectionHeader label={ translate( 'Rejected User Agents' ) }>
 				<Button
-					compact={ true }
-					primary={ true }
-					type="submit">
-						{ translate( 'Save Settings' ) }
+					compact
+					primary
+					disabled={ isDisabled }
+					onClick={ handleSubmitForm }>
+					{ isSaving
+						? translate( 'Saving…' )
+						: translate( 'Save Settings' )
+					}
 				</Button>
 			</SectionHeader>
 			<Card>
 				<form>
 					<FormFieldset>
 						<FormTextarea
-							onChange={ handleChange( 'wp_rejected_user_agent' ) }
-							value={ wp_rejected_user_agent || '' } />
+							disabled={ isDisabled }
+							onChange={ handleChange( 'cache_rejected_user_agent' ) }
+							value={ cache_rejected_user_agent } />
 						<FormSettingExplanation>
 							{ translate(
 								'Strings in the HTTP ’User Agent’ header that prevent WP-Cache from caching bot, ' +
@@ -54,7 +65,7 @@ const RejectedUserAgents = ( {
 
 const getFormSettings = settings => {
 	return pick( settings, [
-		'wp_rejected_user_agent',
+		'cache_rejected_user_agent',
 	] );
 };
 

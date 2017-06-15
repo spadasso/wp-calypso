@@ -10,13 +10,19 @@ import { PLAN_BUSINESS } from 'lib/plans/constants';
 import { userCan } from 'lib/site/utils';
 
 /**
- * Returns true if Automated Transfer is enabled for the current site and current user.
- * @returns {Boolean} true if enabled for the current site and current user
+ * Returns true if Automated Transfer is enabled for the given site
+ * @param { object } site - a full site object
+ * @returns { boolean } - true if AT is enabled for the site
  */
-export function isATEnabledForCurrentSite() {
+export function isATEnabled( site ) {
 	// don't let this explode in SSR'd envs
 	if ( typeof window !== 'object' ) {
 		return false;
+	}
+
+	// Site has already been transferred
+	if ( get( site, 'options.is_automated_transfer' ) ) {
+		return true;
 	}
 
 	// Feature must be enabled on environment
@@ -24,12 +30,6 @@ export function isATEnabledForCurrentSite() {
 		return false;
 	}
 
-	const site = require( 'lib/sites-list' )().getSelectedSite();
-
-	// Site has already been transferred
-	if ( get( site, 'options.is_automated_transfer' ) ) {
-		return true;
-	}
 	// If it's wpcalypso, this is open
 	if ( config( 'env_id' ) === 'wpcalypso' ) {
 		return true;
@@ -47,8 +47,5 @@ export function isATEnabledForCurrentSite() {
 		return false;
 	}
 
-	// Gate to 40% roll. If we modify this value, we need a new test name
-	// in active-tests.js
-	const abtest = require( 'lib/abtest' ).abtest;
-	return abtest( 'automatedTransfer2' ) === 'enabled';
+	return true;
 }

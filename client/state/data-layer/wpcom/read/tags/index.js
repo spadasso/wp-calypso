@@ -7,38 +7,36 @@ import { translate } from 'i18n-calypso';
 /**
  * Internal dependencies
  */
-import {
-	READER_TAGS_REQUEST,
-} from 'state/action-types';
-import { receiveTags, } from 'state/reader/tags/items/actions';
+import { READER_TAGS_REQUEST } from 'state/action-types';
+import { receiveTags } from 'state/reader/tags/items/actions';
 import requestFollowHandler from 'state/data-layer/wpcom/read/tags/mine/new';
 import requestUnfollowHandler from 'state/data-layer/wpcom/read/tags/mine/delete';
 import { http } from 'state/data-layer/wpcom-http/actions';
 import { dispatchRequest } from 'state/data-layer/wpcom-http/utils';
-import { mergeHandlers } from 'state/data-layer/utils';
+import { mergeHandlers } from 'state/action-watchers/utils';
 import { fromApi } from 'state/data-layer/wpcom/read/tags/utils';
 import { errorNotice } from 'state/notices/actions';
 
-export function requestTags( store, action, next ) {
+export function requestTags( store, action ) {
 	const path = action.payload && action.payload.slug
 		? `/read/tags/${ action.payload.slug }`
 		: '/read/tags';
 
-	store.dispatch( http( {
-		path,
-		method: 'GET',
-		apiVersion: '1.2',
-		onSuccess: action,
-		onFailure: action,
-	} ) );
-
-	next( action );
+	store.dispatch(
+		http( {
+			path,
+			method: 'GET',
+			apiVersion: '1.2',
+			onSuccess: action,
+			onFailure: action,
+		} )
+	);
 }
 
 export function receiveTagsSuccess( store, action, next, apiResponse ) {
 	let tags = fromApi( apiResponse );
-	if ( ! apiResponse || ! apiResponse.tag && ! apiResponse.tags ) {
-		receiveTagsError( store, action, next );
+	if ( ! apiResponse || ( ! apiResponse.tag && ! apiResponse.tags ) ) {
+		receiveTagsError( store, action );
 		return;
 	}
 
@@ -47,10 +45,12 @@ export function receiveTagsSuccess( store, action, next, apiResponse ) {
 		tags = map( tags, tag => ( { ...tag, isFollowing: true } ) );
 	}
 
-	store.dispatch( receiveTags( {
-		payload: tags,
-		resetFollowingData: !! apiResponse.tags
-	} ) );
+	store.dispatch(
+		receiveTags( {
+			payload: tags,
+			resetFollowingData: !! apiResponse.tags,
+		} )
+	);
 }
 
 export function receiveTagsError( store, action, next, error ) {
@@ -68,12 +68,9 @@ export function receiveTagsError( store, action, next, error ) {
 }
 
 const readTagsHandler = {
-	[ READER_TAGS_REQUEST ]: [ dispatchRequest( requestTags, receiveTagsSuccess, receiveTagsSuccess ) ],
+	[ READER_TAGS_REQUEST ]: [
+		dispatchRequest( requestTags, receiveTagsSuccess, receiveTagsSuccess ),
+	],
 };
 
-export default mergeHandlers(
-	readTagsHandler,
-	requestFollowHandler,
-	requestUnfollowHandler,
-);
-
+export default mergeHandlers( readTagsHandler, requestFollowHandler, requestUnfollowHandler );

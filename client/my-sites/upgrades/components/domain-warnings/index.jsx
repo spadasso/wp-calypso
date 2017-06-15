@@ -36,7 +36,7 @@ export default React.createClass( {
 		selectedSite: React.PropTypes.oneOfType( [
 			React.PropTypes.object,
 			React.PropTypes.bool
-		] ).isRequired
+		] )
 	},
 
 	getDefaultProps() {
@@ -315,6 +315,10 @@ export default React.createClass( {
 	},
 
 	newDomains() {
+		if ( get( this.props, 'selectedSite.options.is_domain_only' ) ) {
+			return null;
+		}
+
 		const newDomains = this.getDomains().filter( ( domain ) =>
 				domain.registrationMoment &&
 				moment( domain.registrationMoment )

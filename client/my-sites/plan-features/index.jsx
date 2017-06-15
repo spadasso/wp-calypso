@@ -135,10 +135,10 @@ class PlanFeatures extends Component {
 				newPlan,
 				relatedMonthlyPlan,
 				primaryUpgrade,
-				isPlaceholder
+				isPlaceholder,
+				hideMonthly
 			} = properties;
 			const { rawPrice, discountPrice } = properties;
-
 			return (
 				<div className="plan-features__mobile-plan" key={ planName }>
 					<PlanFeaturesHeader
@@ -151,11 +151,13 @@ class PlanFeatures extends Component {
 						rawPrice={ rawPrice }
 						discountPrice={ discountPrice }
 						billingTimeFrame={ planConstantObj.getBillingTimeFrame() }
+						hideMonthly={ hideMonthly }
 						isPlaceholder={ isPlaceholder }
 						intervalType={ intervalType }
 						site={ site }
 						basePlansPath={ basePlansPath }
 						relatedMonthlyPlan={ relatedMonthlyPlan }
+						isInSignup={ isInSignup }
 					/>
 					<p className="plan-features__description">
 						{ planConstantObj.getDescription( abtest ) }
@@ -171,6 +173,8 @@ class PlanFeatures extends Component {
 						isPlaceholder={ isPlaceholder }
 						isInSignup={ isInSignup }
 						isLandingPage={ isLandingPage }
+						isPopular = { popular }
+						planName ={ planConstantObj.getTitle() }
 					/>
 					<FoldableCard
 						header={ translate( 'Show features' ) }
@@ -190,7 +194,7 @@ class PlanFeatures extends Component {
 	}
 
 	renderPlanHeaders() {
-		const { planProperties, intervalType, site, basePlansPath } = this.props;
+		const { planProperties, intervalType, site, basePlansPath, isInSignup } = this.props;
 
 		return map( planProperties, ( properties ) => {
 			const {
@@ -201,7 +205,8 @@ class PlanFeatures extends Component {
 				popular,
 				newPlan,
 				relatedMonthlyPlan,
-				isPlaceholder
+				isPlaceholder,
+				hideMonthly
 			} = properties;
 			const { rawPrice, discountPrice } = properties;
 			const classes = classNames( 'plan-features__table-item', 'has-border-top' );
@@ -221,8 +226,10 @@ class PlanFeatures extends Component {
 						isPlaceholder={ isPlaceholder }
 						intervalType={ intervalType }
 						site={ site }
+						hideMonthly={ hideMonthly }
 						basePlansPath={ basePlansPath }
 						relatedMonthlyPlan={ relatedMonthlyPlan }
+						isInSignup={ isInSignup }
 					/>
 				</td>
 			);
@@ -269,7 +276,9 @@ class PlanFeatures extends Component {
 				onUpgradeClick,
 				planName,
 				primaryUpgrade,
-				isPlaceholder
+				isPlaceholder,
+				planConstantObj,
+				popular,
 			} = properties;
 
 			const classes = classNames(
@@ -286,9 +295,11 @@ class PlanFeatures extends Component {
 						current={ current }
 						available = { available }
 						primaryUpgrade={ primaryUpgrade }
+						planName ={ planConstantObj.getTitle() }
 						onUpgradeClick={ onUpgradeClick }
 						freePlan={ isFreePlan( planName ) }
 						isPlaceholder={ isPlaceholder }
+						isPopular = { popular }
 						isInSignup={ isInSignup }
 						isLandingPage={ isLandingPage }
 						manageHref={ `/plans/my-plan/${ site.slug }` }
@@ -322,27 +333,16 @@ class PlanFeatures extends Component {
 
 	renderFeatureItem( feature, index ) {
 		const description = feature.getDescription
-					? feature.getDescription( abtest )
+					? feature.getDescription( abtest, this.props.domainName )
 					: null;
-		const itemClasses = classNames(
-			'plan-features__item-title',
-			abtest( 'jetpackNewDescriptions' ) === 'showNew'
-			? 'plan-features__item-title-outlined'
-			: null
-		);
-
 		return (
 			<PlanFeaturesItem
 				key={ index }
 				description={ description }
-				hideInfoPopover={ abtest( 'jetpackNewDescriptions' ) === 'showNew' }
+				hideInfoPopover={ false }
 			>
-				<span className="plan_features__item-info">
-					<span className={ itemClasses }>{ feature.getTitle() }</span>
-					{ abtest( 'jetpackNewDescriptions' ) === 'showNew'
-						? <span className="plan-features__item-description">{ description }</span>
-						: null
-					}
+				<span className="plan-features__item-info">
+					<span className="plan-features__item-title">{ feature.getTitle() }</span>
 				</span>
 			</PlanFeaturesItem>
 		);
@@ -390,7 +390,9 @@ class PlanFeatures extends Component {
 				onUpgradeClick,
 				planName,
 				primaryUpgrade,
-				isPlaceholder
+				isPlaceholder,
+				planConstantObj,
+				popular,
 			} = properties;
 			const classes = classNames(
 				'plan-features__table-item',
@@ -405,11 +407,13 @@ class PlanFeatures extends Component {
 						current={ current }
 						available = { available }
 						primaryUpgrade={ primaryUpgrade }
+						planName ={ planConstantObj.getTitle() }
 						onUpgradeClick={ onUpgradeClick }
 						freePlan={ isFreePlan( planName ) }
 						isPlaceholder={ isPlaceholder }
 						isInSignup={ isInSignup }
 						isLandingPage={ isLandingPage }
+						isPopular = { popular }
 						manageHref={ `/plans/my-plan/${ site.slug }` }
 					/>
 				</td>
@@ -460,7 +464,7 @@ export default connect(
 				const planObject = getPlan( state, planProductId );
 				const isLoadingSitePlans = selectedSiteId && ! sitePlans.hasLoadedFromServer;
 				const showMonthly = ! isMonthly( plan );
-				const available = isInSignup ? true : canUpgradeToPlan( plan ) && canPurchase;
+				const available = isInSignup ? true : canUpgradeToPlan( plan, site ) && canPurchase;
 				const relatedMonthlyPlan = showMonthly ? getPlanBySlug( state, getMonthlyPlanByYearly( plan ) ) : null;
 				const popular = isPopular( plan ) && ! isPaid;
 				const newPlan = isNew( plan ) && ! isPaid;
@@ -470,7 +474,6 @@ export default connect(
 				if ( placeholder || ! planObject || isLoadingSitePlans ) {
 					isPlaceholder = true;
 				}
-
 				return {
 					isPlaceholder,
 					isLandingPage,
@@ -481,7 +484,7 @@ export default connect(
 						selectedSiteId,
 						plan,
 						{
-							isMonthly: showMonthly
+							isMonthly: showMonthlyPrice
 						} ),
 					features: getPlanFeaturesObject( planConstantObj.getFeatures( abtest ) ),
 					onUpgradeClick: onUpgradeClick
@@ -503,6 +506,7 @@ export default connect(
 					planObject: planObject,
 					popular: popular,
 					newPlan: newPlan,
+					hideMonthly: false,
 					primaryUpgrade: (
 						( currentPlan === PLAN_PERSONAL && plan === PLAN_PREMIUM ) ||
 						( currentPlan === PLAN_PREMIUM && plan === PLAN_BUSINESS ) ||

@@ -1,5 +1,4 @@
-/***** WARNING: ES5 code only here. Not transpiled! *****/
-/* eslint-disable no-var */
+/***** WARNING: No ES6 modules here. Not transpiled! *****/
 
 /**
  * External dependencies
@@ -42,7 +41,7 @@ const webpackConfig = {
 		noParse: /[\/\\]node_modules[\/\\]localforage[\/\\]dist[\/\\]localforage\.js$/,
 		loaders: [
 			{
-				test: /extensions\/index/,
+				test: /extensions[\/\\]index/,
 				exclude: 'node_modules',
 				loader: path.join( __dirname, 'server', 'bundler', 'extensions-loader' )
 			},
@@ -64,7 +63,7 @@ const webpackConfig = {
 				loader: 'exports?window.tinymce',
 			},
 			{
-				include: /node_modules\/tinymce/,
+				include: /node_modules[\/\\]tinymce/,
 				loader: 'imports?this=>window',
 			}
 		]
@@ -94,7 +93,8 @@ const webpackConfig = {
 		new webpack.DefinePlugin( {
 			'process.env': {
 				NODE_ENV: JSON.stringify( bundleEnv )
-			}
+			},
+			'PROJECT_NAME': JSON.stringify( config( 'project' ) )
 		} ),
 		new WebpackStableBuildPlugin( {
 			seed: 0
@@ -160,10 +160,10 @@ if ( calypsoEnv === 'desktop' ) {
 
 const jsLoader = {
 	test: /\.jsx?$/,
-	exclude: /node_modules/,
+	exclude: /node_modules[\/\\](?!notifications-panel)/,
 	loader: 'babel',
 	query: {
-		cacheDirectory: './.babel-cache',
+		cacheDirectory: path.join( __dirname, 'build', '.babel-client-cache' ),
 		cacheIdentifier: cacheIdentifier,
 		plugins: [ [
 			path.join( __dirname, 'server', 'bundler', 'babel', 'babel-plugin-transform-wpcalypso-async' ),
@@ -179,7 +179,7 @@ if ( calypsoEnv === 'development' ) {
 	webpackConfig.entry.build = [
 		'webpack-dev-server/client?/',
 		'webpack/hot/only-dev-server',
-		path.join( __dirname, 'client', 'boot' )
+		path.join( __dirname, 'client', 'boot', 'app' )
 	];
 
 	if ( config.isEnabled( 'use-source-maps' ) ) {
@@ -196,7 +196,7 @@ if ( calypsoEnv === 'development' ) {
 		jsLoader.loaders = [ 'react-hot' ].concat( jsLoader.loaders );
 	}
 } else {
-	webpackConfig.entry.build = path.join( __dirname, 'client', 'boot' );
+	webpackConfig.entry.build = path.join( __dirname, 'client', 'boot', 'app' );
 	webpackConfig.debug = false;
 	webpackConfig.devtool = false;
 }
@@ -208,6 +208,10 @@ if ( calypsoEnv === 'production' ) {
 	) );
 }
 
+if ( ! config.isEnabled( 'desktop' ) ) {
+	webpackConfig.plugins.push( new webpack.NormalModuleReplacementPlugin( /^lib[\/\\]desktop$/, 'lodash/noop' ) );
+}
+
 if ( config.isEnabled( 'webpack/persistent-caching' ) ) {
 	webpackConfig.recordsPath = path.join( __dirname, '.webpack-cache', 'client-records.json' );
 	webpackConfig.plugins.unshift( new HardSourceWebpackPlugin( { cacheDirectory: path.join( __dirname, '.webpack-cache', 'client' ) } ) );
@@ -215,6 +219,25 @@ if ( config.isEnabled( 'webpack/persistent-caching' ) ) {
 
 webpackConfig.module.loaders = [ jsLoader ].concat( webpackConfig.module.loaders );
 
-module.exports = webpackConfig;
+if ( process.env.WEBPACK_OUTPUT_JSON ) {
+	webpackConfig.devtool = 'cheap-module-source-map';
+	webpackConfig.plugins.push( new webpack.optimize.UglifyJsPlugin( {
+		minimize: true,
+		compress: {
+			warnings: false,
+			conditionals: true,
+			unused: true,
+			comparisons: true,
+			sequences: true,
+			dead_code: true,
+			evaluate: true,
+			if_return: true,
+			join_vars: true,
+			negate_iife: false,
+			screw_ie8: true
+		},
+		sourceMap: true
+	} ) );
+}
 
-/* eslint-enable no-var */
+module.exports = webpackConfig;

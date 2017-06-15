@@ -13,11 +13,7 @@ import {
 	requestFollowTag as requestFollowAction,
 	receiveTags as receiveTagsAction,
 } from 'state/reader/tags/items/actions';
-import {
-	requestFollowTag,
-	receiveFollowTag,
-	receiveError,
-} from '../';
+import { requestFollowTag, receiveFollowTag, receiveError } from '../';
 import { http } from 'state/data-layer/wpcom-http/actions';
 import { fromApi } from 'state/data-layer/wpcom/read/tags/utils';
 import { NOTICE_CREATE } from 'state/action-types';
@@ -31,14 +27,14 @@ export const successfulFollowResponse = freeze( {
 			slug: 'poetry',
 			title: 'Poetry',
 			display_name: 'poetry',
-			URL: 'https://public-api.wordpress.com/rest/v1/read/tags/poetry/posts'
+			URL: 'https://public-api.wordpress.com/rest/v1/read/tags/poetry/posts',
 		},
 		{
 			ID: '69750',
 			slug: 'ship',
 			title: 'SHIP',
 			display_name: 'ship',
-			URL: 'https://public-api.wordpress.com/rest/v1/read/tags/ship/posts'
+			URL: 'https://public-api.wordpress.com/rest/v1/read/tags/ship/posts',
 		},
 	],
 } );
@@ -55,28 +51,19 @@ describe( 'follow tag request', () => {
 		it( 'should dispatch HTTP request to tag endpoint', () => {
 			const action = requestFollowAction( slug );
 			const dispatch = sinon.spy();
-			const next = sinon.spy();
 
-			requestFollowTag( { dispatch }, action, next );
+			requestFollowTag( { dispatch }, action );
 
 			expect( dispatch ).to.have.been.calledOnce;
-			expect( dispatch ).to.have.been.calledWith( http( {
-				apiVersion: '1.1',
-				method: 'POST',
-				path: `/read/tags/${ slug }/mine/new`,
-				onSuccess: action,
-				onFailure: action,
-			} ) );
-		} );
-
-		it( 'should pass the original action along the middleware chain', () => {
-			const action = requestFollowAction( slug );
-			const dispatch = sinon.spy();
-			const next = sinon.spy();
-
-			requestFollowTag( { dispatch }, action, next );
-
-			expect( next ).to.have.been.calledWith( action );
+			expect( dispatch ).to.have.been.calledWith(
+				http( {
+					apiVersion: '1.1',
+					method: 'POST',
+					path: `/read/tags/${ slug }/mine/new`,
+					onSuccess: action,
+					onFailure: action,
+				} )
+			);
 		} );
 	} );
 
@@ -84,9 +71,8 @@ describe( 'follow tag request', () => {
 		it( 'should dispatch the followed tag with isFollowing=true', () => {
 			const action = requestFollowAction( slug );
 			const dispatch = sinon.spy();
-			const next = sinon.spy();
 
-			receiveFollowTag( { dispatch }, action, next, successfulFollowResponse );
+			receiveFollowTag( { dispatch }, action, null, successfulFollowResponse );
 
 			const followedTagId = successfulFollowResponse.added_tag;
 			const followedTag = find( successfulFollowResponse.tags, { ID: followedTagId } );
@@ -106,9 +92,8 @@ describe( 'follow tag request', () => {
 		it( 'if api reports error then create an error notice', () => {
 			const action = requestFollowAction( slug );
 			const dispatch = sinon.spy();
-			const next = sinon.spy();
 
-			receiveFollowTag( { dispatch }, action, next, unsuccessfulResponse );
+			receiveFollowTag( { dispatch }, action, null, unsuccessfulResponse );
 			expect( dispatch ).to.have.been.calledWithMatch( {
 				type: NOTICE_CREATE,
 			} );
@@ -119,10 +104,9 @@ describe( 'follow tag request', () => {
 		it( 'should dispatch an error notice', () => {
 			const action = requestFollowAction( slug );
 			const dispatch = sinon.spy();
-			const next = sinon.spy();
 			const error = 'could not find tag';
 
-			receiveError( { dispatch }, action, next, error );
+			receiveError( { dispatch }, action, null, error );
 
 			expect( dispatch ).to.have.been.calledOnce;
 			expect( dispatch ).to.have.been.calledWithMatch( {

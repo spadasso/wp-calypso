@@ -4,6 +4,9 @@ $blue-light:             #78dcfa;
 $blue-medium:            #00aadc;
 $blue-dark:              #005082;
 
+// Jetpack Green
+$green-jetpack:          #8cc258;
+
 // Grays
 $gray:                   #87a6bc;
 $gray-light:             lighten( $gray, 33% ); //#f3f6f8
@@ -48,7 +51,7 @@ $border-ultra-light-gray: #e8f0f5;
 $masterbar-color:          $blue-wordpress;
 $sidebar-bg-color:         lighten( $gray, 30% );
 $sidebar-text-color:       $gray-dark;
-$sidebar-selected-color:   $gray;
+$sidebar-selected-color:   $gray-text-min;
 
 
 //Social media colors
@@ -58,7 +61,7 @@ $color-gplus: #df4a32;
 $color-tumblr: #35465c;
 $color-linkedin: #0976b4;
 $color-path: #df3b2f;
-$color-instagram: #e12f67;
+$color-instagram: #d93174;
 $color-eventbrite: #ff8000;
 $color-stumbleupon: #eb4924;
 $color-reddit: #5f99cf;

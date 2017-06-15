@@ -206,21 +206,15 @@ const flows = {
 		description: 'Used by `get.blog` users that connect their site to WordPress.com',
 		lastModified: '2016-11-14'
 	},
-
-	'user-first': {
-		steps: [ 'user', 'design-type', 'themes', 'domains', 'plans' ],
-		destination: getSiteDestination,
-		description: 'User-first signup flow',
-		lastModified: '2016-01-18',
-	},
 };
 
 if ( config.isEnabled( 'signup/domain-first-flow' ) ) {
 	flows[ 'domain-first' ] = {
-		steps: [ 'site-or-domain', 'themes', 'plans', 'user' ],
+		steps: [ 'site-or-domain', 'site-picker', 'themes', 'plans-site-selected', 'user' ],
 		destination: getSiteDestination,
 		description: 'An experimental approach for WordPress.com/domains',
-		lastModified: '2017-01-16'
+		disallowResume: true,
+		lastModified: '2017-05-09'
 	};
 
 	flows[ 'site-selected' ] = {
@@ -274,18 +268,27 @@ function filterDesignTypeInFlow( flow ) {
 	} );
 }
 
+/**
+ * Properly filter the current flow.
+ *
+ * Called by `getFlowName` in 'signup/utils.js' to allow conditional filtering of the current
+ * flow for AB tests.
+ *
+ * @example
+ * function filterFlowName( flowName ) {
+ *   const defaultFlows = [ 'main', 'website' ];
+ *   if ( ! user.get() && includes( defaultFlows, flowName ) ) {
+ *     return 'filtered-flow-name';
+ *   }
+ *   return flowName;
+ * }
+ * // If user is logged out and the current flow is 'main' or 'website' switch to 'filtered-flow-name' flow.
+ *
+ * @param  {string} flowName Current flow name.
+ * @return {string}          New flow name.
+ */
 function filterFlowName( flowName ) {
-	const defaultFlows = [ 'main', 'website' ];
-
-	/**
-	 * Only run the User First Signup for logged out users.
-	 */
-	if ( ! user.get() ) {
-		if ( includes( defaultFlows, flowName ) && abtest( 'userFirstSignup' ) === 'userFirst' ) {
-			return 'user-first';
-		}
-	}
-
+	// do nothing. No flows to filter at the moment.
 	return flowName;
 }
 

@@ -14,32 +14,51 @@ import useNock from 'test/helpers/use-nock';
 import {
 	ACCOUNT_RECOVERY_RESET_REQUEST_SUCCESS,
 	ACCOUNT_RECOVERY_RESET_REQUEST_ERROR,
+	ACCOUNT_RECOVERY_RESET_SET_METHOD,
 } from 'state/action-types';
 
 describe( 'handleRequestReset()', () => {
-	const dispatch = sinon.spy();
-
 	const apiBaseUrl = 'https://public-api.wordpress.com:443';
 	const endpoint = '/wpcom/v2/account-recovery/request-reset';
 
-	const request = {
-		user: 'foo',
-		method: 'primary-email',
-	};
+	const userData = { user: 'foo' };
+	const method = 'primary-email';
 
 	describe( 'success', () => {
 		useNock( nock => (
 			nock( apiBaseUrl )
+				.persist()
 				.post( endpoint )
 				.reply( 200, { success: true } )
 		) );
 
-		it( 'should dispatch SUCCESS action on success', () => {
-			return handleRequestReset( { dispatch }, { request } ).then( () =>
-				assert.isTrue( dispatch.calledWith( {
-					type: ACCOUNT_RECOVERY_RESET_REQUEST_SUCCESS,
-				} ) )
-			);
+		it( 'should dispatch SUCCESS action on success', ( done ) => {
+			const dispatch = sinon.spy( ( action ) => {
+				if ( action.type === ACCOUNT_RECOVERY_RESET_REQUEST_SUCCESS ) {
+					assert.isTrue( dispatch.calledWith( {
+						type: ACCOUNT_RECOVERY_RESET_REQUEST_SUCCESS,
+					} ) );
+
+					done();
+				}
+			} );
+
+			handleRequestReset( { dispatch }, { userData, method } );
+		} );
+
+		it( 'should dispatch SET_METHOD action on success', ( done ) => {
+			const dispatch = sinon.spy( ( action ) => {
+				if ( action.type === ACCOUNT_RECOVERY_RESET_SET_METHOD ) {
+					assert.isTrue( dispatch.calledWith( {
+						type: ACCOUNT_RECOVERY_RESET_SET_METHOD,
+						method,
+					} ) );
+
+					done();
+				}
+			} );
+
+			handleRequestReset( { dispatch }, { userData, method } );
 		} );
 	} );
 
@@ -56,12 +75,14 @@ describe( 'handleRequestReset()', () => {
 		) );
 
 		it( 'should dispatch ERROR action on failure', () => {
-			return handleRequestReset( { dispatch }, { request } ).then( () =>
+			const dispatch = sinon.spy( () => {
 				assert.isTrue( dispatch.calledWithMatch( {
 					type: ACCOUNT_RECOVERY_RESET_REQUEST_ERROR,
 					error: errorResponse,
 				} ) )
-			);
+			} );
+
+			handleRequestReset( { dispatch }, { userData, method } );
 		} );
 	} );
 } );

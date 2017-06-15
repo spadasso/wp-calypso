@@ -3,7 +3,6 @@
  */
 import page from 'page';
 import React from 'react';
-import i18n from 'i18n-calypso';
 
 /**
  * Internal Dependencies
@@ -19,28 +18,15 @@ import paths from 'my-sites/upgrades/paths';
 import ProductsList from 'lib/products-list';
 import { renderWithReduxStore } from 'lib/react-helpers';
 import SiteRedirectData from 'components/data/domain-management/site-redirect';
-import SitesList from 'lib/sites-list';
-import { getSelectedSiteId } from 'state/ui/selectors';
-import { getSiteSlug } from 'state/sites/selectors';
+import { getSelectedSiteId, getSelectedSiteSlug } from 'state/ui/selectors';
 import isSiteAutomatedTransfer from 'state/selectors/is-site-automated-transfer';
 import TransferData from 'components/data/domain-management/transfer';
 import WhoisData from 'components/data/domain-management/whois';
-import { setDocumentHeadTitle } from 'state/document-head/actions';
 
-const productsList = new ProductsList(),
-	sites = new SitesList();
+const productsList = new ProductsList();
 
-const setTitle = function( title, pageContext ) {
-	pageContext.store.dispatch( setDocumentHeadTitle( title ) );
-};
-
-module.exports = {
+export default {
 	domainManagementList( pageContext ) {
-		setTitle(
-			i18n.translate( 'Domain Management' ),
-			pageContext
-		);
-
 		analytics.pageView.record(
 			paths.domainManagementList( ':site' ),
 			'Domain Management'
@@ -58,13 +44,6 @@ module.exports = {
 	},
 
 	domainManagementEdit( pageContext ) {
-		setTitle(
-			i18n.translate( 'Edit %(domain)s', {
-				args: { domain: pageContext.params.domain }
-			} ),
-			pageContext
-		);
-
 		analytics.pageView.record(
 			paths.domainManagementEdit( ':site', ':domain' ),
 			'Domain Management › Edit'
@@ -83,11 +62,6 @@ module.exports = {
 	},
 
 	domainManagementPrimaryDomain: function( pageContext ) {
-		setTitle(
-			i18n.translate( 'Set Primary Domain' ),
-			pageContext
-		);
-
 		analytics.pageView.record(
 			paths.domainManagementPrimaryDomain( ':site', ':domain' ),
 			'Domain Management › Set Primary Domain'
@@ -103,11 +77,6 @@ module.exports = {
 	},
 
 	domainManagementContactsPrivacy( pageContext ) {
-		setTitle(
-			i18n.translate( 'Contacts and Privacy' ),
-			pageContext
-		);
-
 		analytics.pageView.record(
 			paths.domainManagementContactsPrivacy( ':site', ':domain' ),
 			'Domain Management › Contacts and Privacy'
@@ -117,20 +86,13 @@ module.exports = {
 			<WhoisData
 				component={ DomainManagement.ContactsPrivacy }
 				context={ pageContext }
-				productsList={ productsList }
-				selectedDomainName={ pageContext.params.domain }
-				sites={ sites } />,
+				selectedDomainName={ pageContext.params.domain } />,
 			document.getElementById( 'primary' ),
 			pageContext.store
 		);
 	},
 
 	domainManagementEditContactInfo( pageContext ) {
-		setTitle(
-			i18n.translate( 'Edit Contact Info' ),
-			pageContext
-		);
-
 		analytics.pageView.record(
 			paths.domainManagementEditContactInfo( ':site', ':domain' ),
 			'Domain Management › Contacts and Privacy › Edit Contact Info'
@@ -140,20 +102,13 @@ module.exports = {
 			<WhoisData
 				component={ DomainManagement.EditContactInfo }
 				context={ pageContext }
-				productsList={ productsList }
-				selectedDomainName={ pageContext.params.domain }
-				sites={ sites } />,
+				selectedDomainName={ pageContext.params.domain } />,
 			document.getElementById( 'primary' ),
 			pageContext.store
 		);
 	},
 
 	domainManagementEmail( pageContext ) {
-		setTitle(
-			i18n.translate( 'Email' ),
-			pageContext
-		);
-
 		analytics.pageView.record(
 			paths.domainManagementEmail( ':site', pageContext.params.domain ? ':domain' : undefined ),
 			'Domain Management › Email'
@@ -172,11 +127,6 @@ module.exports = {
 	},
 
 	domainManagementEmailForwarding( pageContext ) {
-		setTitle(
-			i18n.translate( 'Email Forwarding' ),
-			pageContext
-		);
-
 		analytics.pageView.record(
 			paths.domainManagementEmailForwarding( ':site', ':domain' ),
 			'Domain Management › Email › Email Forwarding'
@@ -193,11 +143,6 @@ module.exports = {
 	},
 
 	domainManagementDns( pageContext ) {
-		setTitle(
-			i18n.translate( 'DNS Records' ),
-			pageContext
-		);
-
 		analytics.pageView.record(
 			paths.domainManagementDns( ':site', ':domain' ),
 			'Domain Management › Name Servers and DNS › DNS Records'
@@ -213,11 +158,6 @@ module.exports = {
 		);
 	},
 	domainManagementNameServers( pageContext ) {
-		setTitle(
-			i18n.translate( 'Name Servers and DNS' ),
-			pageContext
-		);
-
 		analytics.pageView.record(
 			paths.domainManagementNameServers( ':site', ':domain' ),
 			'Domain Management › Name Servers and DNS'
@@ -234,11 +174,6 @@ module.exports = {
 	},
 
 	domainManagementPrivacyProtection( pageContext ) {
-		setTitle(
-			i18n.translate( 'Privacy Protection' ),
-			pageContext
-		);
-
 		analytics.pageView.record(
 			paths.domainManagementPrivacyProtection( ':site', ':domain' ),
 			'Domain Management › Contacts and Privacy › Privacy Protection'
@@ -248,20 +183,13 @@ module.exports = {
 			<WhoisData
 				component={ DomainManagement.PrivacyProtection }
 				context={ pageContext }
-				productsList={ productsList }
-				selectedDomainName={ pageContext.params.domain }
-				sites={ sites } />,
+				selectedDomainName={ pageContext.params.domain } />,
 			document.getElementById( 'primary' ),
 			pageContext.store
 		);
 	},
 
 	domainManagementAddGoogleApps( pageContext ) {
-		setTitle(
-			i18n.translate( 'Add G Suite' ),
-			pageContext
-		);
-
 		analytics.pageView.record(
 			paths.domainManagementAddGoogleApps( ':site', pageContext.params.domain ? ':domain' : undefined ),
 			'Domain Management › Add Google Apps'
@@ -280,11 +208,6 @@ module.exports = {
 	},
 
 	domainManagementRedirectSettings( pageContext ) {
-		setTitle(
-			i18n.translate( 'Redirect Settings' ),
-			pageContext
-		);
-
 		analytics.pageView.record(
 			paths.domainManagementRedirectSettings( ':site', ':domain' ),
 			'Domain Management › Redirect Settings'
@@ -293,40 +216,35 @@ module.exports = {
 		renderWithReduxStore(
 			<SiteRedirectData
 				component={ DomainManagement.SiteRedirect }
-				selectedDomainName={ pageContext.params.domain }
-				sites={ sites } />,
+				selectedDomainName={ pageContext.params.domain } />,
 			document.getElementById( 'primary' ),
 			pageContext.store
 		);
 	},
 
-	domainManagementIndex() {
-		page.redirect( '/domains/manage' + ( sites.getSelectedSite() ? ( '/' + sites.getSelectedSite().slug ) : '' ) );
+	domainManagementIndex( pageContext ) {
+		const state = pageContext.store.getState();
+		const siteSlug = getSelectedSiteSlug( state );
+
+		page.redirect( '/domains/manage' + ( siteSlug ? `/${ siteSlug }` : '' ) );
 	},
 
 	domainManagementTransfer( pageContext ) {
-		setTitle(
-			i18n.translate( 'Transfer Domain' ),
-			pageContext
-		);
-
 		renderWithReduxStore(
 			<TransferData
 				component={ DomainManagement.Transfer }
-				selectedDomainName={ pageContext.params.domain }
-				sites={ sites }
-			/>,
+				selectedDomainName={ pageContext.params.domain } />,
 			document.getElementById( 'primary' ),
 			pageContext.store
 		);
 	},
 
-	domainManagementTransferToOtherUser( pageContext ) {
+	domainManagementTransferToOtherSite( pageContext ) {
 		const state = pageContext.store.getState();
 		const siteId = getSelectedSiteId( state );
 		const isAutomatedTransfer = isSiteAutomatedTransfer( state, siteId );
 		if ( isAutomatedTransfer ) {
-			const siteSlug = getSiteSlug( state, siteId );
+			const siteSlug = getSelectedSiteSlug( state );
 			page.redirect( `/domains/manage/${ siteSlug }` );
 			return;
 		}
@@ -338,25 +256,37 @@ module.exports = {
 
 		renderWithReduxStore(
 			<TransferData
+				component={ DomainManagement.TransferToOtherSite }
+				selectedDomainName={ pageContext.params.domain } />,
+			document.getElementById( 'primary' ),
+			pageContext.store
+		);
+	},
+
+	domainManagementTransferToOtherUser( pageContext ) {
+		const state = pageContext.store.getState();
+		const siteId = getSelectedSiteId( state );
+		const isAutomatedTransfer = isSiteAutomatedTransfer( state, siteId );
+		if ( isAutomatedTransfer ) {
+			const siteSlug = getSelectedSiteSlug( state );
+			page.redirect( `/domains/manage/${ siteSlug }` );
+			return;
+		}
+
+		renderWithReduxStore(
+			<TransferData
 				component={ DomainManagement.TransferToOtherUser }
-				selectedDomainName={ pageContext.params.domain }
-				sites={ sites } />,
+				selectedDomainName={ pageContext.params.domain } />,
 			document.getElementById( 'primary' ),
 			pageContext.store
 		);
 	},
 
 	domainManagementTransferOut( pageContext ) {
-		setTitle(
-			i18n.translate( 'Transfer Domain' ),
-			pageContext
-		);
-
 		renderWithReduxStore(
 			<TransferData
 				component={ DomainManagement.TransferOut }
-				selectedDomainName={ pageContext.params.domain }
-				sites={ sites } />,
+				selectedDomainName={ pageContext.params.domain } />,
 			document.getElementById( 'primary' ),
 			pageContext.store
 		);

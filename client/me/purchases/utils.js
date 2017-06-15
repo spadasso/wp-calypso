@@ -2,13 +2,19 @@
  * External dependencies
  */
 import page from 'page';
-import { get } from 'lodash';
 
 /**
  * Internal dependencies
  */
 import analytics from 'lib/analytics';
+import config from 'config';
 import paths from './paths';
+import {
+	isExpired,
+	isIncludedWithPlan,
+	isOneTimePurchase,
+	isPaidWithCreditCard,
+} from 'lib/purchases';
 
 // TODO: Remove these property-masking functions in favor of accessing the props directly
 function getPurchase( props ) {
@@ -20,8 +26,7 @@ function getSelectedSite( props ) {
 }
 
 function goToCancelPurchase( props ) {
-	const { id } = getPurchase( props ),
-		{ slug } = getSelectedSite( props );
+	const { id } = getPurchase( props ), { slug } = getSelectedSite( props );
 
 	page( paths.cancelPurchase( slug, id ) );
 }
@@ -31,8 +36,7 @@ function goToList() {
 }
 
 function goToManagePurchase( props ) {
-	const { id } = getPurchase( props ),
-		{ slug } = getSelectedSite( props );
+	const { id } = getPurchase( props ), { slug } = getSelectedSite( props );
 
 	page( paths.managePurchase( slug, id ) );
 }
@@ -46,8 +50,10 @@ function recordPageView( trackingSlug, props, nextProps = null ) {
 		return null;
 	}
 
-	if ( nextProps &&
-		( props.hasLoadedUserPurchasesFromServer || ! nextProps.hasLoadedUserPurchasesFromServer ) ) {
+	if (
+		nextProps &&
+		( props.hasLoadedUserPurchasesFromServer || ! nextProps.hasLoadedUserPurchasesFromServer )
+	) {
 		// only record the page view the first time the purchase loads from the server
 		return null;
 	}
@@ -60,28 +66,27 @@ function recordPageView( trackingSlug, props, nextProps = null ) {
 
 	const { productSlug } = purchase;
 
-	analytics.tracks.recordEvent( `calypso_${ trackingSlug }_purchase_view`, { product_slug: productSlug } );
+	analytics.tracks.recordEvent( `calypso_${ trackingSlug }_purchase_view`, {
+		product_slug: productSlug,
+	} );
 }
 
-function enrichedSurveyData( surveyData, moment, site, purchase ) {
-	const purchaseStartDate = get( purchase, 'subscribedDate', null );
-	const siteStartDate = get( site, 'options.created_at', null );
-	const purchaseId = get( purchase, 'id', null );
-	const productSlug = get( purchase, 'productSlug', null );
-
-	return Object.assign(
-		{
-			purchase: productSlug,
-			purchaseId,
-		},
-		purchaseStartDate && {
-			daysSincePurchase: moment.diff( purchaseStartDate, 'days', true ),
-		},
-		siteStartDate && {
-			daysSinceSiteCreation: moment.diff( siteStartDate, 'days', true ),
-		},
-		surveyData,
+function canEditPaymentDetails( purchase ) {
+	if ( ! config.isEnabled( 'upgrades/credit-cards' ) ) {
+		return false;
+	}
+	return (
+		! isExpired( purchase ) && ! isOneTimePurchase( purchase ) && ! isIncludedWithPlan( purchase )
 	);
+}
+
+function getEditCardDetailsPath( site, purchase ) {
+	if ( isPaidWithCreditCard( purchase ) ) {
+		const { payment: { creditCard } } = purchase;
+
+		return paths.editCardDetails( site.slug, purchase.id, creditCard.id );
+	}
+	return paths.addCardDetails( site.slug, purchase.id );
 }
 
 export {
@@ -92,5 +97,6 @@ export {
 	goToManagePurchase,
 	isDataLoading,
 	recordPageView,
-	enrichedSurveyData,
+	canEditPaymentDetails,
+	getEditCardDetailsPath,
 };

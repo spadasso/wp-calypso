@@ -15,7 +15,8 @@ import {
 	ACCOUNT_RECOVERY_RESET_PASSWORD_REQUEST,
 	ACCOUNT_RECOVERY_RESET_PASSWORD_REQUEST_SUCCESS,
 	ACCOUNT_RECOVERY_RESET_PASSWORD_REQUEST_ERROR,
-	ACCOUNT_RECOVERY_RESET_PICK_METHOD,
+	ACCOUNT_RECOVERY_RESET_SET_METHOD,
+	ACCOUNT_RECOVERY_RESET_SET_VALIDATION_KEY,
 } from 'state/action-types';
 
 export const fetchResetOptionsSuccess = ( items ) => ( {
@@ -51,14 +52,17 @@ export const requestResetError = ( error ) => ( {
 	error,
 } );
 
-export const requestReset = ( request ) => ( {
+export const requestReset = ( userData, method ) => ( {
 	type: ACCOUNT_RECOVERY_RESET_REQUEST,
-	request,
+	userData,
+	method,
 } );
 
-export const validateRequest = ( request ) => ( {
+export const validateRequest = ( userData, method, key ) => ( {
 	type: ACCOUNT_RECOVERY_RESET_VALIDATE_REQUEST,
-	request,
+	userData,
+	method,
+	key,
 } );
 
 export const validateRequestSuccess = () => ( {
@@ -87,7 +91,14 @@ export const requestResetPassword = ( userData, method, key, password ) => ( {
 	password,
 } );
 
-export const pickResetMethod = ( method ) => ( {
-	type: ACCOUNT_RECOVERY_RESET_PICK_METHOD,
+export const setResetMethod = ( method ) => ( {
+	type: ACCOUNT_RECOVERY_RESET_SET_METHOD,
 	method,
+} );
+
+export const clearResetMethod = () => setResetMethod( null );
+
+export const setValidationKey = ( key ) => ( {
+	type: ACCOUNT_RECOVERY_RESET_SET_VALIDATION_KEY,
+	key,
 } );

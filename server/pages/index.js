@@ -8,7 +8,7 @@ import qs from 'qs';
 import { execSync } from 'child_process';
 import cookieParser from 'cookie-parser';
 import debugFactory from 'debug';
-import { get } from 'lodash';
+import { get, isEmpty, pick } from 'lodash';
 
 /**
  * Internal dependencies
@@ -19,7 +19,9 @@ import utils from 'bundler/utils';
 import sectionsModule from '../../client/sections';
 import { serverRouter } from 'isomorphic-routing';
 import { serverRender } from 'render';
-import { createReduxStore } from 'state';
+import stateCache from 'state-cache';
+import { createReduxStore, reducer } from 'state';
+import { DESERIALIZE } from 'state/action-types';
 
 const debug = debugFactory( 'calypso:pages' );
 
@@ -37,6 +39,13 @@ const staticFiles = [
 ];
 
 const sections = sectionsModule.get();
+
+// TODO: Re-use (a modified version of) client/state/initial-state#getInitialServerState here
+function getInitialServerState( serializedServerState ) {
+	// Bootstrapped state from a server-render
+	const serverState = reducer( serializedServerState, { type: DESERIALIZE } );
+	return pick( serverState, Object.keys( serializedServerState ) );
+}
 
 /**
  * Generates a hash of a files contents to be used as a version parameter on asset requests.
@@ -84,7 +93,7 @@ function generateStaticUrls( request ) {
 	const assets = request.app.get( 'assets' );
 
 	assets.forEach( function( asset ) {
-		let name = asset.name;
+		const name = asset.name;
 		urls[ name ] = asset.url;
 		if ( config( 'env' ) !== 'development' ) {
 			urls[ name + '-min' ] = asset.url.replace( '.js', '.m.js' );
@@ -111,6 +120,14 @@ function getCurrentCommitShortChecksum() {
 }
 
 function getDefaultContext( request ) {
+	let initialServerState = {};
+	// We don't cache routes with query params
+	if ( isEmpty( request.query ) ) {
+		// context.pathname is set to request.path, see server/isomorphic-routing#getEnhancedContext()
+		const serializeCachedServerState = stateCache.get( request.path ) || {};
+		initialServerState = getInitialServerState( serializeCachedServerState );
+	}
+
 	const context = Object.assign( {}, request.context, {
 		compileDebug: config( 'env' ) === 'development' ? true : false,
 		urls: generateStaticUrls( request ),
@@ -126,7 +143,7 @@ function getDefaultContext( request ) {
 		isFluidWidth: !! config.isEnabled( 'fluid-width' ),
 		abTestHelper: !! config.isEnabled( 'dev/test-helper' ),
 		devDocsURL: '/devdocs',
-		store: createReduxStore()
+		store: createReduxStore( initialServerState )
 	} );
 
 	context.app = {
@@ -186,7 +203,7 @@ function setUpLoggedInRoute( req, res, next ) {
 
 	const context = getDefaultContext( req );
 
-	if ( config( 'wpcom_user_bootstrap' ) ) {
+	if ( config.isEnabled( 'wpcom-user-bootstrap' ) ) {
 		const user = require( 'user-bootstrap' );
 
 		protocol = req.get( 'X-Forwarded-Proto' ) === 'https' ? 'https' : 'http';
@@ -337,10 +354,12 @@ module.exports = function() {
 		} );
 	}
 
-	app.get( '/theme', ( req, res ) => res.redirect( '/design' ) );
-	// Interim redirect before we make `/themes` the canonical showcase URL.
-	app.get( [ '/themes', '/themes/*' ], ( req, res ) => {
-		res.redirect( '/design' + req.originalUrl.slice( '/themes'.length ) );
+	// Redirect legacy `/menus` routes to the corresponding Customizer panel
+	// TODO: Move to `my-sites/customize` route defs once that section is isomorphic
+	app.get( [ '/menus', '/menus/:site?' ], ( req, res ) => {
+		const siteSlug = get( req.params, 'site', '' );
+		const newRoute = '/customize/menus/' + siteSlug;
+		res.redirect( 301, newRoute );
 	} );
 
 	sections

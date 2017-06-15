@@ -92,28 +92,28 @@ $reader-post-card-breakpoint-small: "( max-width: 550px )";
 			.reader-post-card__post-details {
 				flex: 0 auto; // IE11 Photo card actions hidden
 				margin: 0;
-				padding-top: 11px;
+				padding-top: 8px;
 			}
 
 			.reader-post-card__title {
 				color: $white;
 				font-family: $sans;
-				font-size: 10px;
 				position: relative;
 					bottom: 30px;
 					left: 20px;
 				text-shadow: 0 1px rgba(0, 0, 0, 0.3);
-				white-space: nowrap;
 				width: calc( 100% - 44px );
 				text-overflow: ellipsis;
 				overflow: hidden;
 				z-index: z-index( 'root', '.reader-post-card__title' );
 				margin-bottom: -15px; // relative elements need a negative margin so they don't create bottom padding
-				height: 15px;
+				height: 19px;
+				white-space: nowrap;
 			}
 
 			.reader-post-card__title .reader-post-card__title-link {
 				color: $white;
+				display: inline;
 				font-size: 12px;
 				letter-spacing: 0.01em;
 			}
@@ -160,7 +160,7 @@ $reader-post-card-breakpoint-small: "( max-width: 550px )";
 	&.is-photo {
 
 		.reader-post-card__post {
-			margin-top: 17px;
+			margin-top: 16px;
 		}
 	}
 
@@ -202,8 +202,8 @@ $reader-post-card-breakpoint-small: "( max-width: 550px )";
 
 	&::before {
 		content: '';
-		background: linear-gradient( to bottom, rgba( 0, 0, 0, 0 ) 36%, rgba( 0, 0, 0, 0.37 ) 73%, rgba( 0, 0, 0, 1 ) 100% );
-		height: 225px;
+		background: linear-gradient( to bottom, rgba( 0, 0, 0, 0 ) 0%, rgba( 0, 0, 0, 0.37 ) 65%, rgba( 0, 0, 0, 1 ) 110% );
+		height: 80px;
 		opacity: .4;
 		position: absolute;
 			bottom: 0;
@@ -250,14 +250,6 @@ $reader-post-card-breakpoint-small: "( max-width: 550px )";
 	position: relative;
 	height: 20px;
 	width: calc( 100% - 25px );
-
-	a, a:visited {
-		color: $blue-medium;
-	}
-
-	a:hover {
-		color: $blue-light;
-	}
 
 	&::after {
 		@include long-content-fade( $size: 10% );
@@ -331,7 +323,7 @@ $reader-post-card-breakpoint-small: "( max-width: 550px )";
 	}
 
 	&.has-site-icon {
-		margin: 0 9px 0 -1px;
+		margin: 0 12px 0 0;
 	}
 
 	.site-icon {
@@ -346,16 +338,22 @@ $reader-post-card-breakpoint-small: "( max-width: 550px )";
 	display: none;
 }
 
-.reader-post-card__link,
-.reader-post-card__link:visited {
+.reader-post-card__link {
 	color: $blue-medium;
 	cursor: pointer;
+
+	&:hover {
+		color: $blue-light;
+	}
+
+	&:visited {
+		color: $blue-medium;
+	}
 }
 
 .reader-post-card__post {
 	clear: both;
 	display: flex;
-	flex-wrap: wrap;
 	flex-direction: row;
 	margin-top: 14px;
 
@@ -377,6 +375,10 @@ $reader-post-card-breakpoint-small: "( max-width: 550px )";
 	}
 }
 
+.reader-post-card.is-expanded-video .reader-post-card__post {
+	flex-wrap: wrap;
+}
+
 .reader-post-card__post-details {
 	font-family: $serif;
 }
@@ -392,7 +394,7 @@ $reader-post-card-breakpoint-small: "( max-width: 550px )";
 .reader-post-card__title-link:visited {
 	color: $gray-dark;
 	cursor: pointer;
-	font-size: 18px;
+	font-size: 19px;
 	font-weight: 700;
 	display: block;
 
@@ -401,12 +403,12 @@ $reader-post-card-breakpoint-small: "( max-width: 550px )";
 	}
 
 	@include breakpoint( ">480px" ) {
-		font-size: 18px;
+		font-size: 19px;
 	}
 }
 
 .reader-post-card .reader-excerpt {
-	font-size: 15px;
+	font-size: 16px;
 	line-height: 1.6;
 	font-weight: 100;
 	margin-top: 9px;

@@ -2,10 +2,10 @@
  * External dependencies
  */
 import React, { Component } from 'react';
-import page from 'page';
+import { connect } from 'react-redux';
 import classNames from 'classnames';
 import Gridicon from 'gridicons';
-import { get } from 'lodash';
+import { get, flowRight } from 'lodash';
 
 /**
  * Internal dependencies
@@ -24,18 +24,17 @@ import FormFieldset from 'components/forms/form-fieldset';
 import FormLegend from 'components/forms/form-legend';
 import FormLabel from 'components/forms/form-label';
 import FormRadio from 'components/forms/form-radio';
-import FormToggle from 'components/forms/form-toggle';
 import CompactFormToggle from 'components/forms/form-toggle/compact';
 import FormSettingExplanation from 'components/forms/form-setting-explanation';
 import Timezone from 'components/timezone';
 import JetpackSyncPanel from './jetpack-sync-panel';
 import SiteIconSetting from './site-icon-setting';
-import UpgradeNudge from 'my-sites/upgrade-nudge';
+import Banner from 'components/banner';
 import { isBusiness } from 'lib/products-values';
-import { FEATURE_NO_BRANDING } from 'lib/plans/constants';
+import { FEATURE_NO_BRANDING, PLAN_BUSINESS } from 'lib/plans/constants';
 import QuerySiteSettings from 'components/data/query-site-settings';
-import { phpToMomentDatetimeFormat } from 'lib/formatting';
-import { getLocalizedDate } from './date-time-format/utils';
+import { isJetpackMinimumVersion, isJetpackSite } from 'state/sites/selectors';
+import { getSelectedSiteId, getSelectedSiteSlug } from 'state/ui/selectors';
 
 class SiteSettingsFormGeneral extends Component {
 	componentWillMount() {
@@ -90,17 +89,17 @@ class SiteSettingsFormGeneral extends Component {
 	}
 
 	blogAddress() {
-		const { site, translate } = this.props;
+		const { site, siteIsJetpack, siteSlug, translate } = this.props;
 		let customAddress = '',
 			addressDescription = '';
 
-		if ( site.jetpack ) {
+		if ( ! site || siteIsJetpack ) {
 			return null;
 		}
 
 		if ( config.isEnabled( 'upgrades/domain-search' ) ) {
 			customAddress = (
-				<Button href={ '/domains/add/' + site.slug } onClick={ this.trackUpgradeClick }>
+				<Button href={ '/domains/add/' + siteSlug } onClick={ this.trackUpgradeClick }>
 					<Gridicon icon="plus" /> { translate( 'Add a Custom Address', { context: 'Site address, domain' } ) }
 				</Button>
 			);
@@ -115,13 +114,13 @@ class SiteSettingsFormGeneral extends Component {
 							{
 								components: {
 									domainSearchLink: (
-										<a href={ '/domains/add/' + site.slug } onClick={ this.trackUpgradeClick } />
+										<a href={ '/domains/add/' + siteSlug } onClick={ this.trackUpgradeClick } />
 									),
 									mapDomainLink: (
-										<a href={ '/domains/add/mapping/' + site.slug } onClick={ this.trackUpgradeClick } />
+										<a href={ '/domains/add/mapping/' + siteSlug } onClick={ this.trackUpgradeClick } />
 									),
 									redirectLink: (
-										<a href={ '/domains/add/site-redirect/' + site.slug } onClick={ this.trackUpgradeClick } />
+										<a href={ '/domains/add/site-redirect/' + siteSlug } onClick={ this.trackUpgradeClick } />
 									)
 								}
 							}
@@ -152,8 +151,8 @@ class SiteSettingsFormGeneral extends Component {
 	}
 
 	languageOptions() {
-		const { eventTracker, fields, isRequestingSettings, onChangeField, site, translate } = this.props;
-		if ( site.jetpack ) {
+		const { eventTracker, fields, isRequestingSettings, onChangeField, siteIsJetpack, translate } = this.props;
+		if ( siteIsJetpack ) {
 			return null;
 		}
 		return (
@@ -178,7 +177,7 @@ class SiteSettingsFormGeneral extends Component {
 	}
 
 	visibilityOptions() {
-		const { fields, handleRadio, isRequestingSettings, eventTracker, site, translate } = this.props;
+		const { fields, handleRadio, isRequestingSettings, eventTracker, siteIsJetpack, translate } = this.props;
 
 		return (
 			<FormFieldset>
@@ -191,10 +190,10 @@ class SiteSettingsFormGeneral extends Component {
 						disabled={ isRequestingSettings }
 						onClick={ eventTracker( 'Clicked Site Visibility Radio Button' ) } />
 					<span>{ translate( 'Public' ) }</span>
-					<FormSettingExplanation isIndented>
-						{ translate( 'Your site is visible to everyone, and it may be indexed by search engines.' ) }
-					</FormSettingExplanation>
 				</FormLabel>
+				<FormSettingExplanation isIndented>
+					{ translate( 'Your site is visible to everyone, and it may be indexed by search engines.' ) }
+				</FormSettingExplanation>
 
 				<FormLabel>
 					<FormRadio
@@ -205,107 +204,41 @@ class SiteSettingsFormGeneral extends Component {
 						disabled={ isRequestingSettings }
 						onClick={ eventTracker( 'Clicked Site Visibility Radio Button' ) } />
 					<span>{ translate( 'Hidden' ) }</span>
-					<FormSettingExplanation isIndented>
-						{ translate( 'Your site is visible to everyone, but we ask search engines to not index your site.' ) }
-					</FormSettingExplanation>
 				</FormLabel>
+				<FormSettingExplanation isIndented>
+					{ translate( 'Your site is visible to everyone, but we ask search engines to not index your site.' ) }
+				</FormSettingExplanation>
 
-				{ ! site.jetpack &&
-					<FormLabel>
-						<FormRadio
-							name="blog_public"
-							value="-1"
-							checked={ -1 === parseInt( fields.blog_public, 10 ) }
-							onChange={ handleRadio }
-							disabled={ isRequestingSettings }
-							onClick={ eventTracker( 'Clicked Site Visibility Radio Button' ) } />
-						<span>{ translate( 'Private' ) }</span>
+				{ ! siteIsJetpack &&
+					<div>
+						<FormLabel>
+							<FormRadio
+								name="blog_public"
+								value="-1"
+								checked={ -1 === parseInt( fields.blog_public, 10 ) }
+								onChange={ handleRadio }
+								disabled={ isRequestingSettings }
+								onClick={ eventTracker( 'Clicked Site Visibility Radio Button' ) } />
+							<span>{ translate( 'Private' ) }</span>
+						</FormLabel>
 						<FormSettingExplanation isIndented>
 							{ translate( 'Your site is only visible to you and users you approve.' ) }
 						</FormSettingExplanation>
-					</FormLabel>
+					</div>
 				}
 
 			</FormFieldset>
 		);
 	}
 
-	handleAmpToggle = () => {
-		const { fields, submitForm, trackEvent, updateFields } = this.props;
-		updateFields( { amp_is_enabled: ! fields.amp_is_enabled }, () => {
-			submitForm();
-			trackEvent( 'Toggled AMP Toggle' );
-		} );
-	};
-
-	handleAmpCustomize = () => {
-		this.props.trackEvent( 'Clicked AMP Customize button' );
-		page( '/customize/amp/' + this.props.site.slug );
-	};
-
-	renderAmpSection() {
-		if ( this.props.site.jetpack ) {
-			return;
-		}
-
-		const {
-			fields: {
-				amp_is_supported: ampIsSupported,
-				amp_is_enabled: ampIsEnabled
-			},
-			isRequestingSettings,
-			isSavingSettings,
-			translate
-		} = this.props;
-
-		const isDisabled = isRequestingSettings || isSavingSettings;
-		const isCustomizeDisabled = isDisabled || ! ampIsEnabled;
-
-		if ( ! ampIsSupported ) {
-			return null;
-		}
-
-		return (
-			<div className="site-settings__amp">
-				<SectionHeader label={ translate( 'AMP' ) }>
-					<Button
-						compact
-						disabled={ isCustomizeDisabled }
-						onClick={ this.handleAmpCustomize }>
-						{ translate( 'Edit Design' ) }
-					</Button>
-					<FormToggle
-						checked={ ampIsEnabled }
-						onChange={ this.handleAmpToggle }
-						disabled={ isDisabled } />
-				</SectionHeader>
-				<Card className="site-settings__amp-explanation">
-					<p>
-						{ translate(
-							'Your WordPress.com site supports {{a}}Accelerated Mobile Pages (AMP){{/a}}, ' +
-							'a new Google-led initiative that dramatically improves loading speeds ' +
-							'on phones and tablets. {{a}}Learn More{{/a}}.',
-							{
-								components: {
-									a: <a
-										href="https://support.wordpress.com/google-amp-accelerated-mobile-pages/"
-										target="_blank" rel="noopener noreferrer" />
-								}
-							}
-						) }
-					</p>
-				</Card>
-			</div>
-		);
-	}
-
 	showPublicPostTypesCheckbox() {
+		const { supportsPublicPostTypesCheckbox } = this.props;
+
 		if ( ! config.isEnabled( 'manage/option_sync_non_public_post_stati' ) ) {
 			return false;
 		}
 
-		const { site } = this.props;
-		if ( site.jetpack && site.versionCompare( '4.1.1', '>' ) ) {
+		if ( ! supportsPublicPostTypesCheckbox ) {
 			return false;
 		}
 
@@ -332,7 +265,7 @@ class SiteSettingsFormGeneral extends Component {
 									'Allow synchronization of Posts and Pages with non-public post statuses'
 								) }
 							</CompactFormToggle>
-							<FormSettingExplanation>
+							<FormSettingExplanation isIndented>
 								{ translate( '(e.g. drafts, scheduled, private, etc\u2026)' ) }
 							</FormSettingExplanation>
 						</li>
@@ -343,10 +276,10 @@ class SiteSettingsFormGeneral extends Component {
 	}
 
 	jetpackDisconnectOption() {
-		const { site, translate } = this.props;
+		const { site, siteIsJetpack, translate } = this.props;
 		const isAutomatedTransfer = get( site, 'options.is_automated_transfer', false );
 
-		if ( ! site.jetpack || isAutomatedTransfer ) {
+		if ( ! siteIsJetpack || isAutomatedTransfer ) {
 			return null;
 		}
 
@@ -363,12 +296,12 @@ class SiteSettingsFormGeneral extends Component {
 
 	holidaySnowOption() {
 		// Note that years and months below are zero indexed
-		const { fields, handleToggle, isRequestingSettings, moment, site, translate } = this.props,
+		const { fields, handleToggle, isRequestingSettings, moment, supportsHolidaySnowOption, translate } = this.props,
 			today = moment(),
 			startDate = moment( { year: today.year(), month: 11, day: 1 } ),
 			endDate = moment( { year: today.year(), month: 0, day: 4 } );
 
-		if ( site.jetpack && site.versionCompare( '4.0', '<' ) ) {
+		if ( ! supportsHolidaySnowOption ) {
 			return null;
 		}
 
@@ -397,8 +330,8 @@ class SiteSettingsFormGeneral extends Component {
 	}
 
 	Timezone() {
-		const { fields, isRequestingSettings, site, translate } = this.props;
-		if ( site.jetpack ) {
+		const { fields, isRequestingSettings, siteIsJetpack, translate } = this.props;
+		if ( siteIsJetpack ) {
 			return;
 		}
 
@@ -421,54 +354,9 @@ class SiteSettingsFormGeneral extends Component {
 		);
 	}
 
-	dateTimeFormat() {
-		if ( ! config.isEnabled( 'manage/site-settings/date-time-format' ) ) {
-			return null;
-		}
-
-		const {
-			fields: {
-				date_format: dateFormat,
-				start_of_week: startOfWeek,
-				time_format: timeFormat,
-				timezone_string: timezoneString,
-			},
-			moment,
-			site,
-			translate,
-		} = this.props;
-
-		const localizedDate = getLocalizedDate( timezoneString );
-		const weekday = startOfWeek
-			? moment.weekdays( parseInt( startOfWeek, 10 ) )
-			: moment.weekdays( 0 );
-
-		return (
-			<Card
-				className="site-settings__date-time-format"
-				href={ `/settings/date-time-format/${ site.slug }` }
-			>
-				<h2 className="site-settings__date-time-format-title">
-					{ translate( 'Date and Time Format' ) }
-				</h2>
-				<div className="site-settings__date-time-format-info">
-					{
-						dateFormat &&
-							localizedDate.format( phpToMomentDatetimeFormat( dateFormat ) )
-					} &bull; {
-						timeFormat &&
-							localizedDate.format( phpToMomentDatetimeFormat( timeFormat ) )
-					} &bull; {
-						translate( 'Week starts on %s', { args: weekday } )
-					}
-				</div>
-			</Card>
-		);
-	}
-
 	renderJetpackSyncPanel() {
-		const { site } = this.props;
-		if ( ! site.jetpack || site.versionCompare( '4.2-alpha', '<' ) ) {
+		const { supportsJetpackSync } = this.props;
+		if ( ! supportsJetpackSync ) {
 			return null;
 		}
 
@@ -493,19 +381,20 @@ class SiteSettingsFormGeneral extends Component {
 				>
 					{ translate(
 						'Use synchronized data to boost performance'
-					) }
+					) } (a8c-only experimental feature)
 				</CompactFormToggle>
 			</CompactCard>
 		);
 	}
 
 	showApiCacheCheckbox() {
+		const { supportsApiCacheCheckbox } = this.props;
+
 		if ( ! config.isEnabled( 'jetpack/api-cache' ) ) {
 			return false;
 		}
 
-		const { site } = this.props;
-		if ( ! site.jetpack || site.versionCompare( '4.4', '<=' ) ) {
+		if ( ! supportsApiCacheCheckbox ) {
 			return false;
 		}
 
@@ -518,9 +407,11 @@ class SiteSettingsFormGeneral extends Component {
 			isRequestingSettings,
 			isSavingSettings,
 			site,
+			siteIsJetpack,
+			siteSlug,
 			translate
 		} = this.props;
-		if ( site.jetpack && ! site.hasMinimumJetpackVersion ) {
+		if ( siteIsJetpack && ! site.hasMinimumJetpackVersion ) {
 			return this.jetpackDisconnectOption();
 		}
 
@@ -555,8 +446,6 @@ class SiteSettingsFormGeneral extends Component {
 					</form>
 				</Card>
 
-				{ this.dateTimeFormat() }
-
 				<SectionHeader label={ translate( 'Privacy' ) }>
 					<Button
 						compact={ true }
@@ -577,33 +466,33 @@ class SiteSettingsFormGeneral extends Component {
 					</form>
 				</Card>
 
-				{ this.renderAmpSection() }
-
 				{
-					! site.jetpack && <div className="site-settings__footer-credit-container">
+					! siteIsJetpack && <div className="site-settings__footer-credit-container">
 						<SectionHeader label={ translate( 'Footer Credit' ) } />
 						<CompactCard className="site-settings__footer-credit-explanation">
 							<p>
 								{ translate( 'You can customize your website by changing the footer credit in customizer.' ) }
 							</p>
 							<div>
-								<Button className="site-settings__footer-credit-change" href={ '/customize/identity/' + site.slug }>
+								<Button className="site-settings__footer-credit-change" href={ '/customize/identity/' + siteSlug }>
 									{ translate( 'Change footer credit' ) }
 								</Button>
 							</div>
 						</CompactCard>
-						{ ! isBusiness( site.plan ) && <UpgradeNudge
-							className="site-settings__footer-credit-nudge"
-							feature={ FEATURE_NO_BRANDING }
-							title={ translate( 'Remove the footer credit entirely with WordPress.com Business' ) }
-							message={ translate( 'Upgrade to remove the footer credit, add Google Analytics and more' ) }
-							icon="customize"
-						/> }
+						{
+							site && ! isBusiness( site.plan ) &&
+							<Banner
+								feature={ FEATURE_NO_BRANDING }
+								plan={ PLAN_BUSINESS }
+								title={ translate( 'Remove the footer credit entirely with WordPress.com Business' ) }
+								description={ translate( 'Upgrade to remove the footer credit, add Google Analytics and more' ) }
+							/>
+						}
 					</div>
 				}
 
-				{ this.props.site.jetpack
-					? <div>
+				{ siteIsJetpack
+					? <div className="site-settings__general-jetpack">
 						<SectionHeader label={ translate( 'Jetpack' ) }>
 							{ this.jetpackDisconnectOption() }
 							{ this.showPublicPostTypesCheckbox() || this.showApiCacheCheckbox()
@@ -626,7 +515,7 @@ class SiteSettingsFormGeneral extends Component {
 						{ this.renderApiCache() }
 						{ this.syncNonPublicPostTypes() }
 
-						<CompactCard href={ '../security/' + site.slug }>
+						<CompactCard href={ '../security/' + siteSlug }>
 							{ translate( 'View Jetpack Monitor Settings' ) }
 						</CompactCard>
 					</div>
@@ -636,11 +525,11 @@ class SiteSettingsFormGeneral extends Component {
 	}
 
 	_showWarning( site ) {
-		const { translate } = this.props;
+		const { siteIsJetpack, translate } = this.props;
 		if ( ! site || ! site.options ) {
 			return;
 		}
-		if ( site.jetpack && ! site.hasMinimumJetpackVersion ) {
+		if ( siteIsJetpack && ! site.hasMinimumJetpackVersion ) {
 			notices.warning(
 				translate( 'Jetpack %(version)s is required to manage Settings', {
 					args: { version: config( 'jetpack_min_version' ) }
@@ -654,21 +543,35 @@ class SiteSettingsFormGeneral extends Component {
 	}
 }
 
-export default wrapSettingsForm( settings => {
+const connectComponent = connect(
+	( state ) => {
+		const siteId = getSelectedSiteId( state );
+		const siteIsJetpack = isJetpackSite( state, siteId );
+
+		return {
+			siteIsJetpack,
+			siteSlug: getSelectedSiteSlug( state ),
+			supportsPublicPostTypesCheckbox: siteIsJetpack && ! isJetpackMinimumVersion( state, siteId, '4.2' ),
+			supportsHolidaySnowOption: siteIsJetpack && isJetpackMinimumVersion( state, siteId, '4.0' ),
+			supportsJetpackSync: siteIsJetpack && isJetpackMinimumVersion( state, siteId, '4.2-alpha' ),
+			supportsApiCacheCheckbox: siteIsJetpack && isJetpackMinimumVersion( state, siteId, '4.4.1' ),
+		};
+	},
+	null,
+	null,
+	{ pure: false }
+);
+
+const getFormSettings = settings => {
 	const defaultSettings = {
 		blogname: '',
 		blogdescription: '',
 		lang_id: '',
 		timezone_string: '',
-		date_format: '',
-		time_format: '',
-		start_of_week: 0,
 		blog_public: '',
 		admin_url: '',
 		jetpack_sync_non_public_post_stati: false,
 		holidaysnow: false,
-		amp_is_supported: false,
-		amp_is_enabled: false,
 		api_cache: false,
 	};
 
@@ -683,13 +586,7 @@ export default wrapSettingsForm( settings => {
 		lang_id: settings.lang_id,
 		blog_public: settings.blog_public,
 		timezone_string: settings.timezone_string,
-		date_format: settings.date_format,
-		time_format: settings.time_format,
-		start_of_week: settings.start_of_week,
 		jetpack_sync_non_public_post_stati: settings.jetpack_sync_non_public_post_stati,
-
-		amp_is_supported: settings.amp_is_supported,
-		amp_is_enabled: settings.amp_is_enabled,
 
 		holidaysnow: !! settings.holidaysnow,
 
@@ -710,4 +607,9 @@ export default wrapSettingsForm( settings => {
 	}
 
 	return formSettings;
-} )( SiteSettingsFormGeneral );
+};
+
+export default flowRight(
+	connectComponent,
+	wrapSettingsForm( getFormSettings )
+)( SiteSettingsFormGeneral );

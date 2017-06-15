@@ -1,9 +1,4 @@
 /**
- * External dependencies
- */
-import { combineReducers } from 'redux';
-
-/**
  * Internal dependencies
  */
 import {
@@ -12,9 +7,11 @@ import {
 	PREVIEW_IS_SHOWING,
 	SERIALIZE,
 	DESERIALIZE,
+	NOTIFICATIONS_PANEL_TOGGLE,
 } from 'state/action-types';
-import { createReducer } from 'state/utils';
+import { combineReducers, createReducer } from 'state/utils';
 import editor from './editor/reducer';
+import dropZone from './drop-zone/reducer';
 import guidedTour from './guided-tours/reducer';
 import queryArguments from './query-arguments/reducer';
 import reader from './reader/reducer';
@@ -42,6 +39,10 @@ export function selectedSiteId( state = null, action ) {
 
 	return state;
 }
+
+export const siteSelectionInitialized = createReducer( false, {
+	[ SELECTED_SITE_SET ]: () => true,
+} );
 
 //TODO: do we really want to mix strings and booleans?
 export function section( state = false, action ) {
@@ -73,6 +74,19 @@ export const isPreviewShowing = createReducer( false, {
 		isShowing !== undefined ? isShowing : state,
 } );
 
+/**
+ * Tracks if the notifications panel is open
+ * @param  {Object} state  Current state
+ * @param  {Object} action Action payload
+ * @return {Object}        Updated state
+ */
+export const isNotificationsOpen = function( state = false, { type } ) {
+	if ( type === NOTIFICATIONS_PANEL_TOGGLE ) {
+		return ! state;
+	}
+	return state;
+};
+
 const reducer = combineReducers( {
 	section,
 	isLoading,
@@ -81,6 +95,8 @@ const reducer = combineReducers( {
 	isPreviewShowing,
 	queryArguments,
 	selectedSiteId,
+	siteSelectionInitialized,
+	dropZone,
 	guidedTour,
 	editor,
 	reader,
@@ -91,12 +107,16 @@ const reducer = combineReducers( {
 	mediaModal,
 	themeSetup,
 	npsSurveyNotice,
+	isNotificationsOpen,
 } );
 
-export default function( state, action ) {
+const ui = function( state, action ) {
 	if ( SERIALIZE === action.type || DESERIALIZE === action.type ) {
 		return {};
 	}
 
 	return reducer( state, action );
-}
+};
+ui.hasCustomPersistence = true;
+
+export default ui;

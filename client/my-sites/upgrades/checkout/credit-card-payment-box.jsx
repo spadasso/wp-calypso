@@ -16,11 +16,13 @@ var PayButton = require( './pay-button' ),
 	cartValues = require( 'lib/cart-values' ),
 	transactionStepTypes = require( 'lib/store-transactions/step-types' );
 
+import { abtest } from 'lib/abtest';
 import CartCoupon from 'my-sites/upgrades/cart/cart-coupon';
 import PaymentChatButton from './payment-chat-button';
 import config from 'config';
 import { PLAN_BUSINESS } from 'lib/plans/constants';
 import ProgressBar from 'components/progress-bar';
+import CartToggle from './cart-toggle';
 
 var CreditCardPaymentBox = React.createClass( {
 	getInitialState: function() {
@@ -94,7 +96,9 @@ var CreditCardPaymentBox = React.createClass( {
 	paymentButtons: function() {
 		const cart = this.props.cart,
 			hasBusinessPlanInCart = some( cart.products, { product_slug: PLAN_BUSINESS } ),
-			showPaymentChatButton = config.isEnabled( 'upgrades/presale-chat' ) && hasBusinessPlanInCart,
+			showPaymentChatButton = config.isEnabled( 'upgrades/presale-chat' ) &&
+				abtest( 'presaleChatButton' ) === 'showChatButton' &&
+				hasBusinessPlanInCart,
 			paypalButtonClasses = classnames( 'credit-card-payment-box__switch-link', {
 				'credit-card-payment-box__switch-link-left': showPaymentChatButton
 			} );
@@ -109,6 +113,10 @@ var CreditCardPaymentBox = React.createClass( {
 					? <a className={ paypalButtonClasses } href="" onClick={ this.handleToggle }>{ this.translate( 'or use PayPal' ) }</a>
 					: null
 				}
+
+				<CartCoupon cart={ cart } />
+
+				<CartToggle />
 
 				{
 					showPaymentChatButton &&
@@ -155,8 +163,6 @@ var CreditCardPaymentBox = React.createClass( {
 
 				<TermsOfService
 					hasRenewableSubscription={ cartValues.cartItems.hasRenewableSubscription( cart ) } />
-
-				<CartCoupon cart={ cart } />
 
 				{ this.paymentBoxActions() }
 			</form>

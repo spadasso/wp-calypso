@@ -22,7 +22,6 @@ import { localize } from 'i18n-calypso';
 /**
  * Internal dependencies
  */
-import { abtest } from 'lib/abtest';
 import wpcom from 'lib/wp';
 import Notice from 'components/notice';
 import { checkDomainAvailability, getFixedDomainSearch } from 'lib/domains';
@@ -36,6 +35,7 @@ import DomainSearchResults from 'components/domains/domain-search-results';
 import ExampleDomainSuggestions from 'components/domains/example-domain-suggestions';
 import analyticsMixin from 'lib/mixins/analytics';
 import { getCurrentUser } from 'state/current-user/selectors';
+import QueryContactDetailsCache from 'components/data/query-contact-details-cache';
 import QueryDomainsSuggestions from 'components/data/query-domains-suggestions';
 import {
 	getDomainsSuggestions,
@@ -246,6 +246,7 @@ const RegisterDomainStep = React.createClass( {
 				}
 				{ this.content() }
 				{ queryObject && <QueryDomainsSuggestions { ...queryObject } /> }
+				<QueryContactDetailsCache />
 			</div>
 		);
 	},
@@ -382,34 +383,32 @@ const RegisterDomainStep = React.createClass( {
 					return suggestion.domain_name;
 				} );
 
-				if ( abtest( 'domainSuggestionNudgeLabels' ) === 'withLabels' ) {
-					const isFreeOrUnknown = ( suggestion ) => (
-							suggestion.is_free === true ||
-							suggestion.status === domainAvailability.UNKNOWN
-						),
-						strippedDomainBase = this.getStrippedDomainBase( domain ),
-						exactMatchBeforeTld = ( suggestion ) => (
-							startsWith( suggestion.domain_name, `${ strippedDomainBase }.` )
-						),
-						bestAlternative = ( suggestion ) => (
-							! exactMatchBeforeTld( suggestion ) &&
-							suggestion.isRecommended !== true
-						),
-						availableSuggestions = reject( suggestions, isFreeOrUnknown );
+				const isFreeOrUnknown = ( suggestion ) => (
+						suggestion.is_free === true ||
+						suggestion.status === domainAvailability.UNKNOWN
+					),
+					strippedDomainBase = this.getStrippedDomainBase( domain ),
+					exactMatchBeforeTld = ( suggestion ) => (
+						startsWith( suggestion.domain_name, `${ strippedDomainBase }.` )
+					),
+					bestAlternative = ( suggestion ) => (
+						! exactMatchBeforeTld( suggestion ) &&
+						suggestion.isRecommended !== true
+					),
+					availableSuggestions = reject( suggestions, isFreeOrUnknown );
 
-					const recommendedSuggestion = find( availableSuggestions, exactMatchBeforeTld );
-					if ( recommendedSuggestion ) {
-						recommendedSuggestion.isRecommended = true;
-					} else if ( availableSuggestions.length > 0 ) {
-						availableSuggestions[ 0 ].isRecommended = true;
-					}
+				const recommendedSuggestion = find( availableSuggestions, exactMatchBeforeTld );
+				if ( recommendedSuggestion ) {
+					recommendedSuggestion.isRecommended = true;
+				} else if ( availableSuggestions.length > 0 ) {
+					availableSuggestions[ 0 ].isRecommended = true;
+				}
 
-					const bestAlternativeSuggestion = find( availableSuggestions, bestAlternative );
-					if ( bestAlternativeSuggestion ) {
-						bestAlternativeSuggestion.isBestAlternative = true;
-					} else if ( availableSuggestions.length > 1 ) {
-						availableSuggestions[ 1 ].isBestAlternative = true;
-					}
+				const bestAlternativeSuggestion = find( availableSuggestions, bestAlternative );
+				if ( bestAlternativeSuggestion ) {
+					bestAlternativeSuggestion.isBestAlternative = true;
+				} else if ( availableSuggestions.length > 1 ) {
+					availableSuggestions[ 1 ].isBestAlternative = true;
 				}
 
 				this.setState( {
@@ -446,6 +445,7 @@ const RegisterDomainStep = React.createClass( {
 			domainRegistrationSuggestions = suggestions.map( function( suggestion ) {
 				return (
 					<DomainRegistrationSuggestion
+						isSignupStep={ this.props.isSignupStep }
 						suggestion={ suggestion }
 						key={ suggestion.domain_name }
 						cart={ this.props.cart }
@@ -457,6 +457,7 @@ const RegisterDomainStep = React.createClass( {
 
 			domainMappingSuggestion = (
 				<DomainMappingSuggestion
+					isSignupStep={ this.props.isSignupStep }
 					onButtonClick={ this.goToMapDomainStep }
 					selectedSite={ this.props.selectedSite }
 					domainsWithPlansOnly={ this.props.domainsWithPlansOnly }
@@ -513,6 +514,7 @@ const RegisterDomainStep = React.createClass( {
 				selectedSite={ this.props.selectedSite }
 				offerMappingOption={ this.props.offerMappingOption }
 				placeholderQuantity={ SUGGESTION_QUANTITY }
+				isSignupStep={ this.props.isSignupStep }
 				cart={ this.props.cart } />
 		);
 	},

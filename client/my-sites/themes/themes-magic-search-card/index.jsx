@@ -4,7 +4,7 @@
 import React, { PropTypes } from 'react';
 import wrapWithClickOutside from 'react-click-outside';
 import { connect } from 'react-redux';
-import { debounce } from 'lodash';
+import { debounce, intersection, difference, includes } from 'lodash';
 import classNames from 'classnames';
 import Gridicon from 'gridicons';
 
@@ -17,11 +17,14 @@ import Suggestions from 'components/suggestions';
 import StickyPanel from 'components/sticky-panel';
 import config from 'config';
 import { isMobile } from 'lib/viewport';
-import { filterIsValid, getTaxonomies, } from '../theme-filters.js';
 import { localize } from 'i18n-calypso';
 import MagicSearchWelcome from './welcome';
 import { isJetpackSite } from 'state/sites/selectors';
 import { getSelectedSiteId } from 'state/ui/selectors';
+import { getThemeFilters, getThemeFilterToTermTable } from 'state/selectors';
+
+//We want those taxonomies if they are used to be presented in this order
+const preferredOrderOfTaxonomies = [ 'feature', 'layout', 'column', 'subject', 'style' ];
 
 class ThemesMagicSearchCard extends React.Component {
 	constructor( props ) {
@@ -145,7 +148,9 @@ class ThemesMagicSearchCard extends React.Component {
 		// Get rid of empty match at end
 		tokens[ tokens.length - 1 ] === '' && tokens.splice( tokens.length - 1, 1 );
 		const tokenIndex = this.findEditedTokenIndex( tokens, this.state.cursorPosition );
-		tokens[ tokenIndex ] = suggestion;
+		// Check if we want to add additional sapce after suggestion so next suggestions card can be opened immediately
+		const hasNextTokenFirstSpace = tokens[ tokenIndex + 1 ] && tokens[ tokenIndex + 1 ][ 0 ] === ' ';
+		tokens[ tokenIndex ] = hasNextTokenFirstSpace ? suggestion : suggestion + ' ';
 		return tokens.join( '' );
 	}
 
@@ -172,7 +177,7 @@ class ThemesMagicSearchCard extends React.Component {
 			tokens.map( ( token, i ) => {
 				if ( token.trim() === '' ) {
 					return <span className="themes-magic-search-card__search-white-space" key={ i }>{ token }</span>; // use shortid for key
-				} else if ( filterIsValid( token ) ) {
+				} else if ( includes( this.props.allValidFilters, token ) ) {
 					const separator = ':';
 					const [ taxonomy, filter ] = token.split( separator );
 					const themesTokenTypeClass = classNames(
@@ -225,7 +230,7 @@ class ThemesMagicSearchCard extends React.Component {
 	}
 
 	render() {
-		const { isJetpack, translate } = this.props;
+		const { isJetpack, translate, filters } = this.props;
 		const isPremiumThemesEnabled = config.isEnabled( 'upgrades/premium-themes' );
 
 		const tiers = [
@@ -234,8 +239,10 @@ class ThemesMagicSearchCard extends React.Component {
 			{ value: 'premium', label: translate( 'Premium' ) },
 		];
 
-		const taxonomies = getTaxonomies();
-		const taxonomiesKeys = Object.keys( taxonomies );
+		const filtersKeys = [
+			...intersection( preferredOrderOfTaxonomies, Object.keys( filters ) ),
+			...difference( Object.keys( filters ), preferredOrderOfTaxonomies )
+		];
 
 		const searchField = (
 			<Search
@@ -297,22 +304,24 @@ class ThemesMagicSearchCard extends React.Component {
 						}
 					</div>
 				</StickyPanel>
-				{ renderSuggestions &&
-					<Suggestions
-						ref="suggestions"
-						terms={ taxonomies }
-						input={ this.state.editedSearchElement }
-						suggest={ this.suggest }
-					/>
-				}
-				{ ! renderSuggestions &&
-					<MagicSearchWelcome
-						ref="welcome"
-						taxonomies={ taxonomiesKeys }
-						topSearches={ [] }
-						suggestionsCallback={ this.insertTextInInput }
-					/>
-				}
+				<div onClick={ this.handleClickInside }>
+					{ renderSuggestions &&
+						<Suggestions
+							ref="suggestions"
+							terms={ this.props.filters }
+							input={ this.state.editedSearchElement }
+							suggest={ this.suggest }
+						/>
+					}
+					{ ! renderSuggestions &&
+						<MagicSearchWelcome
+							ref="welcome"
+							taxonomies={ filtersKeys }
+							topSearches={ [] }
+							suggestionsCallback={ this.insertTextInInput }
+						/>
+					}
+				</div>
 			</div>
 		);
 	}
@@ -334,6 +343,8 @@ ThemesMagicSearchCard.defaultProps = {
 
 export default connect(
 	( state ) => ( {
-		isJetpack: isJetpackSite( state, getSelectedSiteId( state ) )
+		isJetpack: isJetpackSite( state, getSelectedSiteId( state ) ),
+		filters: getThemeFilters( state ),
+		allValidFilters: Object.keys( getThemeFilterToTermTable( state ) ),
 	} )
 )( localize( wrapWithClickOutside( ThemesMagicSearchCard ) ) );

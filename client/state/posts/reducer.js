@@ -1,13 +1,13 @@
 /**
  * External dependencies
  */
-import { combineReducers } from 'redux';
 import { get, set, omit, omitBy, isEqual, reduce, merge, findKey, mapValues, mapKeys } from 'lodash';
 
 /**
  * Internal dependencies
  */
 import PostQueryManager from 'lib/query-manager/post';
+import { combineReducers, createReducer, isValidStateWithSchema } from 'state/utils';
 import {
 	EDITOR_START,
 	EDITOR_STOP,
@@ -31,13 +31,13 @@ import {
 } from 'state/action-types';
 import counts from './counts/reducer';
 import likes from './likes/reducer';
+import revisions from './revisions/reducer';
 import {
 	getSerializedPostsQuery,
 	isTermsEqual,
 	mergeIgnoringArrays,
 	normalizePostForState
 } from './utils';
-import { createReducer, isValidStateWithSchema } from 'state/utils';
 import { itemsSchema, queriesSchema } from './schema';
 
 /**
@@ -97,10 +97,6 @@ export function siteRequests( state = {}, action ) {
 					[ action.postId ]: POST_REQUEST === action.type
 				} )
 			} );
-
-		case SERIALIZE:
-		case DESERIALIZE:
-			return {};
 	}
 
 	return state;
@@ -124,10 +120,6 @@ export function queryRequests( state = {}, action ) {
 			return Object.assign( {}, state, {
 				[ serializedQuery ]: POSTS_REQUEST === action.type
 			} );
-
-		case SERIALIZE:
-		case DESERIALIZE:
-			return {};
 	}
 
 	return state;
@@ -298,10 +290,6 @@ export function edits( state = {}, action ) {
 					'' === key ? savedPost.ID : key
 				) )
 			};
-
-		case SERIALIZE:
-		case DESERIALIZE:
-			return {};
 	}
 
 	return state;
@@ -315,4 +303,5 @@ export default combineReducers( {
 	queries,
 	edits,
 	likes,
+	revisions,
 } );

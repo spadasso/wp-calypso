@@ -4,11 +4,15 @@
 import React, { Component, PropTypes } from 'react';
 import { localize } from 'i18n-calypso';
 import { connect } from 'react-redux';
+import Gridicon from 'gridicons';
 
 /**
  * Internal dependencies
  */
+import Banner from 'components/banner';
 import FoldableCard from 'components/foldable-card';
+import Card from 'components/card';
+import CompactCard from 'components/card/compact';
 import SectionHeader from 'components/section-header';
 import FormFieldset from 'components/forms/form-fieldset';
 import FormLegend from 'components/forms/form-legend';
@@ -18,9 +22,12 @@ import InfoPopover from 'components/info-popover';
 import ExternalLink from 'components/external-link';
 import QueryJetpackConnection from 'components/data/query-jetpack-connection';
 import QuerySiteRoles from 'components/data/query-site-roles';
-import { getSelectedSiteId } from 'state/ui/selectors';
+import { getStatsPathForTab } from 'lib/route/path';
+import { getSelectedSiteId, getSelectedSiteSlug } from 'state/ui/selectors';
 import { getSiteRoles } from 'state/site-roles/selectors';
+import { activateModule } from 'state/jetpack/modules/actions';
 import {
+	isActivatingJetpackModule,
 	isJetpackModuleActive,
 	isJetpackModuleUnavailableInDevelopmentMode,
 	isJetpackSiteInDevelopmentMode
@@ -54,6 +61,14 @@ class JetpackSiteStats extends Component {
 
 			setFieldValue( groupName, groupFields, true );
 		};
+	};
+
+	handleStatsActivationButton = ( event ) => {
+		const { siteId } = this.props;
+
+		this.props.activateModule( siteId, 'stats' );
+
+		event.preventDefault();
 	};
 
 	getCurrentGroupFields( groupName ) {
@@ -95,21 +110,38 @@ class JetpackSiteStats extends Component {
 		);
 	}
 
-	render() {
-		const {
-			siteId,
-			siteRoles,
-			translate
-		} = this.props;
-		const header = translate( 'Collecting valuable traffic stats and insights' );
+	renderModuleEnableBanner() {
+		const { translate } = this.props;
 
 		return (
-			<div className="site-settings__traffic-settings">
-				<QueryJetpackConnection siteId={ siteId } />
-				<QuerySiteRoles siteId={ siteId } />
+			<Banner
+				title={ translate( 'Site Stats module is disabled' ) }
+				description={
+					translate( 'Enable this to see detailed information about your traffic, likes, comments, and subscribers.' )
+				}
+				callToAction={ translate( 'Enable' ) }
+				onClick={ this.handleStatsActivationButton }
+				event={ 'site_stats_module_enable_banner' }
+				icon="stats"
+			/>
+		);
+	}
 
-				<SectionHeader label={ translate( 'Site stats' ) } />
+	renderCardSettings() {
+		const {
+			siteRoles,
+			siteSlug,
+			translate
+		} = this.props;
+		const header = (
+			<div>
+				<Gridicon icon="checkmark" />
+				{ translate( 'Enabled! You\'re collecting valuable data and insights.' ) }
+			</div>
+		);
 
+		return (
+			<div>
 				<FoldableCard
 					className="site-settings__foldable-card is-top-level"
 					header={ header }
@@ -117,22 +149,18 @@ class JetpackSiteStats extends Component {
 				>
 					<FormFieldset>
 						<div className="site-settings__info-link-container">
-							<InfoPopover position={ 'left' }>
-								<ExternalLink href={ 'https://jetpack.com/support/wordpress-com-stats/' } target="_blank">
+							<InfoPopover position="left">
+								<ExternalLink href="https://jetpack.com/support/wordpress-com-stats/" target="_blank">
 									{ translate( 'Learn more about WordPress.com Stats' ) }
 								</ExternalLink>
 							</InfoPopover>
 						</div>
 
 						{ this.renderToggle( 'admin_bar', translate( 'Put a chart showing 48 hours of views in the admin bar' ) ) }
-						{ this.renderToggle( 'hide_smile', (
-							<div>
-								{ translate( 'Hide the stats smiley face image' ) }
-								<FormSettingExplanation>
-									{ translate( 'The image helps collect stats, but should work when hidden.' ) }
-								</FormSettingExplanation>
-							</div>
-						) ) }
+						{ this.renderToggle( 'hide_smile', translate( 'Hide the stats smiley face image' ) ) }
+						<FormSettingExplanation isIndented>
+							{ translate( 'The image helps collect stats, but should work when hidden.' ) }
+						</FormSettingExplanation>
 					</FormFieldset>
 
 					<FormFieldset>
@@ -169,6 +197,54 @@ class JetpackSiteStats extends Component {
 						}
 					</FormFieldset>
 				</FoldableCard>
+
+				<CompactCard href={ getStatsPathForTab( 'day', siteSlug ) }>
+					{ translate( 'View your site stats' ) }
+				</CompactCard>
+			</div>
+		);
+	}
+
+	renderPlaceholder() {
+		return (
+			<Card className="site-settings__card is-placeholder">
+				<div />
+			</Card>
+		);
+	}
+
+	renderCardContent() {
+		const {
+			activatingStatsModule,
+			statsModuleActive
+		} = this.props;
+
+		if ( activatingStatsModule ) {
+			return this.renderPlaceholder();
+		}
+
+		if ( statsModuleActive === true ) {
+			return this.renderCardSettings();
+		} else if ( statsModuleActive === false ) {
+			return this.renderModuleEnableBanner();
+		}
+		return this.renderPlaceholder();
+	}
+
+	render() {
+		const {
+			siteId,
+			translate
+		} = this.props;
+
+		return (
+			<div className="site-settings__traffic-settings">
+				<QueryJetpackConnection siteId={ siteId } />
+				<QuerySiteRoles siteId={ siteId } />
+
+				<SectionHeader label={ translate( 'Site stats' ) } />
+
+				{ this.renderCardContent() }
 			</div>
 		);
 	}
@@ -182,9 +258,14 @@ export default connect(
 
 		return {
 			siteId,
-			statsModuleActive: !! isJetpackModuleActive( state, siteId, 'stats' ),
+			siteSlug: getSelectedSiteSlug( state, siteId ),
+			activatingStatsModule: isActivatingJetpackModule( state, siteId, 'stats' ),
+			statsModuleActive: isJetpackModuleActive( state, siteId, 'stats' ),
 			moduleUnavailable: siteInDevMode && moduleUnavailableInDevMode,
 			siteRoles: getSiteRoles( state, siteId ),
 		};
+	},
+	{
+		activateModule
 	}
 )( localize( JetpackSiteStats ) );

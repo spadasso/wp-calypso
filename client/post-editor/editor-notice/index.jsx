@@ -4,10 +4,12 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { localize } from 'i18n-calypso';
+import classNames from 'classnames';
 
 /**
  * Internal dependencies
  */
+import config from 'config';
 import NoticeAction from 'components/notice/notice-action';
 import Notice from 'components/notice';
 import { getSelectedSiteId, getSelectedSite } from 'state/ui/selectors';
@@ -31,7 +33,7 @@ export class EditorNotice extends Component {
 		action: PropTypes.string,
 		link: PropTypes.string,
 		onViewClick: PropTypes.func,
-		isSitePreviewable: PropTypes.bool,
+		isPreviewable: PropTypes.bool,
 		onDismissClick: PropTypes.func,
 		error: PropTypes.object
 	}
@@ -89,9 +91,10 @@ export class EditorNotice extends Component {
 				}
 
 				if ( 'page' === type ) {
-					return translate( 'Page published on {{siteLink/}}!', {
+					return translate( 'Page published on {{siteLink/}}! {{a}}Add another page{{/a}}', {
 						components: {
-							siteLink: <a href={ site.URL } target="_blank" rel="noopener noreferrer">{ site.title }</a>
+							siteLink: <a href={ site.URL } target="_blank" rel="noopener noreferrer">{ site.title }</a>,
+							a: <a href={ `/page/${ site.slug }` } />,
 						},
 						comment: 'Editor: Message displayed when a page is published, with a link to the site it was published on.'
 					} );
@@ -114,9 +117,10 @@ export class EditorNotice extends Component {
 				}
 
 				if ( 'page' === type ) {
-					return translate( 'Page scheduled on {{siteLink/}}!', {
+					return translate( 'Page scheduled on {{siteLink/}}! {{a}}Add another page{{/a}}', {
 						components: {
-							siteLink: <a href={ site.URL } target="_blank" rel="noopener noreferrer">{ site.title }</a>
+							siteLink: <a href={ site.URL } target="_blank" rel="noopener noreferrer">{ site.title }</a>,
+							a: <a href={ `/page/${ site.slug }` } />,
 						},
 						comment: 'Editor: Message displayed when a page is scheduled, with a link to the site it was scheduled on.'
 					} );
@@ -139,9 +143,10 @@ export class EditorNotice extends Component {
 				}
 
 				if ( 'page' === type ) {
-					return translate( 'Page privately published on {{siteLink/}}!', {
+					return translate( 'Page privately published on {{siteLink/}}! {{a}}Add another page{{/a}}', {
 						components: {
-							siteLink: <a href={ site.URL } target="_blank" rel="noopener noreferrer">{ site.title }</a>
+							siteLink: <a href={ site.URL } target="_blank" rel="noopener noreferrer">{ site.title }</a>,
+							a: <a href={ `/page/${ site.slug }` } />,
 						},
 						comment: 'Editor: Message displayed when a page is published privately,' +
 							' with a link to the site it was published on.'
@@ -178,9 +183,10 @@ export class EditorNotice extends Component {
 				}
 
 				if ( 'page' === type ) {
-					return translate( 'Page updated on {{siteLink/}}!', {
+					return translate( 'Page updated on {{siteLink/}}! {{a}}Add another page{{/a}}', {
 						components: {
-							siteLink: <a href={ site.URL } target="_blank" rel="noopener noreferrer">{ site.title }</a>
+							siteLink: <a href={ site.URL } target="_blank" rel="noopener noreferrer">{ site.title }</a>,
+							a: <a href={ `/page/${ site.slug }` } />,
 						},
 						comment: 'Editor: Message displayed when a page is updated, with a link to the site it was updated on.'
 					} );
@@ -196,8 +202,13 @@ export class EditorNotice extends Component {
 	}
 
 	renderNoticeAction() {
-		const { onViewClick, action, link, isSitePreviewable } = this.props;
-		if ( onViewClick && isSitePreviewable && link ) {
+		const {
+			action,
+			link,
+			isPreviewable,
+			onViewClick,
+		} = this.props;
+		if ( onViewClick && isPreviewable && link ) {
 			return (
 				<NoticeAction onClick={ onViewClick }>
 					{ this.getText( action ) }
@@ -217,14 +228,18 @@ export class EditorNotice extends Component {
 	render() {
 		const { siteId, message, status, onDismissClick } = this.props;
 		const text = this.getErrorMessage() || this.getText( message );
+		const classes = classNames( 'editor-notice', {
+			'is-global': config.isEnabled( 'post-editor/delta-post-publish-preview' ),
+		} );
 
 		return (
-			<div className="editor-notice">
+			<div className={ classes }>
 				{ siteId && <QueryPostTypes siteId={ siteId } /> }
 				{ text && (
 					<Notice
 						{ ...{ status, text, onDismissClick } }
-						showDismiss={ true }>
+						showDismiss={ true }
+					>
 						{ this.renderNoticeAction() }
 					</Notice>
 				) }
@@ -245,6 +260,6 @@ export default connect( ( state ) => {
 		site: getSelectedSite( state ),
 		type: post.type,
 		typeObject: getPostType( state, siteId, post.type ),
-		isSitePreviewable: isSitePreviewable( state, siteId ),
+		isPreviewable: isSitePreviewable( state, siteId ),
 	};
 }, { setLayoutFocus } )( localize( EditorNotice ) );

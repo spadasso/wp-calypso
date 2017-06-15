@@ -9,16 +9,23 @@
  * Internal dependencies
  */
 import {
+	HAPPYCHAT_BLUR,
+	HAPPYCHAT_CONNECT,
 	HAPPYCHAT_CONNECTING,
 	HAPPYCHAT_CONNECTED,
+	HAPPYCHAT_DISCONNECTED,
+	HAPPYCHAT_INITIALIZE,
+	HAPPYCHAT_FOCUS,
 	HAPPYCHAT_RECEIVE_EVENT,
-	HAPPYCHAT_SEND_BROWSER_INFO,
+	HAPPYCHAT_RECONNECTING,
+	HAPPYCHAT_SEND_USER_INFO,
 	HAPPYCHAT_SEND_MESSAGE,
 	HAPPYCHAT_SET_AVAILABLE,
 	HAPPYCHAT_SET_CHAT_STATUS,
 	HAPPYCHAT_SET_MESSAGE,
 	HAPPYCHAT_TRANSCRIPT_RECEIVE,
 	HAPPYCHAT_TRANSCRIPT_REQUEST,
+	HAPPYCHAT_SET_GEO_LOCATION,
 } from 'state/action-types';
 
 export const setHappychatChatStatus = status => ( {
@@ -29,7 +36,16 @@ export const receiveChatTranscript = ( messages, timestamp ) => ( {
 	type: HAPPYCHAT_TRANSCRIPT_RECEIVE, messages, timestamp
 } );
 
-export const setChatConnected = () => ( { type: HAPPYCHAT_CONNECTED } );
+export const initialize = () => ( { type: HAPPYCHAT_INITIALIZE } );
+
+export const blur = () => ( { type: HAPPYCHAT_BLUR } );
+export const focus = () => ( { type: HAPPYCHAT_FOCUS } );
+
+export const connectChat = () => ( { type: HAPPYCHAT_CONNECT } );
+export const setConnected = () => ( { type: HAPPYCHAT_CONNECTED } );
+export const setConnecting = () => ( { type: HAPPYCHAT_CONNECTING } );
+export const setDisconnected = errorStatus => ( { type: HAPPYCHAT_DISCONNECTED, errorStatus } );
+export const setReconnecting = () => ( { type: HAPPYCHAT_RECONNECTING } );
 
 export const setHappychatAvailable = isAvailable => ( { type: HAPPYCHAT_SET_AVAILABLE, isAvailable } );
 
@@ -38,8 +54,20 @@ export const clearChatMessage = () => setChatMessage( '' );
 
 export const receiveChatEvent = event => ( { type: HAPPYCHAT_RECEIVE_EVENT, event } );
 
-export const sendBrowserInfo = siteUrl => ( { type: HAPPYCHAT_SEND_BROWSER_INFO, siteUrl } );
-
-export const connectChat = () => ( { type: HAPPYCHAT_CONNECTING } );
+export const sendUserInfo = siteUrl => ( { type: HAPPYCHAT_SEND_USER_INFO, siteUrl } );
 
 export const sendChatMessage = message => ( { type: HAPPYCHAT_SEND_MESSAGE, message } );
+
+/**
+ * Returns an action object to be used in signalling that the current user geo location
+ * has been set.
+ *
+ * @param  {Object} geoLocation Geo location information based on ip
+ * @return {Object}        Action object
+ */
+export function setGeoLocation( geoLocation ) {
+	return {
+		type: HAPPYCHAT_SET_GEO_LOCATION,
+		geoLocation
+	};
+}

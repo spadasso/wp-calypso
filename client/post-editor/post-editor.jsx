@@ -24,22 +24,23 @@ const actions = require( 'lib/posts/actions' ),
 	EditorWordCount = require( 'post-editor/editor-word-count' ),
 	SegmentedControl = require( 'components/segmented-control' ),
 	SegmentedControlItem = require( 'components/segmented-control/item' ),
-	observe = require( 'lib/mixins/data-observe' ),
 	InvalidURLDialog = require( 'post-editor/invalid-url-dialog' ),
 	RestorePostDialog = require( 'post-editor/restore-post-dialog' ),
-	VerifyEmailDialog = require( 'post-editor/verify-email-dialog' ),
+	VerifyEmailDialog = require( 'components/email-verification/email-verification-dialog' ),
 	utils = require( 'lib/posts/utils' ),
 	EditorPreview = require( './editor-preview' ),
 	stats = require( 'lib/posts/stats' ),
 	analytics = require( 'lib/analytics' );
 
-import { getSelectedSiteId } from 'state/ui/selectors';
+import config from 'config';
+import { getSelectedSiteId, getSelectedSite } from 'state/ui/selectors';
 import { setEditorLastDraft, resetEditorLastDraft } from 'state/ui/editor/last-draft/actions';
 import { getEditorPostId, getEditorPath } from 'state/ui/editor/selectors';
-import { receivePost, savePostSuccess } from 'state/posts/actions';
+import { editPost, receivePost, savePostSuccess } from 'state/posts/actions';
 import { getPostEdits, isEditedPostDirty } from 'state/posts/selectors';
 import { getCurrentUserId } from 'state/current-user/selectors';
 import { hasBrokenSiteUserConnection } from 'state/selectors';
+import EditorConfirmationSidebar from 'post-editor/editor-confirmation-sidebar';
 import EditorDocumentHead from 'post-editor/editor-document-head';
 import EditorPostTypeUnsupported from 'post-editor/editor-post-type-unsupported';
 import EditorForbidden from 'post-editor/editor-forbidden';
@@ -67,7 +68,6 @@ export const PostEditor = React.createClass( {
 		setLayoutFocus: React.PropTypes.func.isRequired,
 		editorModePreference: React.PropTypes.string,
 		editorSidebarPreference: React.PropTypes.string,
-		sites: React.PropTypes.object,
 		user: React.PropTypes.object,
 		userUtils: React.PropTypes.object,
 		editPath: React.PropTypes.string,
@@ -79,20 +79,19 @@ export const PostEditor = React.createClass( {
 
 	_previewWindow: null,
 
-	mixins: [
-		observe( 'sites' )
-	],
-
 	getInitialState() {
 		return {
 			...this.getPostEditState(),
+			confirmationSidebar: 'closed',
 			isSaving: false,
 			isPublishing: false,
 			notice: null,
 			showVerifyEmailDialog: false,
 			showAutosaveDialog: true,
 			isLoadingAutosave: false,
-			isTitleFocused: false
+			isTitleFocused: false,
+			showPreview: false,
+			isPostPublishPreview: false,
 		};
 	},
 
@@ -142,7 +141,7 @@ export const PostEditor = React.createClass( {
 	componentDidMount: function() {
 		// if content is passed in, e.g., through url param
 		if ( this.state.post && this.state.post.content ) {
-			this.refs.editor.setEditorContent( this.state.post.content, { initial: true } );
+			this.editor.setEditorContent( this.state.post.content, { initial: true } );
 		}
 	},
 
@@ -172,6 +171,10 @@ export const PostEditor = React.createClass( {
 		}
 	},
 
+	storeEditor( ref ) {
+		this.editor = ref;
+	},
+
 	useDefaultSidebarFocus( nextProps ) {
 		const props = nextProps || this.props;
 		if ( ! isMobile() && ( props.editorSidebarPreference === 'open' || props.hasBrokenPublicizeConnection ) ) {
@@ -185,6 +188,21 @@ export const PostEditor = React.createClass( {
 
 	getLayout() {
 		return this.props.setLayoutFocus( 'content' );
+	},
+
+	setConfirmationSidebar: function( { status, context = null } ) {
+		const allowedStatuses = [ 'closed', 'open', 'publishing' ];
+		const confirmationSidebar = allowedStatuses.indexOf( status ) > -1 ? status : 'closed';
+		this.setState( { confirmationSidebar } );
+
+		switch ( confirmationSidebar ) {
+			case 'closed':
+				analytics.tracks.recordEvent( 'calypso_editor_confirmation_sidebar_close', { context } );
+				break;
+			case 'open':
+				analytics.tracks.recordEvent( 'calypso_editor_confirmation_sidebar_open' );
+				break;
+		}
 	},
 
 	toggleSidebar: function() {
@@ -202,13 +220,13 @@ export const PostEditor = React.createClass( {
 	},
 
 	render: function() {
-		var site = this.props.sites.getSelectedSite() || undefined,
-			mode = this.getEditorMode(),
-			isInvalidURL = this.state.loadingError,
-			siteURL = site ? site.URL + '/' : null,
-			isPage,
-			isTrashed,
-			hasAutosave;
+		const site = this.props.selectedSite || undefined;
+		const mode = this.getEditorMode();
+		const isInvalidURL = this.state.loadingError;
+		const siteURL = site ? site.URL + '/' : null;
+		let isPage;
+		let isTrashed;
+		let hasAutosave;
 
 		if ( this.state.post ) {
 			isPage = utils.isPage( this.state.post );
@@ -221,6 +239,15 @@ export const PostEditor = React.createClass( {
 		return (
 			<div className={ classes }>
 				<QueryPreferences />
+				<EditorConfirmationSidebar
+					onPrivatePublish={ this.onPublish }
+					onPublish={ this.onPublish }
+					post={ this.state.post }
+					savedPost={ this.state.savedPost }
+					setStatus={ this.setConfirmationSidebar }
+					site={ site }
+					status={ this.state.confirmationSidebar }
+				/>
 				<EditorDocumentHead />
 				<EditorPostTypeUnsupported />
 				<EditorForbidden />
@@ -248,17 +275,20 @@ export const PostEditor = React.createClass( {
 					/>
 					<div className="post-editor__content">
 						<div className="editor">
-							<EditorNotice
-								{ ...this.state.notice }
-								onDismissClick={ this.hideNotice }
-								onViewClick={ this.onPreview } />
+							{ ! config.isEnabled( 'post-editor/delta-post-publish-preview' )
+								? <EditorNotice
+									{ ...this.state.notice }
+									onDismissClick={ this.hideNotice }
+									onViewClick={ this.onPreview } />
+								: null }
 							<EditorActionBar
 								isNew={ this.state.isNew }
 								onPrivatePublish={ this.onPublish }
-								post={ this.state.post }
 								savedPost={ this.state.savedPost }
 								site={ site }
 								type={ this.props.type }
+								isPostPrivate={ utils.isPrivate( this.state.post ) }
+								postAuthor={ this.state.post ? this.state.post.author : null }
 							/>
 							<div className="post-editor__site">
 								<Site
@@ -307,7 +337,7 @@ export const PostEditor = React.createClass( {
 							</div>
 							<hr className="editor__header-divider" />
 							<TinyMCE
-								ref="editor"
+								ref={ this.storeEditor }
 								mode={ mode }
 								tabIndex={ 2 }
 								isNew={ this.state.isNew }
@@ -331,16 +361,26 @@ export const PostEditor = React.createClass( {
 						type={ this.props.type }
 						setPostDate={ this.setPostDate }
 						onSave={ this.onSave }
+						isPostPrivate={ utils.isPrivate( this.state.post ) }
 						/>
 					{ this.props.isSitePreviewable ?
 						<EditorPreview
 							showPreview={ this.state.showPreview }
 							onClose={ this.onPreviewClose }
+							onEdit={ this.onPreviewEdit }
 							isSaving={ this.state.isSaving || this.state.isAutosaving }
 							isLoading={ this.state.isLoading }
 							previewUrl={ this.state.previewUrl }
 							externalUrl={ this.state.previewUrl }
+							editUrl={ this.props.editPath }
+							defaultViewportDevice={ config.isEnabled( 'post-editor/delta-post-publish-preview' ) ? 'computer' : 'tablet' }
 						/>
+						: null }
+					{ config.isEnabled( 'post-editor/delta-post-publish-preview' )
+						? <EditorNotice
+								{ ...this.state.notice }
+								onDismissClick={ this.hideNotice }
+								onViewClick={ this.onPreview } />
 						: null }
 				</div>
 				{ isTrashed
@@ -351,7 +391,6 @@ export const PostEditor = React.createClass( {
 				: null }
 				{ this.state.showVerifyEmailDialog
 					? <VerifyEmailDialog
-						user={ this.props.user }
 						onClose={ this.closeVerifyEmailDialog }
 					/>
 				: null }
@@ -405,27 +444,23 @@ export const PostEditor = React.createClass( {
 			this.setState( { loadingError } );
 		} else if ( ( PostEditStore.isNew() && ! this.state.isNew ) || PostEditStore.isLoading() ) {
 			// is new or loading
-			this.setState( this.getInitialState(), function() {
-				this.refs.editor.setEditorContent( '' );
-			} );
+			this.setState( this.getInitialState(), () => this.editor && this.editor.setEditorContent( '' ) );
 		} else if ( this.state.isNew && this.state.hasContent && ! this.state.isDirty ) {
 			// Is a copy of an existing post.
 			// When copying a post, the created draft is new and the editor is not yet dirty, but it already has content.
 			// Once the content is set, the editor becomes dirty and the following setState won't trigger anymore.
-			this.setState( this.getInitialState(), function() {
-				this.refs.editor.setEditorContent( this.state.post.content );
-			} );
+			this.setState( this.getInitialState(), () => this.editor && this.editor.setEditorContent( this.state.post.content ) );
 		} else {
 			postEditState = this.getPostEditState();
 			post = postEditState.post;
-			site = post ? this.props.sites.getSite( post.site_ID ) : false;
+			site = this.props.selectedSite;
 			if ( didLoad && site && ( this.props.type === 'page' ) !== utils.isPage( post ) ) {
 				// incorrect post type in URL
 				page.redirect( utils.getEditURL( post, site ) );
 			}
 			this.setState( postEditState, function() {
-				if ( didLoad || this.state.isLoadingAutosave ) {
-					this.refs.editor.setEditorContent( this.state.post.content, { initial: true } );
+				if ( this.editor && ( didLoad || this.state.isLoadingAutosave ) ) {
+					this.editor.setEditorContent( this.state.post.content, { initial: true } );
 				}
 
 				if ( this.state.isLoadingAutosave ) {
@@ -451,12 +486,12 @@ export const PostEditor = React.createClass( {
 	onEditorFocus: function() {
 		// Fire a click when the editor is focused so that any global handlers have an opportunity to do their thing.
 		// In particular, this ensures that open popovers are closed when a user clicks into the editor.
-		ReactDom.findDOMNode( this.refs.editor ).click();
+		ReactDom.findDOMNode( this.editor ).click();
 	},
 
 	saveRawContent: function() {
 		// TODO: REDUX - remove flux actions when whole post-editor is reduxified
-		actions.editRawContent( this.refs.editor.getContent( { format: 'raw' } ) );
+		actions.editRawContent( this.editor.getContent( { format: 'raw' } ) );
 	},
 
 	autosave: function() {
@@ -470,7 +505,7 @@ export const PostEditor = React.createClass( {
 		// TODO: REDUX - remove flux actions when whole post-editor is reduxified
 		const edits = {
 			...this.props.edits,
-			content: this.refs.editor.getContent()
+			content: this.editor.getContent()
 		};
 		actions.edit( edits );
 
@@ -502,8 +537,8 @@ export const PostEditor = React.createClass( {
 	},
 
 	getAllPostsUrl: function() {
-		const { type, sites } = this.props;
-		const site = sites.getSelectedSite();
+		const { type, selectedSite } = this.props;
+		const site = selectedSite;
 
 		let path;
 		switch ( type ) {
@@ -562,7 +597,7 @@ export const PostEditor = React.createClass( {
 			return;
 		}
 
-		edits.content = this.refs.editor.getContent();
+		edits.content = this.editor.getContent();
 
 		// TODO: REDUX - remove flux actions when whole post-editor is reduxified
 		actions.saveEdited( edits, function( error ) {
@@ -607,7 +642,7 @@ export const PostEditor = React.createClass( {
 
 		if ( status === 'publish' ) {
 			// TODO: REDUX - remove flux actions when whole post-editor is reduxified
-			actions.edit( { content: this.refs.editor.getContent() } );
+			actions.edit( { content: this.editor.getContent() } );
 			actions.autosave( previewPost );
 		} else {
 			this.onSave( null, previewPost );
@@ -628,7 +663,16 @@ export const PostEditor = React.createClass( {
 	},
 
 	onPreviewClose: function() {
-		this.setState( { showPreview: false } );
+		if ( this.state.isPostPublishPreview ) {
+			page.back( this.getAllPostsUrl() );
+		} else {
+			this.setState( { showPreview: false, isPostPublishPreview: false } );
+		}
+	},
+
+	onPreviewEdit: function() {
+		this.setState( { showPreview: false, isPostPublishPreview: false } );
+		return false;
 	},
 
 	onSaveDraftFailure: function( error ) {
@@ -645,11 +689,20 @@ export const PostEditor = React.createClass( {
 		}
 	},
 
-	onPublish: function() {
+	onPublish: function( isConfirmed = false ) {
 		const edits = {
 			...this.props.edits,
 			status: 'publish'
 		};
+
+		if ( config.isEnabled( 'post-editor/delta-post-publish-flow' ) && false === isConfirmed ) {
+			this.setConfirmationSidebar( { status: 'open' } );
+			return;
+		}
+
+		if ( config.isEnabled( 'post-editor/delta-post-publish-flow' ) ) {
+			this.setConfirmationSidebar( { status: 'publishing' } );
+		}
 
 		// determine if this is a private publish
 		if ( utils.isPrivate( this.state.post ) ) {
@@ -660,7 +713,7 @@ export const PostEditor = React.createClass( {
 
 		// Update content on demand to avoid unnecessary lag and because it is expensive
 		// to serialize when TinyMCE is the active mode
-		edits.content = this.refs.editor.getContent();
+		edits.content = this.editor.getContent();
 
 		actions.saveEdited( edits, function( error ) {
 			if ( error && 'NO_CHANGE' !== error.message ) {
@@ -678,6 +731,10 @@ export const PostEditor = React.createClass( {
 
 	onPublishFailure: function( error ) {
 		this.onSaveFailure( error, 'publishFailure' );
+
+		if ( config.isEnabled( 'post-editor/delta-post-publish-flow' ) ) {
+			this.setConfirmationSidebar( { status: 'closed', context: 'publish_failure' } );
+		}
 	},
 
 	onPublishSuccess: function() {
@@ -690,6 +747,10 @@ export const PostEditor = React.createClass( {
 			message = 'scheduled';
 		} else {
 			message = 'published';
+		}
+
+		if ( config.isEnabled( 'post-editor/delta-post-publish-flow' ) ) {
+			this.setConfirmationSidebar( { status: 'closed', context: 'publish_success' } );
 		}
 
 		this.onSaveSuccess( message, ( message === 'published' ? 'view' : 'preview' ), savedPost.URL );
@@ -710,9 +771,15 @@ export const PostEditor = React.createClass( {
 	},
 
 	setPostDate: function( date ) {
+		const { siteId, postId } = this.props;
 		const dateValue = date ? date.format() : null;
 		// TODO: REDUX - remove flux actions when whole post-editor is reduxified
 		actions.edit( { date: dateValue } );
+
+		if ( siteId && postId ) {
+			this.props.editPost( siteId, postId, { date: dateValue } );
+		}
+
 		this.checkForDateChange( dateValue );
 	},
 
@@ -776,10 +843,15 @@ export const PostEditor = React.createClass( {
 				status: 'is-success',
 				message,
 				action,
-				link
+				link: config.isEnabled( 'post-editor/delta-post-publish-preview' ) ? null : link,
 			};
 
 			window.scrollTo( 0, 0 );
+
+			if ( config.isEnabled( 'post-editor/delta-post-publish-preview' ) && this.props.isSitePreviewable ) {
+				this.setState( { isPostPublishPreview: true } );
+				this.iframePreview();
+			}
 		} else {
 			nextState.notice = null;
 		}
@@ -801,10 +873,10 @@ export const PostEditor = React.createClass( {
 	},
 
 	switchEditorMode: function( mode ) {
-		var content = this.refs.editor.getContent();
+		const content = this.editor.getContent();
 
 		if ( mode === 'html' ) {
-			this.refs.editor.setEditorContent( content );
+			this.editor.setEditorContent( content );
 		}
 
 		this.props.setEditorModePreference( mode );
@@ -836,6 +908,7 @@ export default connect(
 		return {
 			siteId,
 			postId,
+			selectedSite: getSelectedSite( state ),
 			editorModePreference: getPreference( state, 'editor-mode' ),
 			editorSidebarPreference: getPreference( state, 'editor-sidebar' ) || 'open',
 			editPath: getEditorPath( state, siteId, postId ),
@@ -852,6 +925,7 @@ export default connect(
 			setEditorLastDraft,
 			resetEditorLastDraft,
 			receivePost,
+			editPost,
 			savePostSuccess,
 			setEditorModePreference: savePreference.bind( null, 'editor-mode' ),
 			setEditorSidebar: savePreference.bind( null, 'editor-sidebar' ),

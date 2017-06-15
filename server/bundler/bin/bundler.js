@@ -21,8 +21,11 @@ var webpackConfig = require( process.cwd() + '/webpack.config' ),
  * Variables
  */
 var start = new Date().getTime(),
-	bundleEnv = config( 'env' ),
 	outputOptions;
+
+if ( 'development' === config( 'env' ) ) {
+	process.exit( 0 );
+}
 
 outputOptions = {
 	colors: true,
@@ -54,7 +57,10 @@ function minify( files ) {
 			],
 			// have to pipe stderr to parent, otherwise large bundles will never finish
 			// see https://github.com/nodejs/node-v0.x-archive/issues/6764
-			{ stdio: ['ignore', 'pipe', 'ignore'] }
+			{
+				stdio: ['ignore', 'pipe', 'ignore'],
+				shell: true,
+			}
 		);
 
 		child.on( 'exit', function( code ) {
@@ -107,12 +113,14 @@ webpack( webpackConfig, function( error, stats ) {
 
 	fs.writeFileSync( path.join( __dirname, '..', 'assets.json' ), JSON.stringify( assets, null, '\t' ) );
 
-	// sort by size to make parallel minification go a bit quicker. don't get stuck doing the big stuff last.
-	files = assets.sort( function( a, b ) {
-		return b.size - a.size;
-	} ).map( function( chunk ) {
-		return path.join( process.cwd(), 'public', chunk.file );
-	} );
+	if ( ! process.env.WEBPACK_OUTPUT_JSON ) {
+		// sort by size to make parallel minification go a bit quicker. don't get stuck doing the big stuff last.
+		files = assets.sort( function( a, b ) {
+			return b.size - a.size;
+		} ).map( function( chunk ) {
+			return path.join( process.cwd(), 'public', chunk.file );
+		} );
 
-	minify( files );
+		minify( files );
+	}
 });

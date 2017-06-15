@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-import React from 'react';
-import { noop } from 'lodash';
+import React, { Component } from 'react';
+import { get, noop, some } from 'lodash';
 import { connect } from 'react-redux';
 import { translate } from 'i18n-calypso';
 import Gridicon from 'gridicons';
@@ -31,31 +31,21 @@ import PostCommentWithError from './post-comment-with-error';
 import PostTrackback from './post-trackback.jsx';
 import CommentActions from './comment-actions';
 
-class PostComment extends React.Component {
-	constructor() {
-		super();
+class PostComment extends Component {
+	state = {
+		showReplies: false
+	};
 
-		this.state = {
-			showReplies: false
-		};
-
-		// bind event handlers to this instance
-		Object.getOwnPropertyNames( PostComment.prototype )
-			.filter( ( prop ) => prop.indexOf( 'handle' ) === 0 )
-			.filter( ( prop ) => typeof this[ prop ] === 'function' )
-			.forEach( ( prop ) => this[ prop ] = this[ prop ].bind( this ) );
-	}
-
-	handleToggleRepliesClick() {
+	handleToggleRepliesClick = () => {
 		this.setState( { showReplies: ! this.state.showReplies } );
 	}
 
-	handleReply() {
+	handleReply = () => {
 		this.props.onReplyClick( this.props.commentId );
 		this.setState( { showReplies: true } ); // show the comments when replying
 	}
 
-	handleAuthorClick( event ) {
+	handleAuthorClick = ( event ) => {
 		recordAction( 'comment_author_click' );
 		recordGaEvent( 'Clicked Author Name' );
 		recordTrack( 'calypso_reader_comment_author_click', {
@@ -67,7 +57,7 @@ class PostComment extends React.Component {
 	}
 
 	renderRepliesList() {
-		const commentChildrenIds = this.props.commentsTree.getIn( [ this.props.commentId, 'children' ] ).toJS();
+		const commentChildrenIds = get( this.props.commentsTree, [ this.props.commentId, 'children' ] );
 		// Hide children if more than maxChildrenToShow, but not if replying
 		const exceedsMaxChildrenToShow = commentChildrenIds.length < this.props.maxChildrenToShow;
 		const showReplies = this.state.showReplies || exceedsMaxChildrenToShow;
@@ -109,7 +99,7 @@ class PostComment extends React.Component {
 			{ showReplies
 				? <ol className="comments__list">
 					{
-						commentChildrenIds.reverse().map( ( childId ) =>
+						commentChildrenIds.map( ( childId ) =>
 							<PostComment { ...this.props } depth={ this.props.depth + 1 } key={ childId } commentId={ childId } />
 						)
 					}
@@ -136,11 +126,11 @@ class PostComment extends React.Component {
 	render() {
 		// todo: connect this constants to the state (new selector)
 		const commentsTree = this.props.commentsTree;
-		const comment = commentsTree.getIn( [ this.props.commentId, 'data' ] ).toJS();
+		const comment = get( commentsTree, [ this.props.commentId, 'data' ] );
 
 		// todo: connect this constants to the state (new selector)
-		const haveReplyWithError = commentsTree.getIn( [ this.props.commentId, 'children' ] )
-			.some( ( childId ) => commentsTree.getIn( [ childId, 'data', 'placeholderState' ] ) === PLACEHOLDER_STATE.ERROR );
+		const haveReplyWithError = some( get( commentsTree, [ this.props.commentId, 'children' ] ),
+			( childId ) => get( commentsTree, [ childId, 'data', 'placeholderState' ] ) === PLACEHOLDER_STATE.ERROR );
 
 		// If it's a pending comment, use the current user as the author
 		if ( comment.isPlaceholder ) {
@@ -178,7 +168,9 @@ class PostComment extends React.Component {
 						: <Gravatar user={ comment.author } /> }
 
 					{ authorUrl
-						? <a href={ authorUrl } className="comments__comment-username" onClick={ this.handleAuthorClick }>{ comment.author.name }</a>
+						? <a href={ authorUrl } className="comments__comment-username" onClick={ this.handleAuthorClick }>
+								{ comment.author.name }
+							</a>
 						: <strong className="comments__comment-username">{ comment.author.name }</strong> }
 					<div className="comments__comment-timestamp">
 						<a href={ comment.URL }>

@@ -2,6 +2,7 @@
  * External Dependencies
  */
 import React from 'react';
+import { connect } from 'react-redux';
 import Debug from 'debug';
 
 /**
@@ -16,6 +17,9 @@ import URLSearch from 'lib/mixins/url-search';
 import PostCountsStore from 'lib/posts/post-counts-store';
 import Gravatar from 'components/gravatar';
 import userLib from 'lib/user';
+import { areAllSitesSingleUser } from 'state/selectors';
+import { getSelectedSiteId } from 'state/ui/selectors';
+import { isJetpackSite, isSingleUserSite } from 'state/sites/selectors';
 
 const debug = new Debug( 'calypso:posts-navigation' );
 const user = userLib();
@@ -28,12 +32,11 @@ const statusToDescription = {
 	trash: 'trashed'
 };
 
-export default React.createClass( {
+const PostsNavigation = React.createClass( {
 	displayName: 'PostsNavigation',
 
 	propTypes: {
 		context: React.PropTypes.object.isRequired,
-		sites: React.PropTypes.object.isRequired,
 		author: React.PropTypes.number,
 		statusSlug: React.PropTypes.string,
 		search: React.PropTypes.string
@@ -46,12 +49,12 @@ export default React.createClass( {
 			state = {
 				show: true,
 				loading: true,
-				counts: null === this.props.sites.selected ?
-					this._defaultCounts() :
-					this._getCounts()
+				counts: ! this.props.siteId
+					? this._defaultCounts()
+					: this._getCounts()
 			};
 
-		if ( ! this.props.sites.selected || Object.keys( counts ).length ) {
+		if ( ! this.props.siteId || Object.keys( counts ).length ) {
 			state.loading = false;
 		}
 
@@ -67,10 +70,10 @@ export default React.createClass( {
 	},
 
 	componentWillReceiveProps( nextProps ) {
-		if ( this.props.siteID !== nextProps.siteID ||
+		if ( this.props.siteId !== nextProps.siteId ||
 			this.props.author !== nextProps.author ||
 			this.props.statusSlug !== nextProps.statusSlug ) {
-			this._setPostCounts( nextProps.siteID, nextProps.author ? 'mine' : 'all' );
+			this._setPostCounts( nextProps.siteId, nextProps.author ? 'mine' : 'all' );
 		}
 	},
 
@@ -83,11 +86,11 @@ export default React.createClass( {
 			return ( <SectionNav /> );
 		}
 
-		let author = this.props.author ? '/my' : '',
+		const author = this.props.author ? '/my' : '',
 			statusSlug = this.props.statusSlug ? '/' + this.props.statusSlug : '',
-			siteFilter = this.props.sites.selected ? '/' + this.props.sites.selected : '',
-			selectedSite = this.props.sites.getSelectedSite(),
-			showMyFilter = true;
+			siteFilter = this.props.siteSlug ? '/' + this.props.siteSlug : '';
+
+		let showMyFilter = true;
 
 		this.filterStatuses = {
 			publish: this.translate( 'Published', { context: 'Filter label for posts list' } ),
@@ -109,11 +112,11 @@ export default React.createClass( {
 		let statusTabs = this._getStatusTabs( author, siteFilter );
 		let authorSegmented = this._getAuthorSegmented( statusSlug, siteFilter );
 
-		if ( this.props.sites.selected ) {
-			if ( selectedSite.single_user_site || selectedSite.jetpack ) {
+		if ( this.props.siteId ) {
+			if ( this.props.isSingleUser || this.props.isJetpack ) {
 				showMyFilter = false;
 			}
-		} else if ( this.props.sites.allSingleSites ) {
+		} else if ( this.props.allSingleSites ) {
 			showMyFilter = false;
 		}
 
@@ -154,9 +157,7 @@ export default React.createClass( {
 
 			let textItem = this.filterStatuses[ status ];
 
-			let count = false !== this.state.counts[ status ]
-				? this.state.counts[ status ]
-				: false;
+			let count = this.state.counts[ status ];
 
 			if ( path === this.props.context.pathname ) {
 				selectedText = textItem;
@@ -168,12 +169,16 @@ export default React.createClass( {
 				count = 0;
 			}
 
+			if ( null === count || false === count ) {
+				count = 0;
+			}
+
 			statusItems.push(
 				<NavItem
 					className={ 'is-' + status }
 					key={ 'statusTabs' + path }
 					path={ path }
-					count={ null === this.props.sites.selected || count }
+					count={ this.props.siteId && count }
 					value={ textItem }
 					selected={ path === this.props.context.pathname }>
 					{ textItem }
@@ -271,17 +276,17 @@ export default React.createClass( {
 	/**
 	 * Set immediately post filters state
 	 *
-	 * @param {String} siteID - site ID
+	 * @param {String} siteId - site ID
 	 * @param {String} scope - scope `all` or `mine`
 	 * @return {void}
 	 */
-	_setPostCounts( siteID, scope ) {
+	_setPostCounts( siteId, scope ) {
 		// print default filters for `All my Sites`
-		if ( ! siteID || null === this.props.sites.selected ) {
+		if ( ! siteId || null === this.props.siteId ) {
 			return this._defaultStateOptions();
 		}
 
-		if ( ! PostCountsStore.getTotalCount( siteID, 'all' ) ) {
+		if ( ! PostCountsStore.getTotalCount( siteId, 'all' ) ) {
 			return this.setState( {
 				show: true,
 				loading: true
@@ -291,28 +296,28 @@ export default React.createClass( {
 		this.setState( {
 			show: true,
 			loading: false,
-			counts: this._getCounts( siteID, scope )
+			counts: this._getCounts( siteId, scope )
 		} );
 	},
 
-	_updatePostCounts( siteID = this.props.sites.selected, scope ) {
+	_updatePostCounts( siteId = this.props.siteId, scope ) {
 		scope = scope || ( this.props.author ? 'mine' : 'all' );
 
 		// is `All my sites` selected`
-		if ( null === this.props.sites.selected ) {
+		if ( ! this.props.siteId ) {
 			return this._defaultStateOptions();
 		}
 
-		let state = {
+		const state = {
 			show: true,
 			loading: false,
 			counts: {}
 		};
 
-		if ( PostCountsStore.getTotalCount( siteID, 'all' ) ) {
-			state.counts = this._getCounts( siteID, scope );
+		if ( PostCountsStore.getTotalCount( siteId, 'all' ) ) {
+			state.counts = this._getCounts( siteId, scope );
 		} else {
-			debug( '[%s] clean counts', siteID || 'All my sites' );
+			debug( '[%s] clean counts', siteId || 'All my sites' );
 			state.show = false;
 			state.counts = {};
 		}
@@ -326,17 +331,17 @@ export default React.createClass( {
 	 * `me` scope.
 	 * Also calc and remove unallowed statuses.
 	 *
-	 * @param {String} siteID - Site identifier
+	 * @param {String} siteId - Site identifier
 	 * @param {String} [scope] - Optional scope (mine or all)
 	 * @return {Object} counts
 	 */
-	_getCounts( siteID = this.props.sites.selected, scope ) {
+	_getCounts( siteId = this.props.siteId, scope ) {
 		var counts = {},
 			status;
 
 		scope = scope || ( this.props.author ? 'mine' : 'all' );
-		let all = PostCountsStore.get( siteID, 'all' );
-		let mine = PostCountsStore.get( siteID, 'mine' );
+		const all = PostCountsStore.get( siteId, 'all' );
+		const mine = PostCountsStore.get( siteId, 'mine' );
 
 		// make a copy of counts object
 		for ( status in all ) {
@@ -367,7 +372,19 @@ export default React.createClass( {
 	 * @return {Number|Null} return count of the given status
 	 */
 	getCountByStatus( status ) {
-		let count = this.state.counts[ status ];
+		const count = this.state.counts[ status ];
 		return ( count !== false ) ? count : null;
 	}
 } );
+
+export default connect(
+	( state ) => {
+		const siteId = getSelectedSiteId( state );
+		return {
+			allSingleSites: areAllSitesSingleUser( state ),
+			isJetpack: isJetpackSite( state, siteId ),
+			isSingleUser: isSingleUserSite( state, siteId ),
+			siteId
+		};
+	}
+)( PostsNavigation );

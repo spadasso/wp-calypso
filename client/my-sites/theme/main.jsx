@@ -8,7 +8,6 @@ import React from 'react';
 import { connect } from 'react-redux';
 import i18n from 'i18n-calypso';
 import titlecase from 'to-title-case';
-import { isArray } from 'lodash';
 import Gridicon from 'gridicons';
 
 /**
@@ -26,7 +25,7 @@ import SectionNav from 'components/section-nav';
 import NavTabs from 'components/section-nav/tabs';
 import NavItem from 'components/section-nav/item';
 import Card from 'components/card';
-import { getSelectedSite } from 'state/ui/selectors';
+import { getSelectedSiteId } from 'state/ui/selectors';
 import { getSiteSlug, isJetpackSite } from 'state/sites/selectors';
 import { getCurrentUserId } from 'state/current-user/selectors';
 import { isUserPaid } from 'state/purchases/selectors';
@@ -47,14 +46,14 @@ import {
 	getThemeForumUrl,
 } from 'state/themes/selectors';
 import { getBackPath } from 'state/themes/themes-ui/selectors';
-import EmptyContentComponent from 'components/empty-content';
 import PageViewTracker from 'lib/analytics/page-view-tracker';
 import DocumentHead from 'components/data/document-head';
 import { decodeEntities } from 'lib/formatting';
 import { getCanonicalTheme } from 'state/themes/selectors';
-import { isValidTerm } from 'my-sites/themes/theme-filters';
 import { recordTracksEvent } from 'state/analytics/actions';
 import { setThemePreviewOptions } from 'state/themes/actions';
+import ThemeNotFoundError from './theme-not-found-error';
+import ThemeFeaturesCard from './theme-features-card';
 
 const ThemeSheet = React.createClass( {
 	displayName: 'ThemeSheet',
@@ -67,16 +66,20 @@ const ThemeSheet = React.createClass( {
 		screenshots: React.PropTypes.array,
 		price: React.PropTypes.string,
 		description: React.PropTypes.string,
-		descriptionLong: React.PropTypes.string,
+		descriptionLong: React.PropTypes.oneOfType( [
+			React.PropTypes.string,
+			React.PropTypes.bool // happens if no content: false
+		] ),
 		supportDocumentation: React.PropTypes.string,
 		download: React.PropTypes.string,
 		taxonomies: React.PropTypes.object,
 		stylesheet: React.PropTypes.string,
+		retired: React.PropTypes.bool,
 		// Connected props
 		isLoggedIn: React.PropTypes.bool,
 		isActive: React.PropTypes.bool,
 		isPurchased: React.PropTypes.bool,
-		selectedSite: React.PropTypes.object,
+		siteId: React.PropTypes.number,
 		siteSlug: React.PropTypes.string,
 		backPath: React.PropTypes.string,
 		isWpcomTheme: React.PropTypes.bool,
@@ -98,8 +101,18 @@ const ThemeSheet = React.createClass( {
 		};
 	},
 
-	componentDidMount() {
+	scrollToTop() {
 		window.scroll( 0, 0 );
+	},
+
+	componentDidMount() {
+		this.scrollToTop();
+	},
+
+	componentWillUpdate( nextProps ) {
+		if ( nextProps.id !== this.props.id ) {
+			this.scrollToTop();
+		}
 	},
 
 	isLoaded() {
@@ -186,7 +199,6 @@ const ThemeSheet = React.createClass( {
 	renderPreviewButton() {
 		return (
 			<a className="theme__sheet-preview-link" onClick={ this.previewAction } data-tip-target="theme-sheet-preview">
-				<Gridicon icon="themes" size={ 18 } />
 				<span className="theme__sheet-preview-link-text">
 					{ i18n.translate( 'Open Live Demo', { context: 'Individual theme live preview button' } ) }
 				</span>
@@ -195,16 +207,21 @@ const ThemeSheet = React.createClass( {
 	},
 
 	renderScreenshot() {
-		let screenshot;
-		if ( ! this.props.isWpcomTheme ) {
-			screenshot = this.props.screenshot;
-		} else {
-			screenshot = this.getFullLengthScreenshot();
+		const { demo_uri, retired, isWpcomTheme } = this.props;
+		const screenshotFull = isWpcomTheme ? this.getFullLengthScreenshot() : this.props.screenshot;
+		const img = screenshotFull && <img className="theme__sheet-img" src={ screenshotFull + '?w=680' } />;
+
+		if ( demo_uri && ! retired ) {
+			return (
+				<div className="theme__sheet-screenshot is-active" onClick={ this.previewAction }>
+					{ this.renderPreviewButton() }
+					{ img }
+				</div>
+			);
 		}
-		const img = screenshot && <img className="theme__sheet-img" src={ screenshot + '?=w680' } />;
+
 		return (
 			<div className="theme__sheet-screenshot">
-				{ this.props.demo_uri && this.renderPreviewButton() }
 				{ img }
 			</div>
 		);
@@ -240,11 +257,19 @@ const ThemeSheet = React.createClass( {
 	},
 
 	renderSectionContent( section ) {
-		return {
+		const activeSection = {
 			'': this.renderOverviewTab(),
 			setup: this.renderSetupTab(),
 			support: this.renderSupportTab(),
 		}[ section ];
+
+		return (
+			<div className="theme__sheet-content">
+				{ this.renderSectionNav( section ) }
+				{ activeSection }
+				<div className="theme__sheet-footer-line"><Gridicon icon="my-sites" /></div>
+			</div>
+		);
 	},
 
 	renderDescription() {
@@ -257,17 +282,30 @@ const ThemeSheet = React.createClass( {
 		return <div>{ this.props.description }</div>;
 	},
 
+	renderNextTheme() {
+		const { next, siteSlug } = this.props;
+		const sitePart = siteSlug ? `/${ siteSlug }` : '';
+
+		const nextThemeHref = `/theme/${ next }${ sitePart }`;
+		return <SectionHeader
+			href={ nextThemeHref }
+			label={ i18n.translate( 'Next theme' ) } />;
+	},
+
 	renderOverviewTab() {
-		const { isWpcomTheme, download } = this.props;
+		const { download, isWpcomTheme, siteSlug, taxonomies, isPremium } = this.props;
 
 		return (
 			<div>
 				<Card className="theme__sheet-content">
 					{ this.renderDescription() }
 				</Card>
-				{ this.renderFeaturesCard() }
-				{ download && <ThemeDownloadCard href={ download } /> }
+				<ThemeFeaturesCard taxonomies={ taxonomies }
+					siteSlug={ siteSlug }
+					isWpcomTheme={ isWpcomTheme } />
+				{ download && ! isPremium && <ThemeDownloadCard href={ download } /> }
 				{ isWpcomTheme && this.renderRelatedThemes() }
+				{ isWpcomTheme && this.renderNextTheme() }
 			</div>
 		);
 	},
@@ -397,36 +435,6 @@ const ThemeSheet = React.createClass( {
 		return renderedTab;
 	},
 
-	renderFeaturesCard() {
-		const { isWpcomTheme, siteSlug, taxonomies } = this.props;
-		if ( ! taxonomies || ! isArray( taxonomies.theme_feature ) ) {
-			return null;
-		}
-
-		const themeFeatures = taxonomies.theme_feature.map( function( item ) {
-			const term = isValidTerm( item.slug ) ? item.slug : `feature:${ item.slug }`;
-			return (
-				<li key={ 'theme-features-item-' + item.slug }>
-					{ ! isWpcomTheme
-						? <a>{ item.name }</a>
-						: <a href={ `/design/filter/${ term }/${ siteSlug || '' }` }>{ item.name }</a>
-					}
-				</li>
-			);
-		} );
-
-		return (
-			<div>
-				<SectionHeader label={ i18n.translate( 'Features' ) } />
-				<Card>
-					<ul className="theme__sheet-features-list">
-						{ themeFeatures }
-					</ul>
-				</Card>
-			</div>
-		);
-	},
-
 	getDefaultOptionLabel() {
 		const { defaultOption, isActive, isLoggedIn, isPremium, isPurchased } = this.props;
 		if ( isLoggedIn && ! isActive ) {
@@ -438,28 +446,31 @@ const ThemeSheet = React.createClass( {
 		return defaultOption.label;
 	},
 
-	renderError() {
-		const emptyContentTitle = i18n.translate( 'Looking for great WordPress designs?', {
-			comment: 'Message displayed when requested theme was not found',
-		} );
-		const emptyContentMessage = i18n.translate( 'Check our theme showcase', {
-			comment: 'Message displayed when requested theme was not found',
-		} );
-
-		return (
-			<Main>
-				<EmptyContentComponent
-					title={ emptyContentTitle }
-					line={ emptyContentMessage }
-					action={ i18n.translate( 'View the showcase' ) }
-					actionURL="/design"
-				/>
-			</Main>
-		);
-	},
-
 	renderRelatedThemes() {
 		return <ThemesRelatedCard currentTheme={ this.props.id } />;
+	},
+
+	renderRetired() {
+		return (
+			<div className="theme__sheet-content">
+				<Card className="theme__retired-theme-message">
+					<Gridicon icon="cross-circle" size={ 48 } />
+					<div className="theme__retired-theme-message-details">
+						<div className="theme__retired-theme-message-details-title">{ i18n.translate( 'This theme is retired' ) }</div>
+						<div>
+							{ i18n.translate( 'We invite you to try out a newer theme; start by browsing our WordPress theme directory.' ) }
+						</div>
+					</div>
+					<Button
+						primary={ true }
+						href={ '/themes/' }>
+						{ i18n.translate( 'See All Themes' ) }
+					</Button>
+				</Card>
+
+				<div className="theme__sheet-footer-line"><Gridicon icon="my-sites" /></div>
+			</div>
+		);
 	},
 
 	renderPrice() {
@@ -483,17 +494,17 @@ const ThemeSheet = React.createClass( {
 				href={ getUrl ? getUrl( this.props.id ) : null }
 				onClick={ this.onButtonClick }>
 				{ this.isLoaded() ? label : placeholder }
-				{ this.renderPrice() }
+				{ this.props.isWpcomTheme && this.renderPrice() }
 			</Button>
 		);
 	},
 
 	renderSheet() {
 		const section = this.validateSection( this.props.section );
-		const siteID = this.props.selectedSite && this.props.selectedSite.ID;
+		const { siteId, retired } = this.props;
 
-		const analyticsPath = `/theme/:slug${ section ? '/' + section : '' }${ siteID ? '/:site_id' : '' }`;
-		const analyticsPageTitle = `Themes > Details Sheet${ section ? ' > ' + titlecase( section ) : '' }${ siteID ? ' > Site' : '' }`;
+		const analyticsPath = `/theme/:slug${ section ? '/' + section : '' }${ siteId ? '/:site_id' : '' }`;
+		const analyticsPageTitle = `Themes > Details Sheet${ section ? ' > ' + titlecase( section ) : '' }${ siteId ? ' > Site' : '' }`;
 
 		const { canonicalUrl, currentUserId, description, name: themeName } = this.props;
 		const title = themeName && i18n.translate( '%(themeName)s Theme', {
@@ -501,9 +512,11 @@ const ThemeSheet = React.createClass( {
 		} );
 
 		const metas = [
+			{ property: 'og:title', content: title },
 			{ property: 'og:url', content: canonicalUrl },
 			{ property: 'og:image', content: this.props.screenshot },
-			{ property: 'og:type', content: 'website' }
+			{ property: 'og:type', content: 'website' },
+			{ property: 'og:site_name', content: 'WordPress.com' }
 		];
 
 		if ( description ) {
@@ -518,30 +531,27 @@ const ThemeSheet = React.createClass( {
 
 		return (
 			<Main className="theme__sheet">
-				<QueryCanonicalTheme themeId={ this.props.id } siteId={ siteID } />
+				<QueryCanonicalTheme themeId={ this.props.id } siteId={ siteId } />
 				{ currentUserId && <QueryUserPurchases userId={ currentUserId } /> }
-				{ siteID && <QuerySitePurchases siteId={ siteID } /> }
-				{ siteID && <QuerySitePlans siteId={ siteID } /> }
+				{ siteId && <QuerySitePurchases siteId={ siteId } /> /* TODO: Make QuerySitePurchases handle falsey siteId */ }
+				<QuerySitePlans siteId={ siteId } />
 				<DocumentHead
 					title={ title }
 					meta={ metas }
 					link={ links } />
 				<PageViewTracker path={ analyticsPath } title={ analyticsPageTitle } />
 				{ this.renderBar() }
-				{ siteID && <QueryActiveTheme siteId={ siteID } /> }
+				<QueryActiveTheme siteId={ siteId } />
 				<ThanksModal source={ 'details' } />
 				<HeaderCake className="theme__sheet-action-bar"
 					backHref={ this.props.backPath }
 					backText={ i18n.translate( 'All Themes' ) }>
-					{ this.renderButton() }
+					{ ! retired && this.renderButton() }
 				</HeaderCake>
 				<div className="theme__sheet-columns">
 					<div className="theme__sheet-column-left">
-						<div className="theme__sheet-content">
-							{ this.renderSectionNav( section ) }
-							{ this.renderSectionContent( section ) }
-							<div className="theme__sheet-footer-line"><Gridicon icon="my-sites" /></div>
-						</div>
+						{ ! retired && this.renderSectionContent( section ) }
+						{ retired && this.renderRetired() }
 					</div>
 					<div className="theme__sheet-column-right">
 						{ this.renderScreenshot() }
@@ -554,7 +564,7 @@ const ThemeSheet = React.createClass( {
 
 	render() {
 		if ( this.props.error ) {
-			return this.renderError();
+			return <ThemeNotFoundError />;
 		}
 		return this.renderSheet();
 	},
@@ -562,13 +572,12 @@ const ThemeSheet = React.createClass( {
 
 const ConnectedThemeSheet = connectOptions(
 	( props ) => {
-		if ( ! props.isLoggedIn || props.selectedSite ) {
+		if ( ! props.isLoggedIn || props.siteId ) {
 			return <ThemeSheet { ...props } />;
 		}
 
 		return (
-			<ThemesSiteSelectorModal { ...props }
-				sourcePath={ `/theme/${ props.id }${ props.section ? '/' + props.section : '' }` }>
+			<ThemesSiteSelectorModal { ...props }>
 				<ThemeSheet />
 			</ThemesSiteSelectorModal>
 		);
@@ -577,13 +586,12 @@ const ConnectedThemeSheet = connectOptions(
 
 const ThemeSheetWithOptions = ( props ) => {
 	const {
-		selectedSite: site,
+		siteId,
 		isActive,
 		isLoggedIn,
 		isPremium,
 		isPurchased,
 	} = props;
-	const siteId = site ? site.ID : null;
 
 	let defaultOption;
 	let secondaryOption = 'tryandcustomize';
@@ -610,32 +618,32 @@ const ThemeSheetWithOptions = ( props ) => {
 
 export default connect(
 	( state, { id } ) => {
-		const selectedSite = getSelectedSite( state );
-		const siteSlug = selectedSite ? getSiteSlug( state, selectedSite.ID ) : '';
+		const siteId = getSelectedSiteId( state );
+		const siteSlug = getSiteSlug( state, siteId );
 		const isWpcomTheme = isThemeWpcom( state, id );
 		const backPath = getBackPath( state );
 		const currentUserId = getCurrentUserId( state );
 		const isCurrentUserPaid = isUserPaid( state, currentUserId );
-		const theme = getCanonicalTheme( state, selectedSite && selectedSite.ID, id );
-		const siteIdOrWpcom = selectedSite ? selectedSite.ID : 'wpcom';
+		const theme = getCanonicalTheme( state, siteId, id );
+		const siteIdOrWpcom = siteId || 'wpcom';
 		const error = theme ? false : getThemeRequestErrors( state, id, siteIdOrWpcom );
 
 		return {
 			...theme,
 			id,
 			error,
-			selectedSite,
+			siteId,
 			siteSlug,
 			backPath,
 			currentUserId,
 			isCurrentUserPaid,
 			isWpcomTheme,
 			isLoggedIn: !! currentUserId,
-			isActive: selectedSite && isThemeActive( state, id, selectedSite.ID ),
-			isJetpack: selectedSite && isJetpackSite( state, selectedSite.ID ),
+			isActive: isThemeActive( state, id, siteId ),
+			isJetpack: isJetpackSite( state, siteId ),
 			isPremium: isThemePremium( state, id ),
-			isPurchased: selectedSite && isPremiumThemeAvailable( state, id, selectedSite.ID ),
-			forumUrl: getThemeForumUrl( state, id, selectedSite && selectedSite.ID ),
+			isPurchased: isPremiumThemeAvailable( state, id, siteId ),
+			forumUrl: getThemeForumUrl( state, id, siteId ),
 			canonicalUrl: 'https://wordpress.com' + getThemeDetailsUrl( state, id ) // No siteId specified since we want the *canonical* URL :-)
 		};
 	},

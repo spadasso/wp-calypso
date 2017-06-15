@@ -1,0 +1,78 @@
+.payments__currency-select {
+	width: 100%;
+}
+
+.payments__type-container .section-header__label::before {
+	display: none;
+}
+
+// PAYMENT-METHOD-ROW
+.payments__type-container {
+
+	p.payments__method-suggested {
+		font-size: 11px;
+		text-transform: uppercase;
+		color: $gray-text-min;
+	}
+
+	p.payments__method-suggested,
+	p.payments__method-name,
+	p.payments__method-information {
+		margin: 0;
+		padding: 0;
+	}
+
+	p.payments__method-information
+	p.payments__method-name {
+		font-size: 15px;
+	}
+
+	.list-header + .list-item {
+		border-top: 0;
+	}
+
+	.list-item {
+		border-top: 1px solid $border-ultra-light-gray;
+	}
+
+	.payments__method-information {
+		font-size: 12px;
+	}
+
+	.payments__method-name {
+		font-size: 14px;
+	}
+
+	.list-item-field {
+		width: 30%;
+
+		&:nth-child( 2 ) {
+			width: 45%;
+		}
+
+		&:nth-child( 3 ) {
+			width: 25%;
+		}
+	}
+
+	.list-item-field:nth-child( 3 ) {
+		.button {
+			align-self: flex-end;
+		}
+	}
+}
+
+.payments__method-edit-field-container {
+	display: block;
+	width: 100%;
+}
+
+.payments__method-edit-fields {
+	padding: 16px;
+	border-top: 1px solid $border-ultra-light-gray;
+	width: 100%;
+
+	@include breakpoint( '>480px' ) {
+		padding: 24px;
+	}
+}

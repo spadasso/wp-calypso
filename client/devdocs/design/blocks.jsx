@@ -23,12 +23,15 @@ import CalendarButton from 'blocks/calendar-button/docs/example';
 import CalendarPopover from 'blocks/calendar-popover/docs/example';
 import AuthorSelector from 'blocks/author-selector/docs/example';
 import CommentButtons from 'blocks/comment-button/docs/example';
+import CommentDetail from 'blocks/comment-detail/docs/example';
 import DisconnectJetpackDialog from 'blocks/disconnect-jetpack-dialog/docs/example';
 import FollowButton from 'blocks/follow-button/docs/example';
 import LikeButtons from 'blocks/like-button/docs/example';
 import PostSchedule from 'components/post-schedule/docs/example';
 import PostSelector from 'my-sites/post-selector/docs/example';
-import Sites from 'lib/sites-list/docs/example';
+import AllSites from 'my-sites/all-sites/docs/example';
+import Site from 'blocks/site/docs/example';
+import SitePlaceholder from 'blocks/site/docs/placeholder-example';
 import SitesDropdown from 'components/sites-dropdown/docs/example';
 import SiteIcon from 'blocks/site-icon/docs/example';
 import Theme from 'components/theme/docs/example';
@@ -48,13 +51,16 @@ import ReaderFullPostHeader from 'blocks/reader-full-post/docs/header-example';
 import AuthorCompactProfile from 'blocks/author-compact-profile/docs/example';
 import RelatedPostCardv2 from 'blocks/reader-related-card-v2/docs/example';
 import PlanPrice from 'my-sites/plan-price/docs/example';
+import PostShare from 'blocks/post-share/docs/example';
 import PlanThankYouCard from 'blocks/plan-thank-you-card/docs/example';
 import DismissibleCard from 'blocks/dismissible-card/docs/example';
 import PostEditButton from 'blocks/post-edit-button/docs/example';
 import ReaderAvatar from 'blocks/reader-avatar/docs/example';
 import ImageEditor from 'blocks/image-editor/docs/example';
+import VideoEditor from 'blocks/video-editor/docs/example';
 import ReaderPostCard from 'blocks/reader-post-card/docs/example';
 import ReaderCombinedCard from 'blocks/reader-combined-card/docs/example';
+import ReaderRecommendedSites from 'blocks/reader-recommended-sites/docs/example';
 import ReaderPostOptionsMenu from 'blocks/reader-post-options-menu/docs/example';
 import DailyPostButton from 'blocks/daily-post-button/docs/example';
 import ReaderSubscriptionListItem from 'blocks/reader-subscription-list-item/docs/example';
@@ -62,7 +68,10 @@ import PostLikes from 'blocks/post-likes/docs/example';
 import ReaderFeaturedVideo from 'blocks/reader-featured-video/docs/example';
 import NpsSurvey from 'blocks/nps-survey/docs/example';
 import ReaderExportButton from 'blocks/reader-export-button/docs/example';
+import ReaderImportButton from 'blocks/reader-import-button/docs/example';
 import SharingPreviewPane from 'blocks/sharing-preview-pane/docs/example';
+import ReaderShare from 'blocks/reader-share/docs/example';
+import Login from 'blocks/login/docs/example';
 
 export default React.createClass( {
 
@@ -104,17 +113,22 @@ export default React.createClass( {
 					<CalendarButton />
 					<CalendarPopover />
 					<CommentButtons />
+					<CommentDetail />
 					<DisconnectJetpackDialog />
 					<CreditCardForm />
 					<FollowButton />
 					<HappinessSupport />
 					<ImageEditor />
+					<VideoEditor />
 					<LikeButtons />
+					<Login />
 					<PostEditButton />
 					<PlanStorage />
 					<PostSchedule />
 					<PostSelector />
-					<Sites />
+					<AllSites />
+					<Site />
+					<SitePlaceholder />
 					<SitesDropdown />
 					<SiteIcon />
 					<Theme />
@@ -134,7 +148,9 @@ export default React.createClass( {
 					<AuthorCompactProfile />
 					<ReaderPostCard />
 					<ReaderCombinedCard />
+					<ReaderRecommendedSites />
 					<PlanPrice />
+					<PostShare />
 					<PlanThankYouCard />
 					<DismissibleCard />
 					<ReaderAvatar />
@@ -144,7 +160,9 @@ export default React.createClass( {
 					<ReaderFeaturedVideo />
 					{ isEnabled( 'nps-survey/devdocs' ) && <NpsSurvey /> }
 					<ReaderExportButton />
+					<ReaderImportButton />
 					<SharingPreviewPane />
+					<ReaderShare />
 				</Collection>
 			</Main>
 		);

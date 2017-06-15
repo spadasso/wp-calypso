@@ -2,11 +2,14 @@
  * External dependencies
  */
 import thunkMiddleware from 'redux-thunk';
-import { createStore, applyMiddleware, combineReducers, compose } from 'redux';
+import { createStore, applyMiddleware, compose } from 'redux';
 
 /**
  * Internal dependencies
  */
+import { combineReducers } from 'state/utils';
+import activityLog from './activity-log/reducer';
+import analyticsTracking from './analytics/reducer';
 import sitesSync from './sites/enhancer';
 import noticesMiddleware from './notices/middleware';
 import extensionsModule from 'extensions';
@@ -60,6 +63,8 @@ import timezones from './timezones/reducer';
 import themes from './themes/reducer';
 import ui from './ui/reducer';
 import users from './users/reducer';
+import userDevices from './user-devices/reducer';
+import userSettings from './user-settings/reducer';
 import wordads from './wordads/reducer';
 import config from 'config';
 
@@ -71,8 +76,10 @@ import config from 'config';
 const extensions = combineReducers( extensionsModule.reducers() );
 
 const reducers = {
-	application,
+	analyticsTracking,
 	accountRecovery,
+	activityLog,
+	application,
 	automatedTransfer,
 	billingTransactions,
 	comments,
@@ -121,10 +128,20 @@ const reducers = {
 	themes,
 	ui,
 	users,
+	userDevices,
+	userSettings,
 	wordads,
 };
 
 export const reducer = combineReducers( reducers );
+
+/**
+ * @typedef {Object} ReduxStore
+ * @property {!Function} dispatch dispatches actions
+ * @property {!Function} getState returns the current state tree
+ * @property {Function} replaceReducers replaces the state reducers
+ * @property {Function} subscribe attaches an event listener to state changes
+ */
 
 export function createReduxStore( initialState = {} ) {
 	const isBrowser = typeof window === 'object';
@@ -135,7 +152,10 @@ export function createReduxStore( initialState = {} ) {
 		noticesMiddleware,
 		isBrowser && require( './happychat/middleware.js' ).default(),
 		isBrowser && require( './analytics/middleware.js' ).analyticsMiddleware,
-		isBrowser && require( './data-layer/wpcom-api-middleware.js' ).default,
+		require( './data-layer/wpcom-api-middleware.js' ).default,
+		isBrowser && require( './lib/middleware.js' ).default,
+		isBrowser && config.isEnabled( 'restore-last-location' ) && require( './routing/middleware.js' ).default,
+		isBrowser && require( './data-layer/extensions-middleware.js' ).default,
 		isAudioSupported && require( './audio/middleware.js' ).default,
 		isBrowser && config.isEnabled( 'automated-transfer' ) && require( './automated-transfer/middleware.js' ).default,
 	].filter( Boolean );

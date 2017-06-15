@@ -14,13 +14,14 @@ import {
 	ensureStoreLoading,
 	trackPageLoad,
 	trackUpdatesLoaded,
-	trackScrollPage
+	trackScrollPage,
 } from 'reader/controller-helper';
 import { renderWithReduxStore } from 'lib/react-helpers';
 import AsyncLoad from 'components/async-load';
 
 const analyticsPageTitle = 'Reader';
 
+// TODO: delete this after launching sites in search
 function replaceSearchUrl( newValue, sort ) {
 	let searchUrl = '/read/search';
 	if ( newValue ) {
@@ -29,13 +30,13 @@ function replaceSearchUrl( newValue, sort ) {
 	page.replace( searchUrl );
 }
 
-export default {
+const exported = {
 	search: function( context ) {
 		const basePath = '/read/search',
 			fullAnalyticsPageTitle = analyticsPageTitle + ' > Search',
-			searchSlug = context.query.q,
-			sort = context.query.sort || 'relevance',
 			mcKey = 'search';
+
+		const { sort = 'relevance', q: searchSlug, show = 'Posts' } = context.query;
 
 		let store;
 		if ( searchSlug ) {
@@ -51,13 +52,13 @@ export default {
 		if ( searchSlug ) {
 			recordTrack( 'calypso_reader_search_performed', {
 				query: searchSlug,
-				sort
+				sort,
 			} );
 		} else {
 			recordTrack( 'calypso_reader_search_loaded' );
 		}
 
-		const autoFocusInput = ( ! searchSlug ) || context.query.focus === '1';
+		const autoFocusInput = ! searchSlug || context.query.focus === '1';
 
 		function reportQueryChange( query ) {
 			replaceSearchUrl( query, sort !== 'relevance' ? sort : undefined );
@@ -68,7 +69,8 @@ export default {
 		}
 
 		renderWithReduxStore(
-			<AsyncLoad require="reader/search-stream"
+			<AsyncLoad
+				require="reader/search-stream"
 				key="search"
 				postsStore={ store }
 				query={ searchSlug }
@@ -85,9 +87,14 @@ export default {
 				autoFocusInput={ autoFocusInput }
 				onQueryChange={ reportQueryChange }
 				onSortChange={ reportSortChange }
+				searchType={ show }
 			/>,
 			document.getElementById( 'primary' ),
 			context.store
 		);
-	}
+	},
 };
+
+export default exported;
+
+export const { search } = exported;

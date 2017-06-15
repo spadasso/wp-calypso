@@ -45,6 +45,8 @@ import insertMenuPlugin from './plugins/insert-menu/plugin';
 import embedReversalPlugin from './plugins/embed-reversal/plugin';
 import EditorHtmlToolbar from 'post-editor/editor-html-toolbar';
 import mentionsPlugin from './plugins/mentions/plugin';
+import markdownPlugin from './plugins/markdown/plugin';
+import wpEmojiPlugin from './plugins/wpemoji/plugin';
 
 [
 	wpcomPlugin,
@@ -68,6 +70,8 @@ import mentionsPlugin from './plugins/mentions/plugin';
 	wptextpatternPlugin,
 	toolbarPinPlugin,
 	embedReversalPlugin,
+	markdownPlugin,
+	wpEmojiPlugin,
 ].forEach( ( initializePlugin ) => initializePlugin() );
 
 /**
@@ -119,6 +123,7 @@ const PLUGINS = [
 	'wplink',
 	'AtD',
 	'directionality',
+	'wpemoji',
 	'wpcom/autoresize',
 	'wpcom/media',
 	'wpcom/advanced',
@@ -136,6 +141,7 @@ const PLUGINS = [
 	'wpcom/embedreversal',
 	'wpcom/trackpaste',
 	'wpcom/insertmenu',
+	'wpcom/markdown',
 ];
 
 mentionsPlugin();
@@ -276,6 +282,7 @@ module.exports = React.createClass( {
 			relative_urls: false,
 			remove_script_host: false,
 			convert_urls: false,
+			branding: false,
 			browser_spellcheck: true,
 			fix_list_elements: true,
 			entities: '38,amp,60,lt,62,gt',

@@ -9,6 +9,7 @@ import { truncate, includes } from 'lodash';
  */
 import { successNotice, errorNotice } from 'state/notices/actions';
 import { getSitePost } from 'state/posts/selectors';
+import { getSiteDomain } from 'state/sites/selectors';
 import {
 	ACCOUNT_RECOVERY_SETTINGS_FETCH_FAILED,
 	ACCOUNT_RECOVERY_SETTINGS_UPDATE_SUCCESS,
@@ -30,6 +31,7 @@ import {
 	JETPACK_MODULE_ACTIVATE_FAILURE,
 	JETPACK_MODULE_DEACTIVATE_FAILURE,
 	KEYRING_CONNECTION_DELETE,
+	KEYRING_CONNECTION_DELETE_FAILURE,
 	POST_DELETE_FAILURE,
 	POST_DELETE_SUCCESS,
 	POST_RESTORE_FAILURE,
@@ -43,11 +45,16 @@ import {
 	PUBLICIZE_CONNECTION_REFRESH_FAILURE,
 	PUBLICIZE_CONNECTION_UPDATE,
 	PUBLICIZE_CONNECTION_UPDATE_FAILURE,
-	SITE_FRONT_PAGE_SET_FAILURE,
+	SITE_DELETE,
+	SITE_DELETE_SUCCESS,
+	SITE_DELETE_FAILURE,
+	SITE_MONITOR_SETTINGS_UPDATE_SUCCESS,
+	SITE_MONITOR_SETTINGS_UPDATE_FAILURE,
 	THEME_DELETE_FAILURE,
 	THEME_DELETE_SUCCESS,
 	THEME_ACTIVATE_FAILURE,
 } from 'state/action-types';
+import purchasesPaths from 'me/purchases/paths';
 
 import { dispatchSuccess, dispatchError } from './utils';
 
@@ -191,6 +198,38 @@ const onThemeActivateFailure = ( dispatch, { error } ) => {
 	return dispatch( errorNotice( translate( 'Unable to activate theme. Contact support.' ) ) );
 };
 
+const onSiteMonitorSettingsUpdateSuccess = ( dispatch ) => dispatch(
+	successNotice( translate( 'Settings saved successfully!' ) )
+);
+
+const onSiteMonitorSettingsUpdateFailure = ( dispatch ) => dispatch(
+	successNotice( translate( 'There was a problem saving your changes. Please, try again.' ) )
+);
+
+const onSiteDelete = ( dispatch, { siteId }, getState ) => dispatch(
+	successNotice( translate( '%(siteDomain)s is being deleted.', {
+		args: { siteDomain: getSiteDomain( getState(), siteId ) }
+	} ), { duration: 5000, id: 'site-delete' } )
+);
+
+const onSiteDeleteSuccess = ( dispatch, { siteId }, getState ) => dispatch(
+	successNotice( translate( '%(siteDomain)s has been deleted.', {
+		args: { siteDomain: getSiteDomain( getState(), siteId ) }
+	} ), { duration: 5000, id: 'site-delete' } )
+);
+
+const onSiteDeleteFailure = ( dispatch, { error } ) => {
+	if ( error.error === 'active-subscriptions' ) {
+		return dispatch( errorNotice( translate( 'You must cancel any active subscriptions prior to deleting your site.' ), {
+			id: 'site-delete',
+			showDismiss: false,
+			button: translate( 'Manage Purchases' ),
+			href: purchasesPaths.purchasesRoot()
+		} ) );
+	}
+	return dispatch( errorNotice( error.message ) );
+};
+
 /**
  * Handler action type mapping
  */
@@ -212,13 +251,18 @@ export const handlers = {
 	[ GRAVATAR_RECEIVE_IMAGE_FAILURE ]: ( dispatch, action ) => {
 		dispatch( errorNotice( action.errorMessage ) );
 	},
-	[ GRAVATAR_UPLOAD_REQUEST_FAILURE ]: dispatchError( translate( 'New Gravatar was not saved.' ) ),
-	[ GRAVATAR_UPLOAD_REQUEST_SUCCESS ]: dispatchSuccess( translate( 'New Gravatar uploaded successfully!' ) ),
+	[ GRAVATAR_UPLOAD_REQUEST_FAILURE ]: dispatchError(
+		translate( 'Hmm, your new Gravatar was not saved. Please try uploading again.' )
+	),
+	[ GRAVATAR_UPLOAD_REQUEST_SUCCESS ]: dispatchSuccess(
+		translate( 'You successfully uploaded a new Gravatar — looking sharp!' )
+	),
 	[ JETPACK_MODULE_ACTIVATE_SUCCESS ]: onJetpackModuleActivationActionMessage,
 	[ JETPACK_MODULE_DEACTIVATE_SUCCESS ]: onJetpackModuleActivationActionMessage,
 	[ JETPACK_MODULE_ACTIVATE_FAILURE ]: onJetpackModuleActivationActionMessage,
 	[ JETPACK_MODULE_DEACTIVATE_FAILURE ]: onJetpackModuleActivationActionMessage,
 	[ KEYRING_CONNECTION_DELETE ]: onPublicizeConnectionDelete,
+	[ KEYRING_CONNECTION_DELETE_FAILURE ]: onPublicizeConnectionDeleteFailure,
 	[ POST_DELETE_FAILURE ]: onPostDeleteFailure,
 	[ POST_DELETE_SUCCESS ]: dispatchSuccess( translate( 'Post successfully deleted' ) ),
 	[ POST_RESTORE_FAILURE ]: onPostRestoreFailure,
@@ -233,7 +277,11 @@ export const handlers = {
 	[ PUBLICIZE_CONNECTION_UPDATE ]: onPublicizeConnectionUpdate,
 	[ PUBLICIZE_CONNECTION_UPDATE_FAILURE ]: onPublicizeConnectionUpdateFailure,
 	[ GUIDED_TRANSFER_HOST_DETAILS_SAVE_SUCCESS ]: dispatchSuccess( translate( 'Thanks for confirming those details!' ) ),
-	[ SITE_FRONT_PAGE_SET_FAILURE ]: dispatchError( translate( 'An error occurred while setting the homepage' ) ),
+	[ SITE_DELETE ]: onSiteDelete,
+	[ SITE_DELETE_FAILURE ]: onSiteDeleteFailure,
+	[ SITE_DELETE_SUCCESS ]: onSiteDeleteSuccess,
+	[ SITE_MONITOR_SETTINGS_UPDATE_SUCCESS ]: onSiteMonitorSettingsUpdateSuccess,
+	[ SITE_MONITOR_SETTINGS_UPDATE_FAILURE ]: onSiteMonitorSettingsUpdateFailure,
 	[ THEME_DELETE_FAILURE ]: onThemeDeleteFailure,
 	[ THEME_DELETE_SUCCESS ]: onThemeDeleteSuccess,
 	[ THEME_ACTIVATE_FAILURE ]: onThemeActivateFailure,

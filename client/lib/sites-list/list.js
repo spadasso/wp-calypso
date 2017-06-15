@@ -78,7 +78,12 @@ SitesList.prototype.fetch = function() {
 
 	debug( 'getting SitesList from api' );
 
-	wpcom.me().sites( { site_visibility: 'all', include_domain_only: true }, function( error, data ) {
+	wpcom.me().sites( {
+		site_visibility: 'all',
+		include_domain_only: true,
+		fields: 'ID,URL,name,capabilities,jetpack,visible,is_private,is_vip,icon,plan,jetpack_modules,single_user_site,is_multisite,options', //eslint-disable-line max-len
+		options: 'is_mapped_domain,unmapped_url,admin_url,is_redirect,is_automated_transfer,allowed_file_types,show_on_front,main_network_site,jetpack_version,software_version,default_post_format,created_at,frame_nonce,publicize_permanently_disabled,page_on_front,page_for_posts,advanced_seo_front_page_description,advanced_seo_title_formats,verification_services_codes,podcasting_archive,is_domain_only,default_sharing_status,default_likes_enabled,wordads,upgraded_filetypes_enabled,videopress_enabled,permalink_structure' //eslint-disable-line max-len
+	}, function( error, data ) {
 		if ( error ) {
 			debug( 'error fetching SitesList from api', error );
 			this.fetching = false;
@@ -225,6 +230,14 @@ SitesList.prototype.update = function( sites ) {
 			//Assign old URL because new url is broken because the site response caches domains
 			//and we have trouble getting over it.
 			if ( site.options.is_automated_transfer && site.URL.match( '.wordpress.com' ) ) {
+				return siteObj;
+			}
+
+			// When we set a new front page, we clear out SitesList. On accounts with a large
+			// number of sites, the resulting fetch can take time resulting in incorrect data
+			// being displayed. This uses the correct siteObj as the source of truth in case
+			// of a mismatch. See #13143.
+			if ( siteObj.options.page_on_front !== site.options.page_on_front ) {
 				return siteObj;
 			}
 

@@ -1,13 +1,13 @@
 /**
  * External dependencies
  */
-import { combineReducers } from 'redux';
-import { pick } from 'lodash';
+import { stubTrue, stubFalse } from 'lodash';
 
 /**
  * Internal dependencies
  */
-import { createReducer } from 'state/utils';
+import { combineReducers, createReducer } from 'state/utils';
+
 import {
 	ACCOUNT_RECOVERY_RESET_OPTIONS_ERROR,
 	ACCOUNT_RECOVERY_RESET_OPTIONS_RECEIVE,
@@ -16,14 +16,21 @@ import {
 	ACCOUNT_RECOVERY_RESET_REQUEST_SUCCESS,
 	ACCOUNT_RECOVERY_RESET_REQUEST_ERROR,
 	ACCOUNT_RECOVERY_RESET_UPDATE_USER_DATA,
-	ACCOUNT_RECOVERY_RESET_PICK_METHOD,
+	ACCOUNT_RECOVERY_RESET_SET_METHOD,
+	ACCOUNT_RECOVERY_RESET_SET_VALIDATION_KEY,
+	ACCOUNT_RECOVERY_RESET_VALIDATE_REQUEST,
+	ACCOUNT_RECOVERY_RESET_VALIDATE_REQUEST_SUCCESS,
+	ACCOUNT_RECOVERY_RESET_VALIDATE_REQUEST_ERROR,
+	ACCOUNT_RECOVERY_RESET_PASSWORD_REQUEST,
+	ACCOUNT_RECOVERY_RESET_PASSWORD_REQUEST_SUCCESS,
+	ACCOUNT_RECOVERY_RESET_PASSWORD_REQUEST_ERROR,
 } from 'state/action-types';
 
 const options = combineReducers( {
 	isRequesting: createReducer( false, {
-		[ ACCOUNT_RECOVERY_RESET_OPTIONS_REQUEST ]: () => true,
-		[ ACCOUNT_RECOVERY_RESET_OPTIONS_RECEIVE ]: () => false,
-		[ ACCOUNT_RECOVERY_RESET_OPTIONS_ERROR ]: () => false,
+		[ ACCOUNT_RECOVERY_RESET_OPTIONS_REQUEST ]: stubTrue,
+		[ ACCOUNT_RECOVERY_RESET_OPTIONS_RECEIVE ]: stubFalse,
+		[ ACCOUNT_RECOVERY_RESET_OPTIONS_ERROR ]: stubFalse,
 	} ),
 
 	error: createReducer( null, {
@@ -39,24 +46,19 @@ const options = combineReducers( {
 	} ),
 } );
 
-const validUserDataProps = [ 'user', 'firstName', 'lastName', 'url' ];
-
 const userData = createReducer( {}, {
-	[ ACCOUNT_RECOVERY_RESET_UPDATE_USER_DATA ]: ( state, action ) => ( {
-		...state,
-		...pick( action.userData, validUserDataProps ),
-	} ),
+	[ ACCOUNT_RECOVERY_RESET_UPDATE_USER_DATA ]: ( state, action ) => action.userData,
 } );
 
 const method = createReducer( null, {
-	[ ACCOUNT_RECOVERY_RESET_PICK_METHOD ]: ( state, action ) => action.method,
+	[ ACCOUNT_RECOVERY_RESET_SET_METHOD ]: ( state, action ) => action.method,
 } );
 
 const requestReset = combineReducers( {
 	isRequesting: createReducer( false, {
-		[ ACCOUNT_RECOVERY_RESET_REQUEST ]: () => true,
-		[ ACCOUNT_RECOVERY_RESET_REQUEST_SUCCESS ]: () => false,
-		[ ACCOUNT_RECOVERY_RESET_REQUEST_ERROR ]: () => false,
+		[ ACCOUNT_RECOVERY_RESET_REQUEST ]: stubTrue,
+		[ ACCOUNT_RECOVERY_RESET_REQUEST_SUCCESS ]: stubFalse,
+		[ ACCOUNT_RECOVERY_RESET_REQUEST_ERROR ]: stubFalse,
 	} ),
 
 	error: createReducer( null, {
@@ -66,9 +68,48 @@ const requestReset = combineReducers( {
 	} ),
 } );
 
+const key = createReducer( null, {
+	[ ACCOUNT_RECOVERY_RESET_SET_VALIDATION_KEY ]: ( state, action ) => action.key,
+} );
+
+const validate = combineReducers( {
+	isRequesting: createReducer( false, {
+		[ ACCOUNT_RECOVERY_RESET_VALIDATE_REQUEST ]: stubTrue,
+		[ ACCOUNT_RECOVERY_RESET_VALIDATE_REQUEST_SUCCESS ]: stubFalse,
+		[ ACCOUNT_RECOVERY_RESET_VALIDATE_REQUEST_ERROR ]: stubFalse,
+	} ),
+
+	error: createReducer( null, {
+		[ ACCOUNT_RECOVERY_RESET_VALIDATE_REQUEST ]: () => null,
+		[ ACCOUNT_RECOVERY_RESET_VALIDATE_REQUEST_SUCCESS ]: () => null,
+		[ ACCOUNT_RECOVERY_RESET_VALIDATE_REQUEST_ERROR ]: ( state, { error } ) => error,
+	} ),
+} );
+
+const resetPassword = combineReducers( {
+	isRequesting: createReducer( false, {
+		[ ACCOUNT_RECOVERY_RESET_PASSWORD_REQUEST ]: stubTrue,
+		[ ACCOUNT_RECOVERY_RESET_PASSWORD_REQUEST_SUCCESS ]: stubFalse,
+		[ ACCOUNT_RECOVERY_RESET_PASSWORD_REQUEST_ERROR ]: stubFalse,
+	} ),
+	succeeded: createReducer( false, {
+		[ ACCOUNT_RECOVERY_RESET_PASSWORD_REQUEST ]: stubFalse,
+		[ ACCOUNT_RECOVERY_RESET_PASSWORD_REQUEST_SUCCESS ]: stubTrue,
+		[ ACCOUNT_RECOVERY_RESET_PASSWORD_REQUEST_ERROR ]: stubFalse,
+	} ),
+	error: createReducer( null, {
+		[ ACCOUNT_RECOVERY_RESET_PASSWORD_REQUEST ]: () => null,
+		[ ACCOUNT_RECOVERY_RESET_PASSWORD_REQUEST_SUCCESS ]: () => null,
+		[ ACCOUNT_RECOVERY_RESET_PASSWORD_REQUEST_ERROR ]: ( state, { error } ) => error,
+	} ),
+} );
+
 export default combineReducers( {
 	options,
 	userData,
 	method,
 	requestReset,
+	key,
+	validate,
+	resetPassword,
 } );

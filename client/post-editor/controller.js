@@ -9,14 +9,13 @@ import page from 'page';
 import { Provider as ReduxProvider } from 'react-redux';
 import qs from 'querystring';
 import { isWebUri as isValidUrl } from 'valid-url';
-import { map, pick, startsWith } from 'lodash';
+import { map, pick, reduce, startsWith } from 'lodash';
 
 /**
  * Internal dependencies
  */
 import actions from 'lib/posts/actions';
 import route from 'lib/route';
-import SitesList from 'lib/sites-list';
 import User from 'lib/user';
 import userUtils from 'lib/user/utils';
 import analytics from 'lib/analytics';
@@ -30,7 +29,6 @@ import wpcom from 'lib/wp';
 import Dispatcher from 'dispatcher';
 import { getFeaturedImageId } from 'lib/posts/utils';
 
-const sites = SitesList();
 const user = User();
 
 function getPostID( context ) {
@@ -61,7 +59,6 @@ function renderEditor( context, postType ) {
 			React.createElement( PostEditor, {
 				user: user,
 				userUtils: userUtils,
-				sites: sites,
 				type: postType
 			} )
 		),
@@ -74,8 +71,11 @@ function maybeRedirect( context ) {
 	const siteId = getSelectedSiteId( state );
 	const postId = getEditorPostId( state );
 
-	const path = getEditorPath( state, siteId, postId );
+	let path = getEditorPath( state, siteId, postId, 'post', context.query );
 	if ( path !== context.pathname ) {
+		if ( context.querystring ) {
+			path += `?${ context.querystring }`;
+		}
 		page.redirect( path );
 		return true;
 	}
@@ -128,7 +128,6 @@ function startEditingPostCopy( siteId, postToCopyId, context ) {
 			'excerpt',
 			'featured_image',
 			'format',
-			'metadata',
 			'post_thumbnail',
 			'terms',
 			'title',
@@ -138,13 +137,48 @@ function startEditingPostCopy( siteId, postToCopyId, context ) {
 		postAttributes.title = decodeEntities( postAttributes.title );
 		postAttributes.featured_image = getFeaturedImageId( postToCopy );
 
+		/**
+		 * A post attributes whitelist for Redux's `editPost()` action.
+		 *
+		 * This is needed because blindly passing all post attributes to `editPost()`
+		 * caused some of them (notably the featured image) to revert to their original value
+		 * when modified right after the copy.
+		 *
+		 * @see https://github.com/Automattic/wp-calypso/pull/13933
+		 */
+		const reduxPostAttributes = {
+			terms: postAttributes.terms,
+			title: postAttributes.title,
+		};
+
 		actions.startEditingNew( siteId, {
 			content: postToCopy.content,
 			title: postToCopy.title,
 			type: postToCopy.type,
 		} );
-		context.store.dispatch( editPost( siteId, null, postAttributes ) );
+		context.store.dispatch( editPost( siteId, null, reduxPostAttributes ) );
 		actions.edit( postAttributes );
+
+		/**
+		 * A post metadata whitelist for Flux's `updateMetadata()` action.
+		 *
+		 * This is needed because blindly passing all post metadata to `updateMetadata()`
+		 * causes unforeseeable issues, such as Publicize not triggering on the copied post.
+		 *
+		 * @see https://github.com/Automattic/wp-calypso/issues/14840
+		 */
+		const metadataWhitelist = [
+			'geo_latitude',
+			'geo_longitude',
+		];
+
+		// Convert the metadata array into a metadata object, needed because `updateMetadata()` expects an object.
+		const metadata = reduce( postToCopy.metadata, ( newMetadata, { key, value } ) => {
+			newMetadata[ key ] = value;
+			return newMetadata;
+		}, {} );
+
+		actions.updateMetadata( pick( metadata, metadataWhitelist ) );
 	} ).catch( error => {
 		Dispatcher.handleServerAction( {
 			type: 'SET_POST_LOADING_ERROR',

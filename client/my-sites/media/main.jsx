@@ -25,7 +25,8 @@ class Media extends Component {
 	static propTypes = {
 		selectedSite: PropTypes.object,
 		filter: PropTypes.string,
-		search: PropTypes.string
+		search: PropTypes.string,
+		source: PropTypes.string,
 	};
 
 	state = {
@@ -53,6 +54,13 @@ class Media extends Component {
 		}
 
 		page( redirect );
+	};
+
+	onSourceChange = source => {
+		const url = `/media/${ this.props.selectedSite.slug }` + ( source ? `?source=${ source }` : '' );
+
+		MediaActions.changeSource( this.props.selectedSite.ID, source );
+		page( url );
 	};
 
 	openDetailsModalForASingleImage = ( image ) => {
@@ -289,6 +297,8 @@ class Media extends Component {
 							onViewDetails={ this.openDetailsModalForAllSelected }
 							onDeleteItem={ this.handleDeleteMediaEvent }
 							modal={ false }
+							source={ this.props.source }
+							onSourceChange={ this.onSourceChange }
 							containerWidth={ this.state.containerWidth } />
 					</MediaLibrarySelectedData>
 				) }

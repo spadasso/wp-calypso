@@ -24,6 +24,7 @@ import FormSettingExplanation from 'components/forms/form-setting-explanation';
 // We use this for basic birth date validation.
 // Twill need to be updated once Ray gets us to the singularity.
 const currentPlausibleHumanLifespan = 140;
+const minimumLegalAge = 13;
 
 const debug = debugFactory( 'calypso:domains:registrant-extra-info' );
 
@@ -90,7 +91,9 @@ class RegistrantExtraInfoForm extends React.PureComponent {
 			return false;
 		}
 
-		if ( new Date().getFullYear() - toInteger( dobYears ) > currentPlausibleHumanLifespan ) {
+		const yearDiff = new Date().getFullYear() - toInteger( dobYears );
+
+		if ( yearDiff > currentPlausibleHumanLifespan || yearDiff < minimumLegalAge ) {
 			// @todo: set error state
 			return false;
 		}

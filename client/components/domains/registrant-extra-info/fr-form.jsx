@@ -170,7 +170,7 @@ class RegistrantExtraInfoForm extends React.PureComponent {
 			dobDays,
 			placeOfBirth,
 			postalCodeOfBirth,
-		} = defaults( this.state, extra, emptyValues );
+		} = { ...emptyValues, ...extra, ...this.state };
 
 		return (
 			<div>

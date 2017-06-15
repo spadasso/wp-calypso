@@ -282,7 +282,7 @@ class RegistrantExtraInfoForm extends React.PureComponent {
 			registrantVatId,
 			sirenSiret,
 			trademarkNumber
-		} = defaults( extra, emptyValues );;
+		} = defaults( extra, emptyValues );
 
 		return (
 			<div>

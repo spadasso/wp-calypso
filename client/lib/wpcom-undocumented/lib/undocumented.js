@@ -2010,11 +2010,11 @@ Undocumented.prototype.getHelpLinks = function( searchQuery, fn ) {
 };
 
 Undocumented.prototype.getQandA = function( searchQuery, fn ) {
-	debug( 'help-contact-qanda/ searchQuery' );
+	debug( 'help-contact-qanda/ searchQuery {searchQuery}' );
 
 	return this.wpcom.req.get( '/help/qanda', {
 		query: searchQuery,
-		blog: config( 'happychat_support_blog' ) || 'en.support.wordpress.com',
+		site: config( 'happychat_support_blog' ),
 	}, fn );
 };
 

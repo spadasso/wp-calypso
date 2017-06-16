@@ -31,50 +31,25 @@ export const areSetupChoicesLoading = ( state, siteId = getSelectedSiteId( state
 	return LOADING === getSetupChoices( state, siteId );
 };
 
-/**
- * @param {Object} state Whole Redux state tree
- * @param {Number} [siteId] Site ID to check. If not provided, the Site ID selected in the UI will be used
- * @return {boolean} Whether the merchant has opted out of shipping setup
- */
-export const hasOptedOutOfShippingSetup = ( state, siteId = getSelectedSiteId( state ) ) => {
+const isChoiceTrue = ( state, siteId, key ) => {
 	if ( ! siteId ) {
 		return false;
 	}
+
 	const setupChoices = getSetupChoices( state, siteId );
 	if ( ! setupChoices ) {
 		return false;
 	}
-	return setupChoices.opted_out_of_shipping_setup || false;
-};
-/**
- * @param {Object} state Whole Redux state tree
- * @param {Number} [siteId] Site ID to check. If not provided, the Site ID selected in the UI will be used
- * @return {boolean} Whether the merchant has opted out of taxes setup
- */
-export const hasOptedOutOfTaxSetup = ( state, siteId = getSelectedSiteId( state ) ) => {
-	if ( ! siteId ) {
+
+	if ( 'object' !== typeof setupChoices ) {
 		return false;
 	}
-	const setupChoices = getSetupChoices( state, siteId );
-	if ( ! setupChoices ) {
+
+	if ( ! ( key in setupChoices ) ) {
 		return false;
 	}
-	return setupChoices.opted_out_of_taxes_setup || false;
-};
-/**
- * @param {Object} state Whole Redux state tree
- * @param {Number} [siteId] Site ID to check. If not provided, the Site ID selected in the UI will be used
- * @return {boolean} Whether the merchant has tried the customizer
- */
-export const hasTriedCustomizer = ( state, siteId = getSelectedSiteId( state ) ) => {
-	if ( ! siteId ) {
-		return false;
-	}
-	const setupChoices = getSetupChoices( state, siteId );
-	if ( ! setupChoices ) {
-		return false;
-	}
-	return setupChoices.finished_initial_setup || false;
+
+	return setupChoices[ key ];
 };
 
 /**
@@ -85,12 +60,60 @@ export const hasTriedCustomizer = ( state, siteId = getSelectedSiteId( state ) )
  * @return {boolean} Whether or not initial setup was completed
  */
 export function getFinishedInitialSetup( state, siteId = getSelectedSiteId( state ) ) {
-	if ( ! siteId ) {
-		return false;
-	}
-	const setupChoices = getSetupChoices( state, siteId );
-	if ( ! setupChoices ) {
-		return false;
-	}
-	return setupChoices.finished_initial_setup || false;
+	return isChoiceTrue( state, siteId, 'finished_initial_setup' );
+}
+
+/**
+ * Gets whether the merchant has opted out of shipping setup.
+ *
+ * @param {Object} state Global state tree
+ * @param {Number} siteId wpcom site id. If not provided, the Site ID selected in the UI will be used
+ * @return {boolean} Whether or not shipping setup has been opted out of
+ */
+export function getOptedOutOfShippingSetup( state, siteId = getSelectedSiteId( state ) ) {
+	return isChoiceTrue( state, siteId, 'opted_out_of_shipping_setup' );
+}
+
+/**
+ * Gets whether the merchant has opted out of taxes setup.
+ *
+ * @param {Object} state Global state tree
+ * @param {Number} siteId wpcom site id. If not provided, the Site ID selected in the UI will be used
+ * @return {boolean} Whether or not taxes setup has been opted out of
+ */
+export function getOptedOutofTaxesSetup( state, siteId = getSelectedSiteId( state ) ) {
+	return isChoiceTrue( state, siteId, 'opted_out_of_taxes_setup' );
+}
+
+/**
+ * Gets whether the merchant has launched the customizer from the dashboard.
+ *
+ * @param {Object} state Global state tree
+ * @param {Number} siteId wpcom site id. If not provided, the Site ID selected in the UI will be used
+ * @return {boolean} Whether or not the merchant has launched the customizer from the dashboard
+ */
+export function getTriedCustomizerDuringInitialSetup( state, siteId = getSelectedSiteId( state ) ) {
+	return isChoiceTrue( state, siteId, 'tried_customizer_during_initial_setup' );
+}
+
+/**
+ * Gets whether or not all required plugins were installed during setup for this site
+ *
+ * @param {Object} state Global state tree
+ * @param {Number} siteId wpcom site id. If not provided, the Site ID selected in the UI will be used
+ * @return {boolean} Whether or not all required plugins were installed during setup for this site
+ */
+export function getFinishedInstallOfRequiredPlugins( state, siteId = getSelectedSiteId( state ) ) {
+	return isChoiceTrue( state, siteId, 'finished_initial_install_of_required_plugins' );
+}
+
+/**
+ * Gets whether the merchant completed setting the store address during setup
+ *
+ * @param {Object} state Global state tree
+ * @param {Number} siteId wpcom site id. If not provided, the Site ID selected in the UI will be used
+ * @return {boolean} Whether or not the merchant completed setting the store address during setup
+ */
+export function getSetStoreAddressDuringInitialSetup( state, siteId = getSelectedSiteId( state ) ) {
+	return isChoiceTrue( state, siteId, 'set_store_address_during_initial_setup' );
 }

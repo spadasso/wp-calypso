@@ -11,13 +11,15 @@ import React, { Component, PropTypes } from 'react';
  */
 import {
 	areSetupChoicesLoading,
-	hasOptedOutOfShippingSetup,
-	hasOptedOutOfTaxSetup,
-	hasTriedCustomizer
+	getOptedOutOfShippingSetup,
+	getOptedOutofTaxesSetup,
+	getTriedCustomizerDuringInitialSetup
 } from 'woocommerce/state/sites/setup-choices/selectors';
 import {
-	setSetupChoice,
-	fetchSetupChoices
+	fetchSetupChoices,
+	setOptedOutOfShippingSetup,
+	setOptedOutOfTaxesSetup,
+	setTriedCustomizerDuringInitialSetup,
 } from 'woocommerce/state/sites/setup-choices/actions';
 import { getLink } from 'woocommerce/lib/nav-utils';
 import SetupTask from './setup-task';
@@ -25,13 +27,33 @@ import SetupTask from './setup-task';
 class SetupTasks extends Component {
 	static propTypes = {
 		site: PropTypes.shape( {
+			ID: PropTypes.number.isRequired,
 			slug: PropTypes.string.isRequired,
 		} ),
 	};
 
 	state = {
 		showShippingTask: this.props.loading || ! this.props.optedOutOfShippingSetup,
-		showTaxesTask: this.props.loading || ! this.props.optedOutOfTaxSetup,
+		showTaxesTask: this.props.loading || ! this.props.setOptedOutOfTaxesSetup,
+	}
+
+	componentDidMount = () => {
+		const { site } = this.props;
+
+		if ( site && site.ID ) {
+			this.props.fetchSetupChoices( site.ID );
+		}
+	}
+
+	componentWillReceiveProps = ( newProps ) => {
+		const { site } = this.props;
+
+		const newSiteId = newProps.site && newProps.site.ID || null;
+		const oldSiteId = site && site.ID || null;
+
+		if ( oldSiteId !== newSiteId ) {
+			this.props.fetchSetupChoices( newSiteId );
+		}
 	}
 
 	onClickNoShip = ( event ) => {
@@ -39,7 +61,7 @@ class SetupTasks extends Component {
 		this.setState( {
 			showShippingTask: false
 		} );
-		this.props.setSetupChoice( this.props.site.ID, 'opted_out_of_shipping_setup', true );
+		this.props.setOptedOutOfShippingSetup( this.props.site.ID, true );
 	}
 
 	onClickNoTaxes = () => {
@@ -47,7 +69,7 @@ class SetupTasks extends Component {
 		this.setState( {
 			showTaxesTask: false
 		} );
-		this.props.setSetupChoice( this.props.site.ID, 'opted_out_of_taxes_setup', true );
+		this.props.setOptedOutOfTaxesSetup( this.props.site.ID, true );
 	}
 
 	getSetupTasks = () => {
@@ -139,6 +161,7 @@ class SetupTasks extends Component {
 					{
 						label: translate( 'Customize' ),
 						path: getLink( 'https://:site/wp-admin/customize.php?return=%2Fwp-admin%2F', site ),
+						// TODO use onClick here instead in order to hit setTrueTriedCustomizerDuringInitialSetup
 					}
 				]
 			}
@@ -174,9 +197,9 @@ class SetupTasks extends Component {
 function mapStateToProps( state ) {
 	return {
 		loading: areSetupChoicesLoading( state ),
-		optedOutOfShippingSetup: hasOptedOutOfShippingSetup( state ),
-		optedOutOfTaxSetup: hasOptedOutOfTaxSetup( state ),
-		triedCustomizer: hasTriedCustomizer( state ),
+		optedOutOfShippingSetup: getOptedOutOfShippingSetup( state ),
+		optedOutOfTaxesSetup: getOptedOutofTaxesSetup( state ),
+		triedCustomizer: getTriedCustomizerDuringInitialSetup( state ),
 		// TODO - connect the following to selectors when they become available
 		hasProducts: false,
 		paymentsAreSetUp: false,
@@ -189,7 +212,9 @@ function mapDispatchToProps( dispatch ) {
 	return bindActionCreators(
 		{
 			fetchSetupChoices,
-			setSetupChoice,
+			setOptedOutOfShippingSetup,
+			setOptedOutOfTaxesSetup,
+			setTriedCustomizerDuringInitialSetup,
 		},
 		dispatch
 	);

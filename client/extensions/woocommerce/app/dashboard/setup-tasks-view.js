@@ -10,9 +10,9 @@ import React, { Component, PropTypes } from 'react';
  * Internal dependencies
  */
 import {
-	hasOptedOutOfShippingSetup,
-	hasOptedOutOfTaxSetup,
-	hasTriedCustomizer
+	getOptedOutOfShippingSetup,
+	getOptedOutofTaxesSetup,
+	getTriedCustomizerDuringInitialSetup,
 } from 'woocommerce/state/sites/setup-choices/selectors';
 import {
 	setFinishedInitialSetup,
@@ -59,9 +59,9 @@ class SetupTasksView extends Component {
 function mapStateToProps( state ) {
 	// TODO - add test for hasProducts, paymentsAreSetUp, shippingIsSetUp and taxesAreSetUp
 	// when those selectors become available
-	const allTasksCompleted = hasOptedOutOfShippingSetup( state ) &&
-		hasOptedOutOfTaxSetup( state ) &&
-		hasTriedCustomizer( state );
+	const allTasksCompleted = getOptedOutOfShippingSetup( state ) &&
+		getOptedOutofTaxesSetup( state ) &&
+		getTriedCustomizerDuringInitialSetup( state );
 
 	return {
 		allTasksCompleted,

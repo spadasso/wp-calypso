@@ -1,10 +1,4 @@
 /**
- * External dependencies
- */
-import debugFactory from 'debug';
-const debug = debugFactory( 'calypso:allendav' );
-
-/**
  * Internal dependencies
  */
 import {
@@ -21,7 +15,6 @@ import {
 import wp from 'lib/wp';
 
 export const fetchSetupChoices = ( siteId ) => ( dispatch, getState ) => {
-	debug( 'in fetchSetupChoices' );
 	if ( areSetupChoicesLoading( getState(), siteId ) ) {
 		return;
 	}
@@ -81,12 +74,10 @@ export const setFinishedInitialSetup = ( siteId, value ) => ( dispatch ) => {
 };
 
 export const setOptedOutOfShippingSetup = ( siteId, value ) => ( dispatch ) => {
-	debug( 'in setOptedOutOfShippingSetup' );
 	return updateSetupChoice( dispatch, siteId, 'opted_out_of_shipping_setup', value );
 };
 
 export const setOptedOutOfTaxesSetup = ( siteId, value ) => ( dispatch ) => {
-	debug( 'in setOptedOutOfTaxesSetup' );
 	return updateSetupChoice( dispatch, siteId, 'opted_out_of_taxes_setup', value );
 };
 

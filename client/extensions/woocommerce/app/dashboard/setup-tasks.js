@@ -34,7 +34,7 @@ class SetupTasks extends Component {
 
 	state = {
 		showShippingTask: this.props.loading || ! this.props.optedOutOfShippingSetup,
-		showTaxesTask: this.props.loading || ! this.props.setOptedOutOfTaxesSetup,
+		showTaxesTask: this.props.loading || ! this.props.optedOutOfTaxesSetup,
 	}
 
 	componentDidMount = () => {

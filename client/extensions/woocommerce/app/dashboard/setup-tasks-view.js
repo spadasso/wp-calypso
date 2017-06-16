@@ -24,12 +24,14 @@ import SetupTasks from './setup-tasks';
 class SetupTasksView extends Component {
 	static propTypes = {
 		site: PropTypes.shape( {
+			ID: PropTypes.number.isRequired,
 			slug: PropTypes.string.isRequired,
 		} ),
 	};
 
-	onFinished = ( /* event */ ) => {
-		// TODO - dispatch a flag setter for finished_initial_setup
+	onFinished = ( event ) => {
+		event.preventDefault();
+		this.props.setFinishedInitialSetup( this.props.site.ID, true );
 	}
 
 	render = () => {

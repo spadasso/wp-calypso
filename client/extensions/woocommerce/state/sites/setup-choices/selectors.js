@@ -32,6 +32,52 @@ export const areSetupChoicesLoading = ( state, siteId = getSelectedSiteId( state
 };
 
 /**
+ * @param {Object} state Whole Redux state tree
+ * @param {Number} [siteId] Site ID to check. If not provided, the Site ID selected in the UI will be used
+ * @return {boolean} Whether the merchant has opted out of shipping setup
+ */
+export const hasOptedOutOfShippingSetup = ( state, siteId = getSelectedSiteId( state ) ) => {
+	if ( ! siteId ) {
+		return false;
+	}
+	const setupChoices = getSetupChoices( state, siteId );
+	if ( ! setupChoices ) {
+		return false;
+	}
+	return setupChoices.opted_out_of_shipping_setup || false;
+};
+/**
+ * @param {Object} state Whole Redux state tree
+ * @param {Number} [siteId] Site ID to check. If not provided, the Site ID selected in the UI will be used
+ * @return {boolean} Whether the merchant has opted out of taxes setup
+ */
+export const hasOptedOutOfTaxSetup = ( state, siteId = getSelectedSiteId( state ) ) => {
+	if ( ! siteId ) {
+		return false;
+	}
+	const setupChoices = getSetupChoices( state, siteId );
+	if ( ! setupChoices ) {
+		return false;
+	}
+	return setupChoices.opted_out_of_taxes_setup || false;
+};
+/**
+ * @param {Object} state Whole Redux state tree
+ * @param {Number} [siteId] Site ID to check. If not provided, the Site ID selected in the UI will be used
+ * @return {boolean} Whether the merchant has tried the customizer
+ */
+export const hasTriedCustomizer = ( state, siteId = getSelectedSiteId( state ) ) => {
+	if ( ! siteId ) {
+		return false;
+	}
+	const setupChoices = getSetupChoices( state, siteId );
+	if ( ! setupChoices ) {
+		return false;
+	}
+	return setupChoices.finished_initial_setup || false;
+};
+
+/**
  * Gets whether the merchant has marked initial setup finished from API data.
  *
  * @param {Object} state Global state tree

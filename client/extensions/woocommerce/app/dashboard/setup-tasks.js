@@ -16,8 +16,7 @@ import {
 	hasTriedCustomizer
 } from 'woocommerce/state/sites/setup-choices/selectors';
 import {
-	setOptOutofShippingSetup,
-	setOptOutofTaxSetup,
+	setSetupChoice,
 	fetchSetupChoices
 } from 'woocommerce/state/sites/setup-choices/actions';
 import { getLink } from 'woocommerce/lib/nav-utils';
@@ -40,7 +39,7 @@ class SetupTasks extends Component {
 		this.setState( {
 			showShippingTask: false
 		} );
-		this.props.setOptOutofShippingSetup( this.props.site.ID );
+		this.props.setSetupChoice( this.props.site.ID, 'opted_out_of_shipping_setup', true );
 	}
 
 	onClickNoTaxes = () => {
@@ -48,7 +47,7 @@ class SetupTasks extends Component {
 		this.setState( {
 			showTaxesTask: false
 		} );
-		this.props.setOptOutofTaxSetup( this.props.site.ID );
+		this.props.setSetupChoice( this.props.site.ID, 'opted_out_of_taxes_setup', true );
 	}
 
 	getSetupTasks = () => {
@@ -190,8 +189,7 @@ function mapDispatchToProps( dispatch ) {
 	return bindActionCreators(
 		{
 			fetchSetupChoices,
-			setOptOutofShippingSetup,
-			setOptOutofTaxSetup,
+			setSetupChoice,
 		},
 		dispatch
 	);

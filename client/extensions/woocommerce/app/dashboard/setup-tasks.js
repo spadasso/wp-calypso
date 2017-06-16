@@ -161,7 +161,7 @@ class SetupTasks extends Component {
 					{
 						label: translate( 'Customize' ),
 						path: getLink( 'https://:site/wp-admin/customize.php?return=%2Fwp-admin%2F', site ),
-						// TODO use onClick here instead in order to hit setTrueTriedCustomizerDuringInitialSetup
+						// TODO use onClick here instead in order to hit setTriedCustomizerDuringInitialSetup
 					}
 				]
 			}

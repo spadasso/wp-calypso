@@ -279,7 +279,7 @@ export const HelpContactForm = React.createClass( {
 						{ translate( 'Note: Support is only available in English at the moment.' ) }
 					</strong>
 				) }
-				
+
 				{ (
 					<div>
 						<HelpResults
